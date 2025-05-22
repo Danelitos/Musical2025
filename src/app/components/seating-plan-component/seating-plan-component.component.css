@@ -1,0 +1,25 @@
+.seating-plan {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  gap: 5px;
+  margin-bottom: 1rem;
+}
+.seat {
+  width: 40px;
+  height: 40px;
+  background-color: #4caf50; /* green */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+}
+.seat.reserved {
+  background-color: #f44336; /* red */
+  cursor: not-allowed;
+}
+.seat.selected {
+  background-color: #ff9800; /* orange */
+}

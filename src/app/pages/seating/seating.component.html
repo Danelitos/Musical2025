@@ -1,0 +1,70 @@
+<div class="container">    
+    <div class="theater-container">
+    <div class="stage">
+        <div class="stage-label">ESCENARIO</div>
+    </div>
+    
+    <div class="seating-legend">
+        <div class="legend-item">
+        <div class="seat-sample available"></div>
+        <span>Disponible</span>
+        </div>
+        <div class="legend-item">
+        <div class="seat-sample selected"></div>
+        <span>Seleccionado</span>
+        </div>
+        <div class="legend-item">
+        <div class="seat-sample reserved"></div>
+        <span>Reservado</span>
+        </div>
+    </div>
+    
+    <!-- Barra de precio única solo visible en móvil -->
+    <div class="mobile-price-bar" style="display:none;">
+        Entrada General: 10€
+    </div>
+
+    <div class="section-labels">
+        <div class="section-label" [style.gridRow]="getSectionGridRow(1)">
+        Entrada General
+        <span class="section-price">10€</span>
+        </div>
+    </div>
+    
+    <div class="seating-chart" *ngIf="theater">
+      <div *ngFor="let row of seatLayout; let i = index; trackBy: rowTrackBy" class="seating-row">
+        <div class="row-label">{{ i + 1 }}</div>
+        <div class="seats-row">
+          <ng-container *ngFor="let cell of row; let j = index; trackBy: trackByCell">
+            <app-seat
+              *ngIf="cell.type === 'seat' && cell.seat"
+              [seat]="cell.seat"
+              [selected]="isSeatSelected(cell.seat.id)"
+              (seatClick)="toggleSeatSelection($event)">
+            </app-seat>
+            <div *ngIf="cell.type === 'gap'" class="seat-gap"></div>
+          </ng-container>
+        </div>
+        <div class="row-label">{{ i + 1 }}</div>
+      </div>
+    </div>
+    
+    <div class="reservation-summary" *ngIf="selectedSeats.length > 0">
+        <h3 class="reservation-title">Tu Selección</h3>
+        <div class="selected-seats">
+        <div *ngFor="let seat of selectedSeats; trackBy: seatTrackBy">
+            <div class="selected-seat-item">
+            Fila {{ seat.row }} - Asiento {{ seat.number }} ({{ seat.section }})
+            <span class="seat-price">${{ seat.price }}</span>
+            </div>
+        </div>
+        </div>
+        <div class="total-price">
+        <strong>Total:</strong> ${{ totalPrice }}
+        </div>
+        <button class="btn btn-primary reserve-btn" (click)="reserveSeats()">
+        Reservar Asientos
+        </button>
+    </div>
+    </div>
+</div>

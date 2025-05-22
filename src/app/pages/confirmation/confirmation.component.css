@@ -1,0 +1,167 @@
+.confirmation-container {
+  padding: var(--space-4) var(--space-2);
+  display: flex;
+  justify-content: center;
+}
+
+.confirmation-card {
+  background-color: var(--neutral-900);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  color: var(--accent);
+}
+
+.confirmation-header {
+  background-color: var(--primary);
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+  border-bottom: 1px solid var(--primary-dark);
+}
+
+.confirmation-icon {
+  margin: 0 auto var(--space-2);
+  animation: scaleIn 0.5s ease-out;
+}
+
+.confirmation-message {
+  color: var(--accent);
+  margin-bottom: 0;
+}
+
+.order-details,
+.show-info,
+.instructions {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--primary-dark);
+  color: var(--accent);
+}
+
+.order-details h3,
+.show-info h3 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: var(--accent);
+}
+
+.ticket-details {
+  margin-bottom: var(--space-3);
+}
+
+.ticket-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  border-bottom: 1px dashed var(--primary-dark);
+}
+
+.ticket-section {
+  font-weight: 600;
+  display: block;
+}
+
+.ticket-seat {
+  font-size: 0.875rem;
+  color: var(--accent);
+}
+
+.ticket-price {
+  font-weight: 600;
+}
+
+.price-summary {
+  background-color: var(--neutral-800);
+  padding: var(--space-2);
+  border-radius: 8px;
+  color: var(--accent);
+}
+
+.subtotal,
+.fees,
+.total {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.total {
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-top: 1px solid var(--primary-dark);
+  margin-top: 4px;
+  padding-top: 8px;
+}
+
+.show-details {
+  background-color: var(--primary-light);
+  color: var(--neutral-900);
+  padding: var(--space-2);
+  border-radius: 8px;
+}
+
+.show-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.show-venue,
+.show-date {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.confirmation-code {
+  background-color: var(--neutral-900);
+  color: var(--accent);
+  text-align: center;
+  padding: var(--space-2);
+  margin: var(--space-2) 0;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.confirmation-actions {
+  padding: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-outline:hover {
+  background-color: var(--accent);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .confirmation-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

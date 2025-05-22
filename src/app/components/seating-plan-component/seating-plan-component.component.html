@@ -1,0 +1,12 @@
+<div class="seating-plan">
+  <div *ngFor="let seat of seats" 
+       class="seat" 
+       [class.reserved]="seat.reserved"
+       [class.selected]="selectedSeats.has(seat.id)"
+       (click)="toggleSeatSelection(seat)">
+    {{ seat.row }}-{{ seat.number }}
+  </div>
+</div>
+<button (click)="reserveSelectedSeats()" [disabled]="selectedSeats.size === 0">
+  Reserve Selected Seats
+</button>

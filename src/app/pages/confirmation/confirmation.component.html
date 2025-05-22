@@ -1,0 +1,62 @@
+<div class="container confirmation-container">
+  <div class="confirmation-card">
+    <div class="confirmation-header">
+      <div class="confirmation-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40">
+          <circle cx="12" cy="12" r="11" fill="var(--success)" />
+          <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="white" />
+        </svg>
+      </div>
+      <h2>¡Entradas Reservadas para "En Belén de Judá"!</h2>
+      <p class="confirmation-message">Tus entradas han sido reservadas exitosamente para el musical navideño "En Belén de Judá"</p>
+    </div>
+
+    <div class="order-details">
+      <h3>Resumen del Pedido</h3>
+
+      <div class="ticket-details">
+        <div *ngFor="let seat of reservedSeats; trackBy: trackBySeatId" class="ticket-item">
+          <div class="ticket-info">
+            <span class="ticket-section">{{ seat.section }}</span>
+            <span class="ticket-seat">Fila {{ seat.row }}, Asiento {{ seat.number }}</span>
+          </div>
+          <div class="ticket-price">${{ seat.price }}</div>
+        </div>
+      </div>
+
+      <div class="price-summary">
+        <div class="subtotal">
+          <span>Subtotal</span>
+          <span>${{ subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="fees">
+          <span>Comisión de Servicio</span>
+          <span>${{ serviceFee.toFixed(2) }}</span>
+        </div>
+        <div class="total">
+          <span>Total</span>
+          <span>${{ totalPrice.toFixed(2) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="show-info">
+      <h3>Detalles del Evento</h3>
+      <div class="show-details">
+        <div class="show-name">En Belén de Judá</div>
+        <div class="show-venue">Teatro Broadway</div>
+        <div class="show-date">Temporada Navideña 2025</div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <p>Por favor, llega 30 minutos antes del espectáculo. Puedes recoger tus entradas en la taquilla proporcionando tu código de confirmación:</p>
+      <div class="confirmation-code">{{ confirmationCode }}</div>
+    </div>
+
+    <div class="confirmation-actions">
+      <button class="btn btn-accent" (click)="bookMoreTickets()">Reservar Más Entradas</button>
+      <a routerLink="/" class="btn btn-outline">Volver al Inicio</a>
+    </div>
+  </div>
+</div>
