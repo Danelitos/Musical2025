@@ -14,29 +14,12 @@
     <div class="order-details">
       <h3>Resumen del Pedido</h3>
 
-      <div class="ticket-details">
-        <div *ngFor="let seat of reservedSeats; trackBy: trackBySeatId" class="ticket-item">
-          <div class="ticket-info">
-            <span class="ticket-section">{{ seat.section }}</span>
-            <span class="ticket-seat">Fila {{ seat.row }}, Asiento {{ seat.number }}</span>
-          </div>
-          <div class="ticket-price">${{ seat.price }}</div>
-        </div>
+      <div class="ticket-summary">
+        <span><strong>Cantidad de entradas:</strong> {{ seatCount }}</span>
       </div>
 
-      <div class="price-summary">
-        <div class="subtotal">
-          <span>Subtotal</span>
-          <span>${{ subtotal.toFixed(2) }}</span>
-        </div>
-        <div class="fees">
-          <span>Comisión de Servicio</span>
-          <span>${{ serviceFee.toFixed(2) }}</span>
-        </div>
-        <div class="total">
-          <span>Total</span>
-          <span>${{ totalPrice.toFixed(2) }}</span>
-        </div>
+      <div class="total-summary">
+        <span><strong>Total pagado:</strong> {{ totalPrice.toFixed(2) }}€</span>
       </div>
     </div>
 

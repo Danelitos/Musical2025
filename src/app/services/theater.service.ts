@@ -57,4 +57,8 @@ export class TheaterService {
   getTotalPrice(): number {
     return this.selectedSeatsSubject.value.reduce((total, seat) => total + seat.price, 0);
   }
+
+  createStripeCheckoutSession(seatIds: string[]): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.apiUrl}/create-checkout-session`, { seatIds });
+  }
 }

@@ -114,23 +114,12 @@ export class SeatingComponent implements OnInit {
     if (this.selectedSeats.length === 0) return;
 
     const seatIds = this.selectedSeats.map(seat => seat.id);
-    this.theaterService.reserveSeats(seatIds).subscribe({
+    this.theaterService.createStripeCheckoutSession(seatIds).subscribe({
       next: (response) => {
-        if (response.success) {
-          // Navigate to confirmation page
-          this.router.navigate(['/confirmation']);
-        }
+        window.location.href = response.url; // Redirige a Stripe Checkout
       },
       error: (error) => {
-        console.error('Error reserving seats', error);
-        // Handle error (show message to user)
-        if (error.status === 409) {
-          alert('Algunos asientos ya están reservados. Por favor, actualiza y vuelve a intentarlo.');
-          this.loadTheaterData();
-          this.theaterService.clearSelection();
-        } else {
-          alert('Ocurrió un error al reservar los asientos. Inténtalo de nuevo.');
-        }
+        alert('Error iniciando el pago: ' + (error.error?.error || error.message));
       }
     });
   }

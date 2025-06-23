@@ -1,9 +1,9 @@
 .hero {
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
               url('https://images.pexels.com/photos/11968312/pexels-photo-11968312.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
   background-size: cover;
   background-position: center;
-  color: var(--accent);
+  color: white;
   padding: var(--space-6) 0;
   text-align: center;
 }
@@ -16,7 +16,7 @@
 .hero h1 {
   font-size: 3rem;
   margin-bottom: var(--space-2);
-  color: var(--accent);
+  color: white;
   animation: fadeIn 1s ease-out;
 }
 
@@ -40,11 +40,10 @@
 
 .show-info {
   padding: var(--space-5) var(--space-2);
-  color: var(--accent);
 }
 
 .show-dates {
-  color: var(--primary-light);
+  color: var(--primary);
   font-weight: 500;
   margin-bottom: var(--space-2);
 }
@@ -61,38 +60,29 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--space-3);
   margin-top: var(--space-4);
-  background-color: var(--neutral-800);
-  padding: var(--space-2);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: var(--accent);
 }
 
 .highlight {
-  background-color: var(--neutral-800);
+  background-color: var(--neutral-50);
   padding: var(--space-2);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: var(--accent);
 }
 
 .highlight:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .highlight h3 {
-  color: var(--primary-light);
+  color: var(--primary);
   margin-bottom: var(--space-1);
 }
 
 .pricing-info {
   padding: var(--space-5) var(--space-2);
-  background-color: var(--neutral-800);
-  color: var(--accent);
-  border-radius: 8px;
+  background-color: var(--neutral-100);
 }
 
 .pricing-grid {
@@ -103,13 +93,12 @@
 }
 
 .pricing-card {
-  background-color: var(--neutral-900);
+  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   padding: var(--space-3);
   text-align: center;
   transition: transform 0.3s ease;
-  color: var(--accent);
 }
 
 .pricing-card:hover {
@@ -119,14 +108,14 @@
 .section-name {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--primary-light);
+  color: var(--primary);
   margin-bottom: var(--space-1);
 }
 
 .section-price {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--neutral-900);
   margin-bottom: var(--space-2);
 }
 
@@ -138,7 +127,7 @@
 
 .section-details li {
   padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--neutral-700);
+  border-bottom: 1px solid var(--neutral-200);
 }
 
 .section-details li:last-child {
@@ -147,7 +136,6 @@
 
 .booking-cta {
   margin-top: var(--space-4);
-  text-align: center;
 }
 
 @keyframes fadeIn {
