@@ -1,0 +1,108 @@
+<footer class="footer">
+  <div class="container">
+    <!-- Sección principal del footer -->
+    <div class="footer-main">
+      <!-- Logo y descripción -->
+      <div class="footer-brand">
+        <img src="assets/images/logo-belen-juda.png" alt="En Belén de Judá" class="footer-logo">
+        <h3 class="footer-title">En Belén de Judá</h3>
+        <p class="footer-description">
+          Un musical que celebra la magia de la Navidad y la esperanza del nacimiento de Jesús. 
+          Una experiencia teatral única que tocará tu corazón.
+        </p>
+      </div>
+      
+      <!-- Enlaces rápidos -->
+      <div class="footer-links">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="#reservas-section">Reservar Entradas</a></li>
+          <li><a href="#trailer-section">Ver Trailer</a></li>
+          <li><a href="/reparto">Reparto</a></li>
+          <li><a href="/criticas">Críticas</a></li>
+          <li><a href="/prensa">Prensa</a></li>
+        </ul>
+      </div>
+      
+      <!-- Información de contacto -->
+      <div class="footer-contact">
+        <h4>Contacto</h4>
+        <div class="contact-info">
+          <div class="contact-item">
+            <mat-icon>location_on</mat-icon>
+            <span>Teatro Principal Madrid<br>Calle Mayor, 123, Madrid</span>
+          </div>
+          <div class="contact-item">
+            <mat-icon>phone</mat-icon>
+            <span>+34 91 123 45 67</span>
+          </div>
+          <div class="contact-item">
+            <mat-icon>email</mat-icon>
+            <span>info&#64;belendeJuda.com</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Redes sociales -->
+      <div class="footer-social">
+        <h4>Síguenos</h4>
+        <div class="social-links">
+          @for (social of socialLinks; track social.name) {
+            <button mat-icon-button 
+                    class="social-button"
+                    (click)="openSocialLink(social.url)"
+                    [attr.aria-label]="'Seguir en ' + social.name">
+              <mat-icon>{{ social.icon }}</mat-icon>
+            </button>
+          }
+        </div>
+        <p class="social-text">
+          Mantente al día con todas las novedades del musical y no te pierdas ninguna función especial.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Línea divisoria -->
+    <div class="footer-divider"></div>
+    
+    <!-- Sección legal -->
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        <p class="copyright">
+          &copy; {{ currentYear }} En Belén de Judá Musical. Todos los derechos reservados.
+        </p>
+        <nav class="legal-nav">
+          @for (link of legalLinks; track link.name) {
+            <a [href]="link.url" class="legal-link">{{ link.name }}</a>
+          }
+        </nav>
+      </div>
+      
+      <!-- Información adicional -->
+      <div class="footer-credits">
+        <p class="credits-text">
+          Desarrollado con ❤️ para llevar la magia de la Navidad a cada hogar
+        </p>
+        <div class="security-badges">
+          <div class="security-badge">
+            <mat-icon>security</mat-icon>
+            <span>Pago Seguro</span>
+          </div>
+          <div class="security-badge">
+            <mat-icon>verified</mat-icon>
+            <span>SSL Verificado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Decoración navideña sutil -->
+  <div class="footer-decoration">
+    <div class="star star-1">✦</div>
+    <div class="star star-2">✧</div>
+    <div class="star star-3">✦</div>
+    <div class="star star-4">✧</div>
+    <div class="star star-5">✦</div>
+  </div>
+</footer>

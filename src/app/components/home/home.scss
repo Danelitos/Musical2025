@@ -1,0 +1,425 @@
+// Estilos para el componente Home del musical
+
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  
+  .logo-container {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    margin-bottom: 2rem;
+    
+    .logo {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+  }
+  
+  .carousel-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    
+    .carousel-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      
+      .carousel-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+        
+        &.active {
+          opacity: 1;
+        }
+        
+        .carousel-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            135deg,
+            rgba(26, 15, 8, 0.8) 0%,
+            rgba(44, 24, 16, 0.6) 50%,
+            rgba(26, 15, 8, 0.8) 100%
+          );
+        }
+      }
+    }
+    
+    .carousel-indicators {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 2;
+      
+      .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid var(--primary-gold);
+        background: transparent;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        
+        &.active,
+        &:hover {
+          background: var(--primary-gold);
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+  
+  .cta-container {
+    position: relative;
+    z-index: 3;
+    margin-top: 2rem;
+    
+    .btn-primary {
+      font-size: 1.2rem;
+      padding: 1.2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+.reservas-section {
+  background: linear-gradient(to bottom, var(--secondary-cream), #ffffff);
+  
+  .sesiones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+    
+    .sesion-card {
+      transition: var(--transition-smooth);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      
+      &:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-strong);
+      }
+      
+      .mat-mdc-card-header {
+        background: linear-gradient(45deg, var(--primary-gold), #FFD700);
+        color: var(--bg-dark);
+        padding: 1.5rem;
+        
+        .mat-mdc-card-title {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+        
+        .mat-mdc-card-subtitle {
+          color: rgba(26, 26, 26, 0.8);
+          font-size: 1rem;
+        }
+      }
+      
+      .mat-mdc-card-content {
+        padding: 1.5rem;
+        
+        .sesion-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+          
+          .precio {
+            display: flex;
+            flex-direction: column;
+            
+            .precio-label {
+              font-size: 0.9rem;
+              color: var(--text-secondary);
+            }
+            
+            .precio-valor {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: var(--primary-gold);
+            }
+          }
+          
+          .disponibilidad {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+      
+      .mat-mdc-card-actions {
+        padding: 0 1.5rem 1.5rem;
+        
+        .btn-secondary {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+.trailer-section {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  
+  .title-secondary,
+  .subtitle {
+    color: var(--text-light);
+  }
+  
+  .trailer-container {
+    max-width: 800px;
+    margin: 3rem auto 0;
+    
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; // 16:9 aspect ratio
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow-strong);
+      
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
+
+.compra-section {
+  background: linear-gradient(to bottom, #ffffff, var(--secondary-cream));
+  
+  .compra-container {
+    max-width: 600px;
+    margin: 3rem auto 0;
+    
+    .compra-form {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      
+      .form-section {
+        margin-bottom: 2rem;
+        
+        h3 {
+          color: var(--primary-gold);
+          font-size: 1.3rem;
+          margin-bottom: 1.5rem;
+          font-weight: 600;
+          border-bottom: 2px solid var(--primary-gold);
+          padding-bottom: 0.5rem;
+        }
+        
+        .full-width {
+          width: 100%;
+          margin-bottom: 1rem;
+        }
+      }
+      
+      .resumen-compra {
+        background: linear-gradient(45deg, var(--primary-gold), #FFD700);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        color: var(--bg-dark);
+        
+        h3 {
+          color: var(--bg-dark);
+          margin-bottom: 1rem;
+          border-bottom: 2px solid var(--bg-dark);
+        }
+        
+        .resumen-content {
+          .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            
+            &.total {
+              border-top: 2px solid var(--bg-dark);
+              padding-top: 0.5rem;
+              margin-top: 1rem;
+              font-weight: 600;
+              font-size: 1.1rem;
+              
+              .precio-total {
+                font-size: 1.3rem;
+                color: var(--primary-red);
+              }
+            }
+          }
+        }
+      }
+      
+      .form-actions {
+        text-align: center;
+        margin-top: 2rem;
+        
+        .btn-primary {
+          width: 100%;
+          margin-bottom: 1rem;
+          font-size: 1.1rem;
+          padding: 1.2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+        
+        .seguridad-info {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .hero-section {
+    .logo-container {
+      .logo {
+        max-width: 150px;
+      }
+    }
+    
+    .cta-container {
+      .btn-primary {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+      }
+    }
+  }
+  
+  .sesiones-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .trailer-container {
+    margin: 2rem auto 0;
+  }
+  
+  .compra-container {
+    margin: 2rem auto 0;
+    
+    .compra-form {
+      padding: 1.5rem;
+      margin: 0 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    .carousel-indicators {
+      bottom: 1rem;
+    }
+  }
+  
+  .sesion-card {
+    .sesion-info {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}
+
+// Animaciones personalizadas para el musical
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+// Override específico para Angular Material en este componente
+::ng-deep {
+  .mat-mdc-form-field {
+    .mdc-text-field--filled {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+    }
+    
+    .mdc-floating-label {
+      color: var(--text-secondary);
+    }
+    
+    &.mat-focused {
+      .mdc-floating-label {
+        color: var(--primary-gold);
+      }
+      
+      .mdc-line-ripple::after {
+        border-bottom-color: var(--primary-gold);
+      }
+    }
+  }
+  
+  .mat-mdc-select-panel {
+    border-radius: 8px;
+  }
+  
+  .mat-mdc-card {
+    border-radius: 15px;
+  }
+}

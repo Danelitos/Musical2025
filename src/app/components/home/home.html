@@ -1,0 +1,228 @@
+<!-- Header con Logo y Carrusel -->
+<header class="hero-section">
+  <div class="logo-container">
+    <img src="assets/images/logo.jpeg" alt="En Belén de Judá - Musical" class="logo">
+    <h1 class="title-primary animate-fade-in-up">En Belén de Judá</h1>
+    <p class="subtitle animate-fade-in-up">Un Musical que toca el corazón en Navidad</p>
+  </div>
+  
+  <!-- Carrusel de imágenes -->
+  <div class="carousel-container">
+    <div class="carousel-wrapper">
+      @for (image of carouselImages(); track image.src; let i = $index) {
+        <div class="carousel-slide" 
+             [class.active]="i === currentImageIndex()"
+             [style.background-image]="'url(' + image.src + ')'">
+          <div class="carousel-overlay"></div>
+        </div>
+      }
+    </div>
+    
+    <!-- Indicadores del carrusel -->
+    <div class="carousel-indicators">
+      @for (image of carouselImages(); track image.src; let i = $index) {
+        <button class="indicator" 
+                [class.active]="i === currentImageIndex()"
+                (click)="currentImageIndex.set(i)">
+        </button>
+      }
+    </div>
+  </div>
+  
+  <!-- Call to Action principal -->
+  <div class="cta-container animate-fade-in-up">
+    <button class="btn-primary" (click)="scrollToReservas()">
+      <mat-icon>confirmation_number</mat-icon>
+      Reserva tus Entradas
+    </button>
+  </div>
+</header>
+
+<!-- Sección de Reserva de Entradas -->
+<section id="reservas-section" class="section reservas-section">
+  <div class="container">
+    <h2 class="title-secondary text-center animate-fade-in-up">Próximas Funciones</h2>
+    <p class="subtitle text-center animate-fade-in-up">
+      Elige la fecha que mejor se adapte a ti y vive la magia de la Navidad
+    </p>
+    
+    <div class="sesiones-grid">
+      @for (sesion of sesiones(); track sesion.id) {
+        <mat-card class="sesion-card animate-fade-in-up">
+          <mat-card-header>
+            <mat-card-title class="sesion-fecha">
+              {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }}
+            </mat-card-title>
+            <mat-card-subtitle>{{ sesion.hora }} - {{ sesion.lugar }}</mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="sesion-info">
+              <div class="precio">
+                <span class="precio-label">Precio:</span>
+                <span class="precio-valor">{{ sesion.precio }}€</span>
+              </div>
+              <div class="disponibilidad">
+                <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
+                  event_seat
+                </mat-icon>
+                <span>{{ sesion.entradasDisponibles }} entradas disponibles</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions>
+            <button class="btn-secondary" 
+                    [disabled]="sesion.entradasDisponibles === 0"
+                    (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra()">
+              @if (sesion.entradasDisponibles > 0) {
+                Seleccionar esta función
+              } @else {
+                Agotado
+              }
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Sección de Trailer -->
+<section class="section trailer-section">
+  <div class="container">
+    <h2 class="title-secondary text-center animate-fade-in-up">Descubre la Magia</h2>
+    <p class="subtitle text-center animate-fade-in-up">
+      Adelanto exclusivo del musical que está emocionando a toda España
+    </p>
+    
+    <div class="trailer-container animate-fade-in-up">
+      <div class="video-wrapper">
+        <iframe 
+          src="https://www.youtube.com/embed/h?v=ofD_Gqufwb8&list=RDofD_Gqufwb8&start_radio=1"
+          title="Trailer oficial - En Belén de Judá Musical"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Formulario de Compra -->
+<section id="compra-section" class="section compra-section">
+  <div class="container">
+    <h2 class="title-secondary text-center animate-fade-in-up">Completa tu Reserva</h2>
+    <p class="subtitle text-center animate-fade-in-up">
+      Solo faltan unos datos para asegurar tu lugar en esta experiencia única
+    </p>
+    
+    <div class="compra-container">
+      <form [formGroup]="compraForm" (ngSubmit)="onSubmitCompra()" class="compra-form">
+        
+        <!-- Información personal -->
+        <div class="form-section">
+          <h3>Información Personal</h3>
+          
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Nombre completo</mat-label>
+            <input matInput 
+                   formControlName="nombre" 
+                   placeholder="Ingresa tu nombre completo">
+            <mat-error>{{ getErrorMessage('nombre') }}</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput 
+                   type="email"
+                   formControlName="email" 
+                   placeholder="tu@correo.com">
+            <mat-error>{{ getErrorMessage('email') }}</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- Selección de función -->
+        <div class="form-section">
+          <h3>Detalles de la Función</h3>
+          
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Selecciona la función</mat-label>
+            <mat-select formControlName="sesionId">
+              @for (sesion of sesiones(); track sesion.id) {
+                <mat-option [value]="sesion.id" [disabled]="sesion.entradasDisponibles === 0">
+                  {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }} - {{ sesion.hora }} 
+                  ({{ sesion.precio }}€)
+                  @if (sesion.entradasDisponibles === 0) {
+                    - Agotado
+                  }
+                </mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('sesionId') }}</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Número de entradas</mat-label>
+            <mat-select formControlName="numEntradas">
+              @for (num of [1,2,3,4,5,6,7,8,9,10]; track num) {
+                <mat-option [value]="num">{{ num }} {{ num === 1 ? 'entrada' : 'entradas' }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('numEntradas') }}</mat-error>
+          </mat-form-field>
+        </div>
+        
+        <!-- Resumen de compra -->
+        @if (compraForm.get('sesionId')?.value && getSesionById(compraForm.get('sesionId')?.value)) {
+          <div class="resumen-compra">
+            <h3>Resumen de tu Reserva</h3>
+            <div class="resumen-content">
+              <div class="resumen-item">
+                <span>Función:</span>
+                <span>{{ getSesionById(compraForm.get('sesionId')?.value)?.fecha | date:'EEEE, d MMMM':'es-ES' }}</span>
+              </div>
+              <div class="resumen-item">
+                <span>Hora:</span>
+                <span>{{ getSesionById(compraForm.get('sesionId')?.value)?.hora }}</span>
+              </div>
+              <div class="resumen-item">
+                <span>Lugar:</span>
+                <span>{{ getSesionById(compraForm.get('sesionId')?.value)?.lugar }}</span>
+              </div>
+              <div class="resumen-item">
+                <span>Entradas:</span>
+                <span>{{ compraForm.get('numEntradas')?.value || 0 }}</span>
+              </div>
+              <div class="resumen-item total">
+                <span>Total:</span>
+                <span class="precio-total">{{ precioTotal }}€</span>
+              </div>
+            </div>
+          </div>
+        }
+        
+        <!-- Botón de compra -->
+        <div class="form-actions">
+          <button type="submit" 
+                  class="btn-primary"
+                  [disabled]="!compraForm.valid || isSubmitting()">
+            @if (isSubmitting()) {
+              <mat-icon>hourglass_empty</mat-icon>
+              Procesando...
+            } @else {
+              <mat-icon>payment</mat-icon>
+              Proceder al Pago - {{ precioTotal }}€
+            }
+          </button>
+          
+          <p class="seguridad-info">
+            <mat-icon>security</mat-icon>
+            Pago 100% seguro con Stripe. Tus datos están protegidos.
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

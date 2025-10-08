@@ -1,0 +1,341 @@
+// Estilos para el Footer del musical
+
+.footer {
+  background: linear-gradient(
+    135deg,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-end) 50%,
+    #0a0a0a 100%
+  );
+  color: var(--text-light);
+  position: relative;
+  overflow: hidden;
+  margin-top: auto;
+  
+  .container {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .footer-main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    padding: 4rem 0 2rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 3rem 0 2rem;
+    }
+  }
+  
+  .footer-brand {
+    .footer-logo {
+      width: 80px;
+      height: auto;
+      margin-bottom: 1rem;
+      filter: brightness(1.2) contrast(1.1);
+    }
+    
+    .footer-title {
+      color: var(--primary-gold);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .footer-description {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+  }
+  
+  .footer-links {
+    h4 {
+      color: var(--primary-gold);
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        margin-bottom: 0.75rem;
+        
+        a {
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          transition: var(--transition-smooth);
+          position: relative;
+          
+          &:hover {
+            color: var(--primary-gold);
+            transform: translateX(5px);
+          }
+          
+          &::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: var(--transition-smooth);
+            color: var(--primary-gold);
+          }
+          
+          &:hover::before {
+            opacity: 1;
+            left: -15px;
+          }
+        }
+      }
+    }
+  }
+  
+  .footer-contact {
+    h4 {
+      color: var(--primary-gold);
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .contact-info {
+      .contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        
+        mat-icon {
+          color: var(--primary-gold);
+          margin-top: 0.2rem;
+          font-size: 1.2rem;
+        }
+        
+        span {
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+  
+  .footer-social {
+    h4 {
+      color: var(--primary-gold);
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      
+      .social-button {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--primary-gold);
+        border: 1px solid var(--primary-gold);
+        transition: var(--transition-smooth);
+        
+        &:hover {
+          background: var(--primary-gold);
+          color: var(--bg-dark);
+          transform: translateY(-3px) scale(1.1);
+          box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+      }
+    }
+    
+    .social-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+  
+  .footer-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--primary-gold) 50%,
+      transparent 100%
+    );
+    margin: 2rem 0;
+  }
+  
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      text-align: center;
+      gap: 1.5rem;
+    }
+  }
+  
+  .footer-legal {
+    .copyright {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .legal-nav {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      
+      @media (max-width: 768px) {
+        justify-content: center;
+      }
+      
+      .legal-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: var(--transition-smooth);
+        
+        &:hover {
+          color: var(--primary-gold);
+        }
+      }
+    }
+  }
+  
+  .footer-credits {
+    text-align: right;
+    
+    @media (max-width: 768px) {
+      text-align: center;
+    }
+    
+    .credits-text {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .security-badges {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      
+      @media (max-width: 768px) {
+        justify-content: center;
+      }
+      
+      .security-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--primary-gold);
+        font-size: 0.8rem;
+        
+        mat-icon {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+  
+  // Decoración navideña
+  .footer-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    
+    .star {
+      position: absolute;
+      color: var(--primary-gold);
+      font-size: 1.5rem;
+      opacity: 0.3;
+      animation: twinkle 3s ease-in-out infinite;
+      
+      &.star-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+      
+      &.star-2 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 1s;
+      }
+      
+      &.star-3 {
+        bottom: 30%;
+        left: 20%;
+        animation-delay: 2s;
+      }
+      
+      &.star-4 {
+        bottom: 20%;
+        right: 25%;
+        animation-delay: 0.5s;
+      }
+      
+      &.star-5 {
+        top: 50%;
+        left: 50%;
+        animation-delay: 1.5s;
+      }
+    }
+  }
+}
+
+// Animaciones
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+// Estados hover especiales para elementos interactivos
+.footer {
+  a, button {
+    &:focus-visible {
+      outline: 2px solid var(--primary-gold);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// Mejoras de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  .footer {
+    .star {
+      animation: none;
+    }
+    
+    a, button {
+      transition: none;
+    }
+  }
+}

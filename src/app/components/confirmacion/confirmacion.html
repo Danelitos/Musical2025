@@ -1,0 +1,211 @@
+<div class="confirmacion-container">
+  <div class="container">
+    
+    <!-- Estado de carga -->
+    @if (reserva().estado === 'loading') {
+      <div class="loading-state animate-fade-in-up">
+        <mat-card class="status-card">
+          <mat-card-content>
+            <div class="loading-content">
+              <div class="loading-spinner"></div>
+              <h2>Procesando tu reserva...</h2>
+              <p>Por favor, espera mientras confirmamos tu pago.</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+    
+    <!-- Estado de éxito -->
+    @if (reserva().estado === 'success') {
+      <div class="success-state animate-fade-in-up">
+        
+        <!-- Cabecera de confirmación -->
+        <div class="confirmation-header">
+          <div class="success-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <h1 class="title-primary">¡Reserva Confirmada!</h1>
+          <p class="subtitle">
+            Tu entrada para "En Belén de Judá" ha sido reservada exitosamente
+          </p>
+        </div>
+        
+        <!-- Detalles de la reserva -->
+        <mat-card class="reservation-details">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>confirmation_number</mat-icon>
+              Detalles de tu Reserva
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="details-grid">
+              
+              <!-- Información del cliente -->
+              <div class="detail-section">
+                <h3>Información Personal</h3>
+                <div class="detail-item">
+                  <mat-icon>person</mat-icon>
+                  <div>
+                    <span class="label">Nombre:</span>
+                    <span class="value">{{ reserva().customerName }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>email</mat-icon>
+                  <div>
+                    <span class="label">Email:</span>
+                    <span class="value">{{ reserva().customerEmail }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Información de la función -->
+              <div class="detail-section">
+                <h3>Detalles de la Función</h3>
+                <div class="detail-item">
+                  <mat-icon>event</mat-icon>
+                  <div>
+                    <span class="label">Fecha:</span>
+                    <span class="value">{{ reserva().sesionFecha }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>access_time</mat-icon>
+                  <div>
+                    <span class="label">Hora:</span>
+                    <span class="value">{{ reserva().sesionHora }}</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>location_on</mat-icon>
+                  <div>
+                    <span class="label">Lugar:</span>
+                    <span class="value">{{ reserva().sesionLugar }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Información del pago -->
+              <div class="detail-section">
+                <h3>Resumen del Pago</h3>
+                <div class="detail-item">
+                  <mat-icon>theater_comedy</mat-icon>
+                  <div>
+                    <span class="label">Entradas:</span>
+                    <span class="value">{{ reserva().numEntradas }} {{ reserva().numEntradas === 1 ? 'entrada' : 'entradas' }}</span>
+                  </div>
+                </div>
+                <div class="detail-item total-amount">
+                  <mat-icon>payment</mat-icon>
+                  <div>
+                    <span class="label">Total Pagado:</span>
+                    <span class="value">{{ reserva().precioTotal }}€</span>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <mat-icon>verified</mat-icon>
+                  <div>
+                    <span class="label">ID de Transacción:</span>
+                    <span class="value transaction-id">{{ reserva().sessionId.substring(0, 20) }}...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        
+        <!-- Información importante -->
+        <mat-card class="important-info">
+          <mat-card-content>
+            <div class="info-header">
+              <mat-icon>info</mat-icon>
+              <h3>Información Importante</h3>
+            </div>
+            <ul class="info-list">
+              <li>
+                <mat-icon>email</mat-icon>
+                Recibirás un email de confirmación con tus entradas en los próximos minutos
+              </li>
+              <li>
+                <mat-icon>access_time</mat-icon>
+                Te recomendamos llegar 30 minutos antes del inicio de la función
+              </li>
+              <li>
+                <mat-icon>smartphone</mat-icon>
+                Puedes presentar tus entradas en formato digital o impreso
+              </li>
+              <li>
+                <mat-icon>support_agent</mat-icon>
+                Para cambios o cancelaciones, contacta con nosotros al menos 24h antes
+              </li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+        
+        <!-- Acciones -->
+        <div class="action-buttons">
+          <button mat-flat-button color="primary" class="btn-primary" (click)="descargarEntradas()">
+            <mat-icon>download</mat-icon>
+            Descargar Entradas
+          </button>
+          
+          <button mat-stroked-button class="btn-secondary" (click)="compartirReserva()">
+            <mat-icon>share</mat-icon>
+            Compartir
+          </button>
+          
+          <button mat-stroked-button class="btn-secondary" (click)="volverAlInicio()">
+            <mat-icon>home</mat-icon>
+            Volver al Inicio
+          </button>
+        </div>
+        
+        <!-- Mensaje de agradecimiento -->
+        <div class="thank-you-message">
+          <h3>¡Gracias por tu confianza!</h3>
+          <p>
+            Estamos emocionados de compartir contigo la magia de "En Belén de Judá". 
+            Te esperamos para vivir juntos esta experiencia navideña única.
+          </p>
+          <div class="christmas-decoration">
+            <span class="star">✦</span>
+            <span class="star">✧</span>
+            <span class="star">✦</span>
+          </div>
+        </div>
+      </div>
+    }
+    
+    <!-- Estado de error -->
+    @if (reserva().estado === 'error') {
+      <div class="error-state animate-fade-in-up">
+        <mat-card class="status-card error-card">
+          <mat-card-content>
+            <div class="error-content">
+              <mat-icon class="error-icon">error</mat-icon>
+              <h2>Hubo un problema</h2>
+              <p>
+                No pudimos confirmar tu reserva en este momento. 
+                Esto puede deberse a que el enlace es inválido o ha expirado.
+              </p>
+              <div class="error-actions">
+                <button mat-flat-button color="primary" (click)="volverAlInicio()">
+                  <mat-icon>home</mat-icon>
+                  Volver al Inicio
+                </button>
+                <p class="contact-info">
+                  Si crees que esto es un error, contacta con nuestro soporte: 
+                  <a href="mailto:soporte@belendeJuda.com">soporte@belendeJuda.com</a>
+                </p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+    
+  </div>
+</div>
