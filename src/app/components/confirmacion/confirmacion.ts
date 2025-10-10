@@ -98,6 +98,9 @@ export class Confirmacion implements OnInit {
         
         this.logger.success('Pago confirmado exitosamente', this.reserva());
         
+        // Lanzar confeti de celebración
+        this.lanzarConfeti();
+        
         // Enviar email de confirmación
         await this.enviarEmailConfirmacion();
       } else {
@@ -190,5 +193,50 @@ export class Confirmacion implements OnInit {
       alert('Texto copiado al portapapeles');
       this.logger.info('Texto copiado al portapapeles (fallback)');
     }
+  }
+
+  /**
+   * Lanza animación de confeti al confirmar pago exitoso
+   * Crea partículas de confeti con colores navideños
+   */
+  private lanzarConfeti(): void {
+    const confettiContainer = document.createElement('div');
+    confettiContainer.className = 'confetti-container';
+    document.body.appendChild(confettiContainer);
+
+    const colors = ['#D4AF37', '#FFD700', '#8B0000', '#228B22', '#F5F5DC', '#C41E3A'];
+    const confettiCount = 80;
+
+    for (let i = 0; i < confettiCount; i++) {
+      setTimeout(() => {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const left = Math.random() * 100;
+        const animationDelay = Math.random() * 0.5;
+        const animationDuration = 2 + Math.random() * 2;
+        const size = 8 + Math.random() * 6;
+        
+        confetti.style.left = `${left}%`;
+        confetti.style.backgroundColor = color;
+        confetti.style.animationDelay = `${animationDelay}s`;
+        confetti.style.animationDuration = `${animationDuration}s`;
+        confetti.style.width = `${size}px`;
+        confetti.style.height = `${size}px`;
+        
+        confettiContainer.appendChild(confetti);
+        
+        // Eliminar el confeti después de la animación
+        setTimeout(() => {
+          confetti.remove();
+        }, (animationDuration + animationDelay) * 1000);
+      }, i * 30);
+    }
+
+    // Eliminar el contenedor después de que todo el confeti haya caído
+    setTimeout(() => {
+      confettiContainer.remove();
+    }, 5000);
   }
 }
