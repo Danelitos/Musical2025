@@ -83,14 +83,20 @@ app.use('*', (req, res) => {
 // INICIAR SERVIDOR
 // ========================================
 
-app.listen(PORT, () => {
-  console.log(`\n🎭 ======================================`);
-  console.log(`   Musical "En Belén de Judá" - Backend`);
-  console.log(`   ======================================`);
-  console.log(`   🌍 Servidor ejecutándose en puerto ${PORT}`);
-  console.log(`   🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
-  console.log(`   🔐 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configurado' : '❌ No configurado'}`);
-  console.log(`   📧 Email: ${process.env.EMAIL_USER ? '✅ Configurado' : '❌ No configurado'}`);
-  console.log(`   🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   ======================================\n`);
-});
+// Solo iniciar el servidor si no estamos en Vercel (serverless)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n🎭 ======================================`);
+    console.log(`   Musical "En Belén de Judá" - Backend`);
+    console.log(`   ======================================`);
+    console.log(`   🌍 Servidor ejecutándose en puerto ${PORT}`);
+    console.log(`   🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
+    console.log(`   🔐 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configurado' : '❌ No configurado'}`);
+    console.log(`   📧 Email: ${process.env.EMAIL_USER ? '✅ Configurado' : '❌ No configurado'}`);
+    console.log(`   🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   ======================================\n`);
+  });
+}
+
+// Exportar la app para Vercel
+module.exports = app;
