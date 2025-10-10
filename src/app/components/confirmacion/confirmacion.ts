@@ -5,7 +5,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { StripeService } from '../../services/stripe.service';
+import { LoggerService } from '../../services/logger.service';
 
+/**
+ * Interfaz para los detalles de la reserva confirmada
+ */
 interface ReservaDetalles {
   sessionId: string;
   customerName: string;
@@ -18,6 +22,21 @@ interface ReservaDetalles {
   estado: 'loading' | 'success' | 'error';
 }
 
+/**
+ * Componente de Confirmación de Pago
+ * 
+ * Muestra los detalles de una reserva completada exitosamente
+ * después de procesar el pago con Stripe.
+ * 
+ * Funcionalidades:
+ * - Recupera detalles del pago desde Stripe
+ * - Envía email de confirmación al cliente
+ * - Permite compartir la reserva en redes sociales
+ * - Opción de descarga de entradas (futuro)
+ * 
+ * @example
+ * URL: /confirmacion?session_id=cs_test_...
+ */
 @Component({
   selector: 'app-confirmacion',
   imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
@@ -25,6 +44,7 @@ interface ReservaDetalles {
   styleUrl: './confirmacion.scss'
 })
 export class Confirmacion implements OnInit {
+  /** Detalles de la reserva confirmada */
   reserva = signal<ReservaDetalles>({
     sessionId: '',
     customerName: '',
@@ -40,18 +60,26 @@ export class Confirmacion implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    @Inject(StripeService) private stripeService: StripeService
+    @Inject(StripeService) private stripeService: StripeService,
+    private logger: LoggerService
   ) {}
 
+  /**
+   * Inicializa el componente y recupera los detalles del pago
+   * Obtiene el session_id de la URL y consulta el estado del pago
+   */
   async ngOnInit() {
     const sessionId = this.route.snapshot.queryParams['session_id'];
     
     if (!sessionId) {
+      this.logger.warn('No se proporcionó session_id en la URL');
       this.reserva.update(r => ({ ...r, estado: 'error' }));
       return;
     }
 
     try {
+      this.logger.info('Recuperando detalles de la sesión de pago', { sessionId });
+      
       // Obtener detalles del pago desde el backend
       const paymentDetails = await this.stripeService.getCheckoutSession(sessionId);
       
@@ -68,26 +96,27 @@ export class Confirmacion implements OnInit {
           estado: 'success'
         });
         
+        this.logger.success('Pago confirmado exitosamente', this.reserva());
+        
         // Enviar email de confirmación
         await this.enviarEmailConfirmacion();
       } else {
+        this.logger.warn('Pago no completado o estado inválido', paymentDetails);
         this.reserva.update(r => ({ ...r, estado: 'error' }));
       }
 
-      // Simular el envío de email de confirmación
-      await this.enviarEmailConfirmacion();
-
     } catch (error) {
-      console.error('Error al procesar la confirmación:', error);
+      this.logger.error('Error al procesar la confirmación', error);
       this.reserva.update(r => ({ ...r, estado: 'error' }));
     }
   }
 
+  /**
+   * Envía email de confirmación al cliente
+   * En producción, hace una llamada al backend para enviar el email
+   */
   private async enviarEmailConfirmacion(): Promise<void> {
     try {
-      // En producción, esto sería una llamada real a tu backend
-      // que enviaría el email usando nodemailer o un servicio similar
-      
       const emailData = {
         to: this.reserva().customerEmail,
         subject: 'Confirmación de Reserva - En Belén de Judá Musical',
@@ -100,10 +129,9 @@ export class Confirmacion implements OnInit {
         sessionId: this.reserva().sessionId
       };
 
-      // Simular llamada al backend
-      console.log('Email de confirmación enviado:', emailData);
+      this.logger.info('Enviando email de confirmación', { to: emailData.to });
       
-      // En producción sería algo como:
+      // TODO: En producción, llamar al endpoint del backend
       /*
       await fetch('/api/send-confirmation-email', {
         method: 'POST',
@@ -114,21 +142,35 @@ export class Confirmacion implements OnInit {
       });
       */
       
+      this.logger.success('Email de confirmación enviado');
+      
     } catch (error) {
-      console.error('Error al enviar email de confirmación:', error);
+      this.logger.error('Error al enviar email de confirmación', error);
       // No fallar la confirmación solo porque el email falle
     }
   }
 
+  /**
+   * Navega de vuelta a la página principal
+   */
   volverAlInicio() {
     this.router.navigate(['/']);
   }
 
+  /**
+   * Descarga las entradas en formato PDF
+   * TODO: Implementar generación de PDF con entradas
+   */
   descargarEntradas() {
+    this.logger.info('Solicitud de descarga de entradas');
     // En producción, esto generaría y descargaría un PDF con las entradas
     alert('Función de descarga de entradas disponible próximamente. Recibirás las entradas por email.');
   }
 
+  /**
+   * Comparte la reserva en redes sociales
+   * Usa Web Share API si está disponible, sino copia al portapapeles
+   */
   compartirReserva() {
     const texto = `¡Voy a ver "En Belén de Judá" el ${this.reserva().sesionFecha} a las ${this.reserva().sesionHora}! 🎭✨ Un musical navideño que promete ser mágico.`;
     
@@ -137,11 +179,16 @@ export class Confirmacion implements OnInit {
         title: 'Mi reserva para "En Belén de Judá"',
         text: texto,
         url: window.location.origin
+      }).then(() => {
+        this.logger.success('Reserva compartida exitosamente');
+      }).catch((error) => {
+        this.logger.warn('Compartir cancelado', error);
       });
     } else {
       // Fallback para navegadores que no soportan Web Share API
       navigator.clipboard.writeText(texto + ' ' + window.location.origin);
       alert('Texto copiado al portapapeles');
+      this.logger.info('Texto copiado al portapapeles (fallback)');
     }
   }
 }

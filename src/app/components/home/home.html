@@ -1,9 +1,7 @@
 <!-- Header con Logo y Carrusel -->
 <header class="hero-section">
   <div class="logo-container">
-    <img src="assets/images/logo.jpeg" alt="En Belén de Judá - Musical" class="logo">
-    <h1 class="title-primary animate-fade-in-up">En Belén de Judá</h1>
-    <p class="subtitle animate-fade-in-up">Un Musical que toca el corazón en Navidad</p>
+    <img src="assets/images/logo.png" alt="En Belén de Judá - Musical" class="logo">
   </div>
   
   <!-- Carrusel de imágenes -->
@@ -38,6 +36,36 @@
   </div>
 </header>
 
+<!-- Sección Quiénes Somos -->
+<section class="section quienes-somos-section">
+  <div class="container">
+    <div class="quienes-somos-content">
+      <div class="quienes-somos-image">
+        <img src="assets/images/quienes_somos.jpg" alt="Grupo Musical En Belén de Judá" class="animate-fade-in-left">
+      </div>
+      
+      <div class="quienes-somos-text">
+        <h2 class="title-secondary animate-fade-in-up">¿Quiénes Somos?</h2>
+        <p class="animate-fade-in-up">
+          Esta obra musical ha sido creada por un grupo de jóvenes cristianos del País Vasco, 
+          con el objetivo de traer el mensaje de la Navidad a la sociedad actual. Creemos que,
+           en los últimos años, el significado de esta celebración se ha desvanecido entre luces,
+            regalos y música, olvidando el verdadero origen de esta fiesta: el nacimiento de Jesucristo.
+        </p>
+        <p class="animate-fade-in-up">
+          Aunque hemos procurado mantener la esencia de los relatos bíblicos, 
+          hemos adaptado algunos eventos para mejorar la fluidez y la narrativa en el escenario.
+        </p>
+        <p class="animate-fade-in-up">
+          Esperemos que esta obra no solo ofrezca un espectáculo disfrutable, 
+          sino que invite a redescubrir la Navidad desde su raíz cristiana, 
+          conectando con su mensaje de esperanza y amor.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Sección de Reserva de Entradas -->
 <section id="reservas-section" class="section reservas-section">
   <div class="container">
@@ -60,7 +88,9 @@
             <div class="sesion-info">
               <div class="precio">
                 <span class="precio-label">Precio:</span>
-                <span class="precio-valor">{{ sesion.precio }}€</span>
+                <span class="precio-valor">
+                  Adultos: {{ sesion.precioAdulto }}€ | Niños: {{ sesion.precioNino }}€
+                </span>
               </div>
               <div class="disponibilidad">
                 <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
@@ -84,6 +114,29 @@
           </mat-card-actions>
         </mat-card>
       }
+    </div>
+  </div>
+</section>
+
+<!-- Sección de Música - Track de Spotify -->
+<section class="section spotify-section">
+  <div class="container">
+    <h2 class="title-secondary text-center animate-fade-in-up">Nuestra Música</h2>
+    <p class="subtitle text-center animate-fade-in-up">
+      Escucha una de las canciones del musical
+    </p>
+    
+    <div class="spotify-container animate-fade-in-up">
+      <iframe 
+        style="border-radius:12px" 
+        src="https://open.spotify.com/embed/track/4LpyZ2aHyClFSe5YMZXGZD?utm_source=generator&theme=0" 
+        width="100%" 
+        height="152" 
+        frameBorder="0" 
+        allowfullscreen="" 
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+        loading="lazy">
+      </iframe>
     </div>
   </div>
 </section>
@@ -152,8 +205,7 @@
             <mat-select formControlName="sesionId">
               @for (sesion of sesiones(); track sesion.id) {
                 <mat-option [value]="sesion.id" [disabled]="sesion.entradasDisponibles === 0">
-                  {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }} - {{ sesion.hora }} 
-                  ({{ sesion.precio }}€)
+                  {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }} - {{ sesion.hora }}
                   @if (sesion.entradasDisponibles === 0) {
                     - Agotado
                   }
@@ -163,15 +215,34 @@
             <mat-error>{{ getErrorMessage('sesionId') }}</mat-error>
           </mat-form-field>
           
-          <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Número de entradas</mat-label>
-            <mat-select formControlName="numEntradas">
-              @for (num of [1,2,3,4,5,6,7,8,9,10]; track num) {
-                <mat-option [value]="num">{{ num }} {{ num === 1 ? 'entrada' : 'entradas' }}</mat-option>
-              }
-            </mat-select>
-            <mat-error>{{ getErrorMessage('numEntradas') }}</mat-error>
-          </mat-form-field>
+          <div class="entradas-grid">
+            <mat-form-field appearance="fill">
+              <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 7 }}€)</mat-label>
+              <mat-select formControlName="numEntradasAdultos">
+                @for (num of [0,1,2,3,4,5,6,7,8,9,10]; track num) {
+                  <mat-option [value]="num">{{ num }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>{{ getErrorMessage('numEntradasAdultos') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Entradas Niños ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 3 }}€)</mat-label>
+              <mat-select formControlName="numEntradasNinos">
+                @for (num of [0,1,2,3,4,5,6,7,8,9,10]; track num) {
+                  <mat-option [value]="num">{{ num }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>{{ getErrorMessage('numEntradasNinos') }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          @if (compraForm.errors?.['atLeastOneTicket']) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              Debes seleccionar al menos una entrada
+            </div>
+          }
         </div>
         
         <!-- Resumen de compra -->
@@ -191,10 +262,18 @@
                 <span>Lugar:</span>
                 <span>{{ getSesionById(compraForm.get('sesionId')?.value)?.lugar }}</span>
               </div>
-              <div class="resumen-item">
-                <span>Entradas:</span>
-                <span>{{ compraForm.get('numEntradas')?.value || 0 }}</span>
-              </div>
+              @if (compraForm.get('numEntradasAdultos')?.value > 0) {
+                <div class="resumen-item">
+                  <span>Entradas Adultos:</span>
+                  <span>{{ compraForm.get('numEntradasAdultos')?.value }} × {{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto }}€ = {{ (compraForm.get('numEntradasAdultos')?.value || 0) * (getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 0) }}€</span>
+                </div>
+              }
+              @if (compraForm.get('numEntradasNinos')?.value > 0) {
+                <div class="resumen-item">
+                  <span>Entradas Niños:</span>
+                  <span>{{ compraForm.get('numEntradasNinos')?.value }} × {{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino }}€ = {{ (compraForm.get('numEntradasNinos')?.value || 0) * (getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 0) }}€</span>
+                </div>
+              }
               <div class="resumen-item total">
                 <span>Total:</span>
                 <span class="precio-total">{{ precioTotal }}€</span>

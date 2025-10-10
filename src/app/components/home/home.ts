@@ -11,16 +11,33 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { StripeService } from '../../services/stripe.service';
+import { LoggerService } from '../../services/logger.service';
 
+/**
+ * Interfaz para las sesiones del musical
+ */
 interface Sesion {
   id: string;
   fecha: Date;
   hora: string;
   lugar: string;
-  precio: number;
+  precioAdulto: number;
+  precioNino: number;
   entradasDisponibles: number;
 }
 
+/**
+ * Componente principal Home
+ * 
+ * Gestiona la página principal del musical incluyendo:
+ * - Carrusel de imágenes automático
+ * - Listado de sesiones disponibles
+ * - Formulario de compra de entradas
+ * - Integración con Stripe para pagos
+ * 
+ * @example
+ * <app-home></app-home>
+ */
 @Component({
   selector: 'app-home',
   imports: [
@@ -39,6 +56,7 @@ interface Sesion {
   styleUrl: './home.scss'
 })
 export class Home implements OnInit {
+  /** Imágenes del carrusel principal */
   carouselImages = signal([
     { src: 'assets/images/carousel1.jpg', alt: 'Escena del musical En Belén de Judá' },
     { src: 'assets/images/carousel2.jpg', alt: 'Actores del musical' },
@@ -46,15 +64,18 @@ export class Home implements OnInit {
     { src: 'assets/images/carousel4.jpg', alt: 'Puesta en escena navideña' }
   ]);
 
+  /** Índice actual de la imagen mostrada en el carrusel */
   currentImageIndex = signal(0);
   
+  /** Sesiones disponibles del musical */
   sesiones = signal<Sesion[]>([
     {
       id: '1',
       fecha: new Date('2024-12-12'),
       hora: '20:00',
       lugar: 'Teatro de Deusto (Bilbao)',
-      precio: 7,
+      precioAdulto: 7,
+      precioNino: 3,
       entradasDisponibles: 550
     },
     {
@@ -62,60 +83,111 @@ export class Home implements OnInit {
       fecha: new Date('2024-12-21'),
       hora: '20:00',
       lugar: 'Teatro de Deusto (Bilbao)',
-      precio: 7,
+      precioAdulto: 7,
+      precioNino: 3,
       entradasDisponibles: 550
     }
   ]);
 
+  /** Formulario reactivo de compra */
   compraForm: FormGroup;
+  
+  /** Estado de envío del formulario */
   isSubmitting = signal(false);
 
   constructor(
     private fb: FormBuilder,
     @Inject(StripeService) private stripeService: StripeService,
-    private router: Router
+    private router: Router,
+    private logger: LoggerService
   ) {
     this.compraForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       sesionId: ['', Validators.required],
-      numEntradas: [1, [Validators.required, Validators.min(1), Validators.max(10)]]
-    });
+      numEntradasAdultos: [0, [Validators.min(0), Validators.max(10)]],
+      numEntradasNinos: [0, [Validators.min(0), Validators.max(10)]]
+    }, { validators: this.atLeastOneTicketValidator });
   }
 
   ngOnInit() {
     this.startCarousel();
   }
 
+  /**
+   * Validador personalizado: al menos una entrada (adulto o niño) debe ser > 0
+   */
+  private atLeastOneTicketValidator(group: FormGroup): {[key: string]: any} | null {
+    const adultos = group.get('numEntradasAdultos')?.value || 0;
+    const ninos = group.get('numEntradasNinos')?.value || 0;
+    return (adultos + ninos) > 0 ? null : { atLeastOneTicket: true };
+  }
+
+  /**
+   * Inicia el carrusel automático de imágenes
+   * Cambia de imagen cada 5 segundos
+   */
   startCarousel() {
     setInterval(() => {
       this.currentImageIndex.update(index => 
         (index + 1) % this.carouselImages().length
       );
-    }, 5000); // Cambio cada 5 segundos
+    }, 5000);
   }
 
+  /**
+   * Scroll suave a la sección de reservas
+   */
   scrollToReservas() {
     const element = document.getElementById('reservas-section');
     element?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  /**
+   * Scroll suave a la sección de compra
+   */
   scrollToCompra() {
     const element = document.getElementById('compra-section');
     element?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  /**
+   * Obtiene una sesión por su ID
+   * @param id - ID de la sesión a buscar
+   * @returns Sesión encontrada o undefined
+   */
   getSesionById(id: string): Sesion | undefined {
     return this.sesiones().find(sesion => sesion.id === id);
   }
 
+  /**
+   * Calcula el precio total de la compra
+   * @returns Precio total (adultos × precioAdulto + niños × precioNino)
+   */
   get precioTotal(): number {
     const sesionId = this.compraForm.get('sesionId')?.value;
-    const numEntradas = this.compraForm.get('numEntradas')?.value || 0;
+    const numAdultos = this.compraForm.get('numEntradasAdultos')?.value || 0;
+    const numNinos = this.compraForm.get('numEntradasNinos')?.value || 0;
     const sesion = this.getSesionById(sesionId);
-    return sesion ? sesion.precio * numEntradas : 0;
+    
+    if (!sesion) return 0;
+    
+    return (sesion.precioAdulto * numAdultos) + (sesion.precioNino * numNinos);
   }
 
+  /**
+   * Obtiene el número total de entradas
+   */
+  get totalEntradas(): number {
+    const numAdultos = this.compraForm.get('numEntradasAdultos')?.value || 0;
+    const numNinos = this.compraForm.get('numEntradasNinos')?.value || 0;
+    return numAdultos + numNinos;
+  }
+
+  /**
+   * Procesa el envío del formulario de compra
+   * Crea una sesión de checkout en Stripe y redirige al usuario
+   */
   async onSubmitCompra() {
     if (this.compraForm.valid) {
       this.isSubmitting.set(true);
@@ -128,13 +200,15 @@ export class Home implements OnInit {
           throw new Error('Sesión no encontrada');
         }
 
-        // Crear la sesión de pago con Stripe
+        // Preparar datos para Stripe Checkout
         const checkoutData = {
           customerEmail: formData.email,
           customerName: formData.nombre,
           sesionId: formData.sesionId,
-          numEntradas: formData.numEntradas,
-          precioUnitario: sesion.precio,
+          numEntradasAdultos: formData.numEntradasAdultos || 0,
+          numEntradasNinos: formData.numEntradasNinos || 0,
+          precioAdulto: sesion.precioAdulto,
+          precioNino: sesion.precioNino,
           precioTotal: this.precioTotal,
           sesionInfo: {
             fecha: sesion.fecha.toLocaleDateString('es-ES'),
@@ -143,15 +217,18 @@ export class Home implements OnInit {
           }
         };
 
+        this.logger.info('Iniciando proceso de checkout', checkoutData);
+
         const result = await this.stripeService.createCheckoutSession(checkoutData);
         
         if (result.url) {
+          this.logger.success('Sesión de checkout creada, redirigiendo a Stripe');
           // Redirigir a Stripe Checkout
           window.location.href = result.url;
         }
         
       } catch (error) {
-        console.error('Error al procesar el pago:', error);
+        this.logger.error('Error al procesar el pago', error);
         alert('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
       } finally {
         this.isSubmitting.set(false);
@@ -161,12 +238,21 @@ export class Home implements OnInit {
     }
   }
 
+  /**
+   * Marca todos los campos del formulario como tocados
+   * Útil para mostrar mensajes de validación
+   */
   private markFormGroupTouched() {
     Object.keys(this.compraForm.controls).forEach(key => {
       this.compraForm.get(key)?.markAsTouched();
     });
   }
 
+  /**
+   * Obtiene el mensaje de error para un campo del formulario
+   * @param fieldName - Nombre del campo
+   * @returns Mensaje de error localizado
+   */
   getErrorMessage(fieldName: string): string {
     const field = this.compraForm.get(fieldName);
     

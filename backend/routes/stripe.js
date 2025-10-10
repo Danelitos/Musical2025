@@ -3,45 +3,71 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { enviarEmailConfirmacion } = require('./email');
 const router = express.Router();
 
-// Datos de las sesiones (en producción esto vendría de una base de datos)
+/**
+ * Datos de las sesiones del musical
+ * En producción, esto debería venir de una base de datos
+ */
 const sesiones = [
   {
     id: '1',
-    fecha: '2025-12-12',
+    fecha: '2024-12-12',
     hora: '20:00',
     lugar: 'Teatro de Deusto (Bilbao)',
-    precio: 7,
+    precioAdulto: 7,
+    precioNino: 3,
     entradasDisponibles: 550
   },
   {
     id: '2',
-    fecha: '2025-12-21',
+    fecha: '2024-12-21',
     hora: '20:00',
     lugar: 'Teatro de Deusto (Bilbao)',
-    precio: 7,
+    precioAdulto: 7,
+    precioNino: 3,
     entradasDisponibles: 550
   }
 ];
 
-// Crear sesión de checkout de Stripe
+/**
+ * POST /api/stripe/create-checkout-session
+ * Crea una nueva sesión de Stripe Checkout para procesar el pago
+ * 
+ * @body {string} customerEmail - Email del cliente
+ * @body {string} customerName - Nombre del cliente
+ * @body {string} sesionId - ID de la sesión del musical
+ * @body {number} numEntradasAdultos - Número de entradas de adultos
+ * @body {number} numEntradasNinos - Número de entradas de niños
+ * @body {object} sesionInfo - Información de la sesión (fecha, hora, lugar)
+ * 
+ * @returns {object} { sessionId, url } - ID y URL de la sesión de Stripe
+ */
 router.post('/create-checkout-session', async (req, res) => {
   try {
     const { 
       customerEmail, 
       customerName, 
       sesionId, 
-      numEntradas, 
+      numEntradasAdultos = 0,
+      numEntradasNinos = 0,
       sesionInfo 
     } = req.body;
 
-    // Validar datos
-    if (!customerEmail || !customerName || !sesionId || !numEntradas) {
+    // Validar datos requeridos
+    if (!customerEmail || !customerName || !sesionId) {
       return res.status(400).json({ 
         error: 'Faltan datos requeridos' 
       });
     }
 
-    // Buscar la sesión
+    // Validar que al menos haya una entrada
+    const totalEntradas = numEntradasAdultos + numEntradasNinos;
+    if (totalEntradas === 0) {
+      return res.status(400).json({ 
+        error: 'Debes seleccionar al menos una entrada' 
+      });
+    }
+
+    // Buscar la sesión seleccionada
     const sesion = sesiones.find(s => s.id === sesionId);
     if (!sesion) {
       return res.status(404).json({ 
@@ -49,37 +75,57 @@ router.post('/create-checkout-session', async (req, res) => {
       });
     }
 
-    // Verificar disponibilidad
-    if (numEntradas > sesion.entradasDisponibles) {
+    // Verificar disponibilidad de entradas
+    if (totalEntradas > sesion.entradasDisponibles) {
       return res.status(400).json({ 
         error: 'No hay suficientes entradas disponibles' 
       });
     }
 
-    const precioTotal = sesion.precio * numEntradas;
+    // Preparar line items para Stripe (solo los que tienen cantidad > 0)
+    const lineItems = [];
+    
+    if (numEntradasAdultos > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Musical "En Belén de Judá" - Entrada Adulto`,
+            description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
+          },
+          unit_amount: sesion.precioAdulto * 100, // Stripe usa centavos
+        },
+        quantity: numEntradasAdultos,
+      });
+    }
+
+    if (numEntradasNinos > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Musical "En Belén de Judá" - Entrada Niño`,
+            description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
+          },
+          unit_amount: sesion.precioNino * 100, // Stripe usa centavos
+        },
+        quantity: numEntradasNinos,
+      });
+    }
 
     // Crear sesión de Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: customerEmail,
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `Musical "En Belén de Judá"`,
-              description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
-            },
-            unit_amount: sesion.precio * 100, // Stripe usa centavos
-          },
-          quantity: numEntradas,
-        },
-      ],
+      line_items: lineItems,
+      // Guardar metadata para recuperar después
       metadata: {
         sesionId: sesionId,
         customerName: customerName,
-        numEntradas: numEntradas.toString(),
+        numEntradasAdultos: numEntradasAdultos.toString(),
+        numEntradasNinos: numEntradasNinos.toString(),
+        totalEntradas: totalEntradas.toString(),
         sesionFecha: sesionInfo.fecha,
         sesionHora: sesionInfo.hora,
         sesionLugar: sesionInfo.lugar
@@ -95,29 +141,36 @@ router.post('/create-checkout-session', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creando sesión de checkout:', error);
+    console.error('❌ Error creando sesión de checkout:', error.message);
     res.status(500).json({ 
       error: 'Error procesando el pago',
-      message: error.message 
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
-// Obtener detalles de una sesión de checkout
+/**
+ * GET /api/stripe/checkout-session/:sessionId
+ * Obtiene los detalles de una sesión de checkout completada
+ * 
+ * @param {string} sessionId - ID de la sesión de Stripe
+ * @returns {object} Detalles del pago y metadata
+ */
 router.get('/checkout-session/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
 
+    // Recuperar sesión con detalles expandidos
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['line_items', 'payment_intent']
     });
 
     if (session.payment_status === 'paid') {
       // Enviar email de confirmación si el pago está completado
-      // (Esto sirve como backup si el webhook no funcionó)
+      // (Backup si el webhook no funcionó)
       setTimeout(() => {
         enviarEmailConfirmacionAutomatico(session);
-      }, 1000); // Esperar 1 segundo para no bloquear la respuesta
+      }, 1000);
       
       res.json({
         status: 'success',
@@ -136,26 +189,37 @@ router.get('/checkout-session/:sessionId', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Error obteniendo sesión:', error);
+    console.error('❌ Error obteniendo sesión:', error.message);
     res.status(500).json({ 
       error: 'Error obteniendo información del pago' 
     });
   }
 });
 
-// Webhook para manejar eventos de Stripe
+/**
+ * POST /api/stripe/webhook
+ * Webhook de Stripe para procesar eventos automáticamente
+ * Maneja eventos como: checkout.session.completed, payment_intent.succeeded
+ * 
+ * IMPORTANTE: Este endpoint debe usar express.raw() para verificar firma
+ */
 router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    // Verificar firma del webhook
+    event = stripe.webhooks.constructEvent(
+      req.body, 
+      sig, 
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
-    console.error('Error en webhook:', err.message);
+    console.error('❌ Error en webhook (firma inválida):', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Manejar el evento
+  // Procesar evento según tipo
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
@@ -163,7 +227,6 @@ router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
       
       // Enviar email de confirmación automáticamente
       enviarEmailConfirmacionAutomatico(session);
-      
       break;
     
     case 'payment_intent.succeeded':
@@ -172,36 +235,53 @@ router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
       break;
 
     default:
-      console.log(`Evento no manejado: ${event.type}`);
+      // Evento no manejado (normal, Stripe envía muchos tipos)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`ℹ️ Evento no manejado: ${event.type}`);
+      }
   }
 
   res.json({received: true});
 });
 
-// Obtener sesiones disponibles
+/**
+ * GET /api/stripe/sesiones
+ * Obtiene el listado de sesiones disponibles
+ * 
+ * @returns {array} Lista de sesiones con disponibilidad
+ */
 router.get('/sesiones', (req, res) => {
   res.json(sesiones);
 });
 
-// Función para enviar email de confirmación automáticamente
+/**
+ * Función auxiliar: Envía email de confirmación automáticamente
+ * Se ejecuta cuando un pago se completa exitosamente
+ * 
+ * @param {object} session - Objeto de sesión de Stripe Checkout
+ */
 async function enviarEmailConfirmacionAutomatico(session) {
   try {
-    console.log('📧 Iniciando envío de email de confirmación...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📧 Iniciando envío de email de confirmación...');
+    }
     
     // Extraer datos del metadata de la sesión
     const { 
       customerName, 
-      numEntradas, 
+      numEntradasAdultos = '0',
+      numEntradasNinos = '0',
+      totalEntradas,
       sesionFecha, 
       sesionHora, 
       sesionLugar,
       sesionId 
     } = session.metadata;
     
-    // Buscar información de la sesión
+    // Buscar información completa de la sesión
     const sesionInfo = sesiones.find(s => s.id === sesionId);
     
-    // Datos para el email
+    // Preparar datos para el email
     const datosEmail = {
       email: session.customer_email,
       nombre: customerName,
@@ -209,34 +289,39 @@ async function enviarEmailConfirmacionAutomatico(session) {
         fecha: sesionFecha,
         hora: sesionHora,
         lugar: sesionLugar,
-        precio: sesionInfo.precio
+        precioAdulto: sesionInfo.precioAdulto,
+        precioNino: sesionInfo.precioNino
       } : {
         fecha: sesionFecha,
         hora: sesionHora,
         lugar: sesionLugar,
-        precio: session.amount_total / (parseInt(numEntradas) * 100) // Calcular precio por entrada
+        precioAdulto: 7,
+        precioNino: 3
       },
-      numEntradas: parseInt(numEntradas),
-      numeroConfirmacion: session.id.substring(8, 16).toUpperCase(), // Usar parte del session ID
+      numEntradasAdultos: parseInt(numEntradasAdultos),
+      numEntradasNinos: parseInt(numEntradasNinos),
+      numeroConfirmacion: session.id.substring(8, 16).toUpperCase(), // ID único de confirmación
       precioTotal: session.amount_total / 100 // Convertir de centavos a euros
     };
-    
-    console.log('📧 Datos del email:', datosEmail);
     
     // Enviar el email
     await enviarEmailConfirmacion(datosEmail);
     
-    console.log('✅ Email de confirmación enviado exitosamente a:', session.customer_email);
+    console.log('✅ Email de confirmación enviado a:', session.customer_email);
     
-    // Opcional: Reducir entradas disponibles
+    // Actualizar entradas disponibles (en producción usar DB)
     if (sesionInfo) {
-      sesionInfo.entradasDisponibles -= parseInt(numEntradas);
-      console.log(`📊 Entradas actualizadas para sesión ${sesionId}. Disponibles: ${sesionInfo.entradasDisponibles}`);
+      const totalEntradasInt = parseInt(totalEntradas || (parseInt(numEntradasAdultos) + parseInt(numEntradasNinos)));
+      sesionInfo.entradasDisponibles -= totalEntradasInt;
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📊 Entradas actualizadas para sesión ${sesionId}. Disponibles: ${sesionInfo.entradasDisponibles}`);
+        console.log(`   Adultos: ${numEntradasAdultos}, Niños: ${numEntradasNinos}`);
+      }
     }
     
   } catch (error) {
-    console.error('❌ Error enviando email de confirmación:', error);
-    // No lanzamos el error para que no falle el webhook
+    console.error('❌ Error enviando email de confirmación:', error.message);
+    // No lanzar error para no fallar el webhook
   }
 }
 

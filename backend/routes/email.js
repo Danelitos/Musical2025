@@ -75,10 +75,19 @@ function generateEmailTemplate(reservationData) {
                     <span class="detail-value">${reservationData.lugar}</span>
                 </div>
                 
+                ${reservationData.numEntradasAdultos > 0 ? `
                 <div class="detail-row">
-                    <span class="detail-label">🎫 Número de Entradas:</span>
-                    <span class="detail-value">${reservationData.numEntradas}</span>
+                    <span class="detail-label">🎫 Entradas Adultos:</span>
+                    <span class="detail-value">${reservationData.numEntradasAdultos}</span>
                 </div>
+                ` : ''}
+                
+                ${reservationData.numEntradasNinos > 0 ? `
+                <div class="detail-row">
+                    <span class="detail-label">🎫 Entradas Niños:</span>
+                    <span class="detail-value">${reservationData.numEntradasNinos}</span>
+                </div>
+                ` : ''}
                 
                 <div class="detail-row">
                     <span class="detail-label">💳 Método de Pago:</span>

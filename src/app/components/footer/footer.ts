@@ -14,24 +14,19 @@ export class Footer {
   
   socialLinks = [
     {
-      name: 'Facebook',
-      url: 'https://facebook.com/belendeJudaMusical',
-      icon: 'facebook'
-    },
-    {
       name: 'Instagram',
-      url: 'https://instagram.com/belendeJudaMusical',
-      icon: 'instagram'
+      url: 'https://instagram.com/enbelendejuda',
+      icon: 'photo_camera' // Instagram
     },
     {
       name: 'TikTok',
-      url: 'https://tiktok.com/@belendeJudaMusical',
-      icon: 'video_library'
+      url: 'https://tiktok.com/@enbelendejuda',
+      icon: 'music_note' // TikTok
     },
     {
       name: 'YouTube',
-      url: 'https://youtube.com/@belendeJudaMusical',
-      icon: 'play_circle'
+      url: 'https://www.youtube.com/@EnBel%C3%A9nDeJud%C3%A1',
+      icon: 'smart_display' // YouTube
     }
   ];
   
