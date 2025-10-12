@@ -9,7 +9,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { StripeService } from '../../services/stripe.service';
 import { LoggerService } from '../../services/logger.service';
@@ -52,7 +53,9 @@ interface Sesion {
     MatDatepickerModule,
     MatNativeDateModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatCheckboxModule,
+    RouterLink
   ],
   templateUrl: './home.html',
   styleUrl: './home.scss'
@@ -90,7 +93,8 @@ export class Home implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       sesionId: ['', Validators.required],
       numEntradasAdultos: [0, [Validators.min(0), Validators.max(10)]],
-      numEntradasNinos: [0, [Validators.min(0), Validators.max(10)]]
+      numEntradasNinos: [0, [Validators.min(0), Validators.max(10)]],
+      aceptaTerminos: [false, Validators.requiredTrue]
     }, { validators: this.atLeastOneTicketValidator() });
   }
 

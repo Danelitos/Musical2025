@@ -296,6 +296,22 @@
           </div>
         }
         
+        <!-- Términos y condiciones -->
+        <div class="terminos-section">
+          <mat-checkbox formControlName="aceptaTerminos" color="primary">
+            He leído y acepto los 
+            <a routerLink="/terminos-condiciones" target="_blank">Términos y Condiciones</a> 
+            y la 
+            <a routerLink="/politica-privacidad" target="_blank">Política de Privacidad</a>
+          </mat-checkbox>
+          @if (compraForm.get('aceptaTerminos')?.touched && compraForm.get('aceptaTerminos')?.invalid) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              Debes aceptar los términos y condiciones para continuar
+            </div>
+          }
+        </div>
+        
         <!-- Botón de compra -->
         <div class="form-actions">
           <button type="submit" 

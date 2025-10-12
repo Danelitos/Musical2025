@@ -813,6 +813,62 @@
         }
       }
       
+      .terminos-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border: 2px solid rgba(212, 175, 55, 0.2);
+        
+        mat-checkbox {
+          ::ng-deep {
+            .mdc-form-field {
+              font-size: 0.95rem;
+              line-height: 1.5;
+            }
+            
+            .mdc-checkbox__background {
+              border-color: var(--primary-gold) !important;
+            }
+            
+            .mdc-checkbox--selected .mdc-checkbox__background {
+              background-color: var(--primary-gold) !important;
+              border-color: var(--primary-gold) !important;
+            }
+          }
+          
+          a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              text-decoration: underline;
+              color: #FFD700;
+            }
+          }
+        }
+        
+        .error-message {
+          margin-top: 0.5rem;
+          padding: 0.5rem;
+          background: rgba(244, 67, 54, 0.1);
+          border-left: 3px solid #f44336;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: #f44336;
+          }
+        }
+      }
+      
       .form-actions {
         text-align: center;
         margin-top: 2.5rem;
