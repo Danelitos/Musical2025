@@ -20,6 +20,11 @@
     @if (reserva().estado === 'success') {
       <div class="success-state animate-fade-in-up">
         
+        <!-- Logo del musical -->
+        <div class="logo-container">
+          <img src="assets/images/logo.png" alt="En Belén de Judá - Musical" class="logo">
+        </div>
+        
         <!-- Cabecera de confirmación mejorada -->
         <div class="confirmation-header">
           <div class="success-icon-wrapper">
@@ -95,17 +100,21 @@
                   <mat-icon>receipt</mat-icon>
                   <h3>Resumen del Pago</h3>
                 </div>
-                <div class="detail-item">
-                  <span class="label">Entradas</span>
-                  <span class="value">{{ reserva().numEntradas }} {{ reserva().numEntradas === 1 ? 'entrada' : 'entradas' }}</span>
-                </div>
+                @if (reserva().numEntradasAdultos > 0) {
+                  <div class="detail-item">
+                    <span class="label">Entradas Adultos</span>
+                    <span class="value">{{ reserva().numEntradasAdultos }} {{ reserva().numEntradasAdultos === 1 ? 'entrada' : 'entradas' }}</span>
+                  </div>
+                }
+                @if (reserva().numEntradasNinos > 0) {
+                  <div class="detail-item">
+                    <span class="label">Entradas Niños</span>
+                    <span class="value">{{ reserva().numEntradasNinos }} {{ reserva().numEntradasNinos === 1 ? 'entrada' : 'entradas' }}</span>
+                  </div>
+                }
                 <div class="detail-item highlight-item">
                   <span class="label">Total Pagado</span>
                   <span class="value total-value">{{ reserva().precioTotal }}€</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">ID Transacción</span>
-                  <span class="value transaction-id">{{ reserva().sessionId.substring(0, 16) }}...</span>
                 </div>
               </div>
             </div>
@@ -147,32 +156,13 @@
                   <p>Presenta tus entradas en formato digital o impreso</p>
                 </div>
               </div>
-              <div class="info-item">
-                <div class="info-icon">
-                  <mat-icon>support_agent</mat-icon>
-                </div>
-                <div class="info-text">
-                  <strong>Cambios o cancelaciones</strong>
-                  <p>Contacta con nosotros con al menos 24h de antelación</p>
-                </div>
-              </div>
             </div>
           </mat-card-content>
         </mat-card>
         
         <!-- Acciones con diseño mejorado -->
         <div class="action-buttons">
-          <button mat-flat-button class="btn-primary elegant-btn" (click)="descargarEntradas()">
-            <mat-icon>download</mat-icon>
-            <span>Descargar Entradas</span>
-          </button>
-          
-          <button mat-stroked-button class="btn-secondary elegant-btn" (click)="compartirReserva()">
-            <mat-icon>share</mat-icon>
-            <span>Compartir</span>
-          </button>
-          
-          <button mat-stroked-button class="btn-secondary elegant-btn" (click)="volverAlInicio()">
+          <button mat-flat-button class="btn-primary elegant-btn" (click)="volverAlInicio()">
             <mat-icon>home</mat-icon>
             <span>Volver al Inicio</span>
           </button>

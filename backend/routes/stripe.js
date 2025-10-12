@@ -10,19 +10,19 @@ const router = express.Router();
 const sesiones = [
   {
     id: '1',
-    fecha: '2024-12-12',
+    fecha: '2025-12-12',
     hora: '20:00',
-    lugar: 'Teatro de Deusto (Bilbao)',
-    precioAdulto: 7,
+    lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+    precioAdulto: 5,
     precioNino: 3,
     entradasDisponibles: 550
   },
   {
     id: '2',
-    fecha: '2024-12-21',
+    fecha: '2025-12-21',
     hora: '20:00',
-    lugar: 'Teatro de Deusto (Bilbao)',
-    precioAdulto: 7,
+    lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+    precioAdulto: 5,
     precioNino: 3,
     entradasDisponibles: 550
   }
@@ -78,9 +78,14 @@ router.post('/create-checkout-session', async (req, res) => {
     // Verificar disponibilidad de entradas
     if (totalEntradas > sesion.entradasDisponibles) {
       return res.status(400).json({ 
-        error: 'No hay suficientes entradas disponibles' 
+        error: `Solo quedan ${sesion.entradasDisponibles} entradas disponibles para esta función`,
+        entradasDisponibles: sesion.entradasDisponibles
       });
     }
+    
+    // Reservar temporalmente las entradas (se confirmarán en el webhook)
+    sesion.entradasDisponibles -= totalEntradas;
+    console.log(`⏳ Entradas reservadas temporalmente para sesión ${sesionId}. Disponibles: ${sesion.entradasDisponibles}`);
 
     // Preparar line items para Stripe (solo los que tienen cantidad > 0)
     const lineItems = [];
@@ -104,7 +109,7 @@ router.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: `Musical "En Belén de Judá" - Entrada Niño`,
+            name: `Musical "En Belén de Judá" - Entrada Niño (hasta 14 años)`,
             description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
           },
           unit_amount: sesion.precioNino * 100, // Stripe usa centavos
@@ -145,6 +150,23 @@ router.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ 
       error: 'Error procesando el pago',
       message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+/**
+ * GET /api/stripe/sesiones
+ * Obtiene las sesiones disponibles con entradas actualizadas
+ * 
+ * @returns {array} Listado de sesiones disponibles
+ */
+router.get('/sesiones', async (req, res) => {
+  try {
+    res.json(sesiones);
+  } catch (error) {
+    console.error('❌ Error obteniendo sesiones:', error.message);
+    res.status(500).json({ 
+      error: 'Error obteniendo sesiones disponibles' 
     });
   }
 });
@@ -295,7 +317,7 @@ async function enviarEmailConfirmacionAutomatico(session) {
         fecha: sesionFecha,
         hora: sesionHora,
         lugar: sesionLugar,
-        precioAdulto: 7,
+        precioAdulto: 5,
         precioNino: 3
       },
       numEntradasAdultos: parseInt(numEntradasAdultos),

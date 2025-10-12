@@ -25,25 +25,103 @@ function generateEmailTemplate(reservationData) {
     <style>
         body { font-family: 'Georgia', serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; }
-        .header { background: linear-gradient(135deg, #D4AF37, #C41E3A); padding: 30px; text-align: center; }
-        .header h1 { color: white; margin: 0; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header p { color: #FFF8DC; margin: 10px 0 0 0; font-size: 16px; }
+
+        /* CABECERA ACTUALIZADA */
+        .header { 
+            background-color: #000; 
+            padding: 10px 10px; 
+            text-align: center; 
+        }
+        .header img {
+            width: 400px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
         .content { padding: 30px; }
         .ticket-info { background: #FFF8DC; border-left: 5px solid #D4AF37; padding: 20px; margin: 20px 0; }
         .detail-row { margin: 10px 0; padding: 8px 0; border-bottom: 1px dotted #ddd; }
         .detail-label { font-weight: bold; color: #8B0000; }
         .detail-value { color: #333; }
         .total { background: #8B0000; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; }
-        .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 14px; }
-        .star { color: #FFD700; font-size: 20px; }
         .important { background: #FFE4B5; border: 1px solid #D4AF37; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .star { color: #FFD700; font-size: 18px; margin: 0 8px; }
+        
+        /* Footer con diseño mejorado y compacto - basado en footer.html y footer.scss */
+        .footer { 
+            background: #01071f;
+            color: white; 
+            padding: 20px 15px; 
+        }
+        .footer-content { 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+        .footer-section { 
+            margin-bottom: 10px; 
+        }
+        .footer-section h4 {
+            color: #D4AF37;
+            font-size: 14px;
+            margin-bottom: 8px;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 3px 0;
+        }
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-section a:hover {
+            color: #D4AF37;
+        }
+        .social-links { 
+            margin-top: 8px; 
+            margin-bottom: 8px;
+        }
+        .social-link { 
+            color: #D4AF37; 
+            text-decoration: none; 
+            transition: all 0.3s ease;
+        }
+        .social-link:hover { 
+            opacity: 0.8;
+            transform: translateY(-3px);
+        }
+        .footer-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 15px 0;
+        }
+        .footer-bottom {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            padding-top: 10px;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .footer { padding: 15px 10px; }
+            .footer-section { text-align: center; margin-bottom: 8px; }
+            .footer-section h4 { font-size: 13px; margin-bottom: 6px; }
+            .footer-section p { font-size: 12px; }
+            .footer-divider { margin: 10px 0; }
+            .footer-bottom { font-size: 12px; padding-top: 8px; }
+            table td { display: block !important; width: 100% !important; padding: 5px 0 !important; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="star">⭐</span> En Belén de Judá <span class="star">⭐</span></h1>
-            <p>¡Tu reserva ha sido confirmada!</p>
+            <img src="https://raw.githubusercontent.com/Danelitos/Musical2025/main/src/assets/images/logo.png" alt="Logo En Belén de Judá">
         </div>
         
         <div class="content">
@@ -54,11 +132,6 @@ function generateEmailTemplate(reservationData) {
             
             <div class="ticket-info">
                 <h3 style="margin-top: 0; color: #8B0000;">📋 Detalles de tu Reserva</h3>
-                
-                <div class="detail-row">
-                    <span class="detail-label">🎭 Evento:</span>
-                    <span class="detail-value">Musical "En Belén de Judá"</span>
-                </div>
                 
                 <div class="detail-row">
                     <span class="detail-label">📅 Fecha:</span>
@@ -90,21 +163,9 @@ function generateEmailTemplate(reservationData) {
                 ` : ''}
                 
                 <div class="detail-row">
-                    <span class="detail-label">💳 Método de Pago:</span>
-                    <span class="detail-value">Tarjeta (Stripe)</span>
-                </div>
-                
-                <div class="detail-row">
                     <span class="detail-label">📧 Email:</span>
                     <span class="detail-value">${reservationData.customerEmail}</span>
                 </div>
-                
-                ${reservationData.numeroConfirmacion ? `
-                <div class="detail-row">
-                    <span class="detail-label">🔑 Número de Confirmación:</span>
-                    <span class="detail-value">${reservationData.numeroConfirmacion}</span>
-                </div>
-                ` : ''}
             </div>
             
             <div class="total">
@@ -117,26 +178,58 @@ function generateEmailTemplate(reservationData) {
                     <li>Por favor, llega al teatro 30 minutos antes del espectáculo</li>
                     <li>Presenta este email como comprobante en taquilla</li>
                     <li>Las puertas se abren 15 minutos antes del inicio</li>
-                    <li>No se permite el acceso una vez comenzado el espectáculo</li>
                 </ul>
             </div>
             
-            <h3 style="color: #8B0000;">🏛️ Información del Teatro</h3>
-            <p>
-                <strong>${process.env.TEATRO_NOMBRE}</strong><br>
-                📍 ${process.env.TEATRO_DIRECCION}<br>
-                📞 ${process.env.TEATRO_TELEFONO}<br>
-                📧 ${process.env.TEATRO_EMAIL}
-            </p>
-            
             <p style="text-align: center; margin-top: 30px;">
-                <strong>¡Esperamos verte pronto! 🎭✨</strong>
+                <strong>✨ ¡Esperamos verte pronto! ✨</strong>
             </p>
         </div>
         
+        <!-- Footer -->
         <div class="footer">
-            <p><strong>En Belén de Judá</strong> - Donde la fe cobra vida en el escenario</p>
-            <p style="margin: 0;">🎄 Un musical que llena de magia la Navidad 🎄</p>
+            <div class="footer-content">
+                <!-- Sección principal del footer -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 5px;">
+                    <tr>
+                        <td width="33%" style="vertical-align: top; padding: 0 10px;">
+                            <!-- Información de contacto -->
+                            <div class="footer-section">
+                                <h4 style="color: #D4AF37; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Contacto</h4>
+                                <div style="margin-bottom: 8px;">
+                                    <p style="color: rgba(255, 255, 255, 0.9); margin: 3px 0; line-height: 1.5;">
+                                        📍 <a href="https://maps.app.goo.gl/5ymdFEihjQgNpEJj9" target="_blank" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;">
+                                            Teatro Salesianos de Deusto<br>
+                                            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">San Felicísimo Bidea, 48014 Bilbao, Bizkaia</span>
+                                        </a>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style="color: rgba(255, 255, 255, 0.9); margin: 3px 0; line-height: 1.5;">
+                                        📧 <a href="mailto:info@belendejuda.com" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;">info@belendejuda.com</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Línea divisoria -->
+                <div class="footer-divider"></div>
+                
+                <!-- Copyright y badges -->
+                <div class="footer-bottom">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="text-align: center; padding: 8px 0;">
+                                <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">
+                                    &copy; ${new Date().getFullYear()} En Belén de Judá Musical. Todos los derechos reservados.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -144,85 +237,14 @@ function generateEmailTemplate(reservationData) {
   `;
 }
 
-// Enviar email de confirmación
-router.post('/send-confirmation', async (req, res) => {
-  try {
-    const { 
-      customerEmail, 
-      customerName, 
-      fecha, 
-      hora, 
-      lugar, 
-      numEntradas, 
-      total 
-    } = req.body;
-
-    // Validar datos requeridos
-    if (!customerEmail || !customerName || !fecha || !hora || !lugar || !numEntradas || !total) {
-      return res.status(400).json({ 
-        error: 'Faltan datos requeridos para enviar la confirmación' 
-      });
-    }
-
-    const reservationData = {
-      customerEmail,
-      customerName,
-      fecha,
-      hora,
-      lugar,
-      numEntradas,
-      total
-    };
-
-    const mailOptions = {
-      from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
-      to: customerEmail,
-      subject: '🎭 Confirmación de Reserva - En Belén de Judá',
-      html: generateEmailTemplate(reservationData)
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    
-    console.log('Email enviado:', info.messageId);
-    
-    res.json({ 
-      success: true, 
-      message: 'Email de confirmación enviado correctamente',
-      messageId: info.messageId
-    });
-
-  } catch (error) {
-    console.error('Error enviando email:', error);
-    res.status(500).json({ 
-      error: 'Error enviando email de confirmación',
-      message: error.message 
-    });
-  }
-});
-
-// Verificar configuración de email
-router.get('/test-email-config', async (req, res) => {
-  try {
-    await transporter.verify();
-    res.json({ 
-      success: true, 
-      message: 'Configuración de email correcta' 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      error: 'Error en configuración de email',
-      message: error.message 
-    });
-  }
-});
-
 // Función reutilizable para enviar email de confirmación
 async function enviarEmailConfirmacion(datosReserva) {
   const { 
     email, 
     nombre, 
     sesion, 
-    numEntradas, 
+    numEntradasAdultos, 
+    numEntradasNinos, 
     numeroConfirmacion, 
     precioTotal 
   } = datosReserva;
@@ -233,7 +255,8 @@ async function enviarEmailConfirmacion(datosReserva) {
     fecha: sesion.fecha,
     hora: sesion.hora,
     lugar: sesion.lugar,
-    numEntradas: numEntradas,
+    numEntradasAdultos: numEntradasAdultos,
+    numEntradasNinos: numEntradasNinos,
     total: precioTotal,
     numeroConfirmacion: numeroConfirmacion
   };
@@ -241,7 +264,7 @@ async function enviarEmailConfirmacion(datosReserva) {
   const mailOptions = {
     from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: '🎭 Confirmación de Compra - En Belén de Judá',
+    subject: '✝️ Confirmación de Reserva - En Belén de Judá',
     html: generateEmailTemplate(reservationData)
   };
 

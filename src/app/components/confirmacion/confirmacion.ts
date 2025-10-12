@@ -17,6 +17,8 @@ interface ReservaDetalles {
   sesionFecha: string;
   sesionHora: string;
   sesionLugar: string;
+  numEntradasAdultos: number;
+  numEntradasNinos: number;
   numEntradas: number;
   precioTotal: number;
   estado: 'loading' | 'success' | 'error';
@@ -52,6 +54,8 @@ export class Confirmacion implements OnInit {
     sesionFecha: '',
     sesionHora: '',
     sesionLugar: '',
+    numEntradasAdultos: 0,
+    numEntradasNinos: 0,
     numEntradas: 0,
     precioTotal: 0,
     estado: 'loading'
@@ -84,14 +88,20 @@ export class Confirmacion implements OnInit {
       const paymentDetails = await this.stripeService.getCheckoutSession(sessionId);
       
       if (paymentDetails.status === 'success' && paymentDetails.paymentStatus === 'paid') {
+        const numEntradasAdultos = parseInt(paymentDetails.metadata?.numEntradasAdultos) || 0;
+        const numEntradasNinos = parseInt(paymentDetails.metadata?.numEntradasNinos) || 0;
+        const totalEntradas = parseInt(paymentDetails.metadata?.totalEntradas) || (numEntradasAdultos + numEntradasNinos);
+        
         this.reserva.set({
           sessionId: sessionId,
           customerName: paymentDetails.metadata?.customerName || 'Cliente',
           customerEmail: paymentDetails.customerEmail || 'cliente@example.com',
-          sesionFecha: paymentDetails.metadata?.sesionFecha || '12/12/2024',
+          sesionFecha: paymentDetails.metadata?.sesionFecha || '12/12/2025',
           sesionHora: paymentDetails.metadata?.sesionHora || '20:00',
-          sesionLugar: paymentDetails.metadata?.sesionLugar || 'Teatro de Deusto (Bilbao)',
-          numEntradas: parseInt(paymentDetails.metadata?.numEntradas) || 1,
+          sesionLugar: paymentDetails.metadata?.sesionLugar || 'Teatro Salesianos de Deusto (Bilbao)',
+          numEntradasAdultos: numEntradasAdultos,
+          numEntradasNinos: numEntradasNinos,
+          numEntradas: totalEntradas,
           precioTotal: paymentDetails.amountTotal || 7,
           estado: 'success'
         });

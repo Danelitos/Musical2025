@@ -217,9 +217,9 @@
           
           <div class="entradas-grid">
             <mat-form-field appearance="fill">
-              <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 7 }}€)</mat-label>
+              <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 5 }}€)</mat-label>
               <mat-select formControlName="numEntradasAdultos">
-                @for (num of [0,1,2,3,4,5,6,7,8,9,10]; track num) {
+                @for (num of getAvailableTickets('adultos'); track num) {
                   <mat-option [value]="num">{{ num }}</mat-option>
                 }
               </mat-select>
@@ -227,20 +227,34 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill">
-              <mat-label>Entradas Niños ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 3 }}€)</mat-label>
+              <mat-label>Entradas Niños hasta 14 años ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 3 }}€)</mat-label>
               <mat-select formControlName="numEntradasNinos">
-                @for (num of [0,1,2,3,4,5,6,7,8,9,10]; track num) {
+                @for (num of getAvailableTickets('ninos'); track num) {
                   <mat-option [value]="num">{{ num }}</mat-option>
                 }
               </mat-select>
               <mat-error>{{ getErrorMessage('numEntradasNinos') }}</mat-error>
             </mat-form-field>
           </div>
+          
+          @if (getEntradasRestantes() !== null && getEntradasRestantes()! < 10) {
+            <div class="warning-message">
+              <mat-icon>warning</mat-icon>
+              ¡Solo quedan {{ getEntradasRestantes() }} entradas disponibles para esta función!
+            </div>
+          }
 
           @if (compraForm.errors?.['atLeastOneTicket']) {
             <div class="error-message">
               <mat-icon>error</mat-icon>
               Debes seleccionar al menos una entrada
+            </div>
+          }
+          
+          @if (compraForm.errors?.['exceedsAvailable']) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              {{ compraForm.errors?.['exceedsAvailable'].message }}
             </div>
           }
         </div>

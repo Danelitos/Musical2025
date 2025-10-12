@@ -10,8 +10,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { StripeService } from '../../services/stripe.service';
 import { LoggerService } from '../../services/logger.service';
+import { environment } from '../../../environments/environment';
 
 /**
  * Interfaz para las sesiones del musical
@@ -68,26 +70,7 @@ export class Home implements OnInit {
   currentImageIndex = signal(0);
   
   /** Sesiones disponibles del musical */
-  sesiones = signal<Sesion[]>([
-    {
-      id: '1',
-      fecha: new Date('2024-12-12'),
-      hora: '20:00',
-      lugar: 'Teatro de Deusto (Bilbao)',
-      precioAdulto: 7,
-      precioNino: 3,
-      entradasDisponibles: 550
-    },
-    {
-      id: '2',
-      fecha: new Date('2024-12-21'),
-      hora: '20:00',
-      lugar: 'Teatro de Deusto (Bilbao)',
-      precioAdulto: 7,
-      precioNino: 3,
-      entradasDisponibles: 550
-    }
-  ]);
+  sesiones = signal<Sesion[]>([]);
 
   /** Formulario reactivo de compra */
   compraForm: FormGroup;
@@ -99,7 +82,8 @@ export class Home implements OnInit {
     private fb: FormBuilder,
     @Inject(StripeService) private stripeService: StripeService,
     private router: Router,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private http: HttpClient
   ) {
     this.compraForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
@@ -112,6 +96,68 @@ export class Home implements OnInit {
 
   ngOnInit() {
     this.startCarousel();
+    this.loadSesiones();
+    
+    // Revalidar cuando cambie la sesión seleccionada
+    this.compraForm.get('sesionId')?.valueChanges.subscribe(() => {
+      this.compraForm.updateValueAndValidity();
+    });
+    
+    // Revalidar cuando cambien las entradas
+    this.compraForm.get('numEntradasAdultos')?.valueChanges.subscribe(() => {
+      this.compraForm.updateValueAndValidity();
+    });
+    
+    this.compraForm.get('numEntradasNinos')?.valueChanges.subscribe(() => {
+      this.compraForm.updateValueAndValidity();
+    });
+  }
+  
+  /**
+   * Carga las sesiones disponibles desde el backend
+   */
+  async loadSesiones() {
+    try {
+      const apiUrl = environment.production 
+        ? '/api/stripe/sesiones' 
+        : 'http://localhost:3000/api/stripe/sesiones';
+        
+      const sesionesData = await this.http.get<any[]>(apiUrl).toPromise();
+      
+      if (sesionesData) {
+        // Convertir fechas de string a Date
+        const sesionesConFecha = sesionesData.map(s => ({
+          ...s,
+          fecha: new Date(s.fecha)
+        }));
+        
+        this.sesiones.set(sesionesConFecha);
+        this.logger.info('Sesiones cargadas correctamente', sesionesConFecha);
+      }
+    } catch (error) {
+      this.logger.error('Error cargando sesiones', error);
+      // Usar datos de fallback si falla la carga
+      this.sesiones.set([
+        {
+          id: '1',
+          fecha: new Date('2025-12-12'),
+          hora: '20:00',
+          lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+          precioAdulto: 5,
+          precioNino: 3,
+          entradasDisponibles: 550
+        },
+        {
+          id: '2',
+          fecha: new Date('2025-12-21'),
+          hora: '20:00',
+          lugar: 'Teatro Salesianosde Deusto (Bilbao)',
+          precioAdulto: 5,
+          precioNino: 3,
+          entradasDisponibles: 550
+        }
+      ]);
+    }
   }
 
   /**
@@ -120,7 +166,26 @@ export class Home implements OnInit {
   private atLeastOneTicketValidator(group: FormGroup): {[key: string]: any} | null {
     const adultos = group.get('numEntradasAdultos')?.value || 0;
     const ninos = group.get('numEntradasNinos')?.value || 0;
-    return (adultos + ninos) > 0 ? null : { atLeastOneTicket: true };
+    const totalEntradas = adultos + ninos;
+    
+    if (totalEntradas === 0) {
+      return { atLeastOneTicket: true };
+    }
+    
+    // Validar que no exceda las entradas disponibles
+    const sesionId = group.get('sesionId')?.value;
+    if (sesionId) {
+      const sesion = this.sesiones().find(s => s.id === sesionId);
+      if (sesion && totalEntradas > sesion.entradasDisponibles) {
+        return { 
+          exceedsAvailable: { 
+            message: `Solo quedan ${sesion.entradasDisponibles} entradas disponibles para esta función` 
+          } 
+        };
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -133,6 +198,45 @@ export class Home implements OnInit {
         (index + 1) % this.carouselImages().length
       );
     }, 5000);
+  }
+
+  /**
+   * Obtiene las opciones de entradas disponibles según las entradas restantes
+   * @param tipo - Tipo de entrada ('adultos' o 'ninos')
+   * @returns Array de números disponibles para seleccionar
+   */
+  getAvailableTickets(tipo: 'adultos' | 'ninos'): number[] {
+    const sesionId = this.compraForm.get('sesionId')?.value;
+    if (!sesionId) {
+      return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    }
+    
+    const sesion = this.getSesionById(sesionId);
+    if (!sesion) {
+      return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    }
+    
+    const entradasDisponibles = sesion.entradasDisponibles;
+    const maxEntradas = Math.min(10, entradasDisponibles);
+    
+    const options: number[] = [];
+    for (let i = 0; i <= maxEntradas; i++) {
+      options.push(i);
+    }
+    
+    return options;
+  }
+  
+  /**
+   * Obtiene el número de entradas restantes para la sesión seleccionada
+   * @returns Número de entradas restantes o null si no hay sesión seleccionada
+   */
+  getEntradasRestantes(): number | null {
+    const sesionId = this.compraForm.get('sesionId')?.value;
+    if (!sesionId) return null;
+    
+    const sesion = this.getSesionById(sesionId);
+    return sesion ? sesion.entradasDisponibles : null;
   }
 
   /**
