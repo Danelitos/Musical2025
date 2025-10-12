@@ -206,14 +206,16 @@ router.get('/checkout-session/:sessionId', async (req, res) => {
     });
 
     if (session.payment_status === 'paid') {
-      // Enviar email de confirmación si el pago está completado
-      // (Backup si el webhook no funcionó)
-      console.log('📧 [BACKUP] Intentando enviar email desde checkout-session endpoint');
-      setTimeout(() => {
-        enviarEmailConfirmacionAutomatico(session).catch(err => {
-          console.error('❌ [BACKUP] Error enviando email:', err.message);
-        });
-      }, 1000);
+      
+      console.log('✅ Pago completado. Intentando enviar email de confirmación...');
+
+      try {
+        // Esperar al envío del correo ANTES de responder
+        await enviarEmailConfirmacionAutomatico(session);
+        console.log(`📧 Email de confirmación enviado a ${session.customer_email}`);
+      } catch (err) {
+        console.error('❌ Error enviando email de confirmación:', err.message);
+      }
       
       res.json({
         status: 'success',
@@ -238,59 +240,6 @@ router.get('/checkout-session/:sessionId', async (req, res) => {
     });
   }
 });
-
-/**
- * POST /api/stripe/webhook
- * Webhook de Stripe para procesar eventos automáticamente
- * Maneja eventos como: checkout.session.completed, payment_intent.succeeded
- * 
- * IMPORTANTE: Este endpoint debe usar express.raw() para verificar firma
- */
-router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-
-  try {
-    // Verificar firma del webhook
-    event = stripe.webhooks.constructEvent(
-      req.body, 
-      sig, 
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('❌ Error en webhook (firma inválida):', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Procesar evento según tipo
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const session = event.data.object;
-      console.log('✅ Pago completado:', session.id);
-      
-      // Enviar email de confirmación automáticamente (sin await para no bloquear webhook)
-      enviarEmailConfirmacionAutomatico(session).catch(err => {
-        console.error('❌ ERROR CRÍTICO enviando email desde webhook:', err.message);
-        console.error('Stack completo:', err.stack);
-      });
-      break;
-    
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      console.log('💰 Pago exitoso:', paymentIntent.id);
-      break;
-
-    default:
-      // Evento no manejado (normal, Stripe envía muchos tipos)
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`ℹ️ Evento no manejado: ${event.type}`);
-      }
-  }
-
-  res.json({received: true});
-});
-
-
 
 /**
  * Función auxiliar: Envía email de confirmación automáticamente
