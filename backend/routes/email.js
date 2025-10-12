@@ -125,7 +125,7 @@ function generateEmailTemplate(reservationData) {
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://raw.githubusercontent.com/Danelitos/Musical2025/main/src/assets/images/logo.png" alt="Logo En Belén de Judá">
+            <img src="cid:logo" alt="Logo En Belén de Judá">
         </div>
         
         <div class="content">
@@ -314,103 +314,131 @@ async function generarPDFEntrada(datosReserva) {
       doc.y = 210;
 
       // ============ TÍTULO DE CONFIRMACIÓN ============
-      doc.fontSize(24).fillColor('#8B0000').font('Helvetica-Bold')
+      doc.fontSize(20).fillColor('#8B0000').font('Helvetica-Bold')
          .text('ENTRADA CONFIRMADA', 50, doc.y, { align: 'center', width: doc.page.width - 100 });
       
       // Línea divisoria dorada
       const lineY = doc.y;
-      doc.moveTo(80, lineY).lineTo(doc.page.width - 80, lineY).lineWidth(2).stroke('#D4AF37');
+      doc.moveTo(80, lineY).lineTo(doc.page.width - 80, lineY).lineWidth(1.5).stroke('#D4AF37');
+      doc.moveDown(0.5);
+
+      // ============ DATOS DEL COMPRADOR ============
+      const buyerBoxY = doc.y;
+      doc.roundedRect(60, buyerBoxY, doc.page.width - 120, 55, 6)
+         .lineWidth(1.5)
+         .strokeColor('#D4AF37')
+         .fillAndStroke('#FFFFFF', '#D4AF37');
+
+      doc.fontSize(11).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Datos del Comprador', 80, buyerBoxY + 8);
+      
+      doc.fontSize(9).fillColor('#000').font('Helvetica');
+      
+      // Nombre del comprador
+      const buyerDetailsY = buyerBoxY + 25;
+      doc.font('Helvetica-Bold').text('Nombre:', 80, buyerDetailsY);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.nombre, 140, buyerDetailsY, {
+        width: doc.page.width - 220
+      });
+      
+      // Email del comprador
+      doc.font('Helvetica-Bold').fillColor('#000').text('Email:', 80, buyerDetailsY + 15);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.email, 140, buyerDetailsY + 15, {
+        width: doc.page.width - 220
+      });
+
+      doc.y = buyerBoxY + 60;
       doc.moveDown(0.5);
 
       // ============ SECCIÓN DE DETALLES DEL EVENTO ============
       // Caja elegante con sombra para detalles del evento
       const eventBoxY = doc.y;
-      doc.roundedRect(60, eventBoxY, doc.page.width - 120, 100, 8)
+      doc.roundedRect(60, eventBoxY, doc.page.width - 120, 75, 6)
          .lineWidth(1.5)
          .strokeColor('#D4AF37')
          .fillAndStroke('#FFF8DC', '#D4AF37');
 
-      doc.fontSize(15).fillColor('#8B0000').font('Helvetica-Bold')
-         .text('Detalles del Evento', 80, eventBoxY + 15);
+      doc.fontSize(11).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Detalles del Evento', 80, eventBoxY + 8);
       
-      doc.fontSize(11).fillColor('#000').font('Helvetica');
+      doc.fontSize(9).fillColor('#000').font('Helvetica');
       
       // Información del evento sin emojis
-      const detailsY = eventBoxY + 40;
+      const detailsY = eventBoxY + 25;
       doc.font('Helvetica-Bold').text('Fecha:', 80, detailsY);
-      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.fecha, 160, detailsY);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.fecha, 140, detailsY);
       
-      doc.font('Helvetica-Bold').fillColor('#000').text('Hora:', 80, detailsY + 18);
-      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.hora, 160, detailsY + 18);
+      doc.font('Helvetica-Bold').fillColor('#000').text('Hora:', 80, detailsY + 15);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.hora, 140, detailsY + 15);
       
-      doc.font('Helvetica-Bold').fillColor('#000').text('Lugar:', 80, detailsY + 36);
-      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.lugar, 160, detailsY + 36, {
-        width: doc.page.width - 240
+      doc.font('Helvetica-Bold').fillColor('#000').text('Lugar:', 80, detailsY + 30);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.lugar, 140, detailsY + 30, {
+        width: doc.page.width - 220
       });
 
-      doc.y = eventBoxY + 115;
-      doc.moveDown(1);
+      doc.y = eventBoxY + 80;
+      doc.moveDown(0.6);
 
       // ============ TABLA DE ENTRADAS ============
-      doc.fontSize(15).fillColor('#8B0000').font('Helvetica-Bold')
+      doc.fontSize(11).fillColor('#8B0000').font('Helvetica-Bold')
          .text('Entradas Adquiridas', 60, doc.y);
-      doc.moveDown(0.8);
+      doc.moveDown(0.5);
 
       let tableY = doc.y;
       const tableX = 60;
       const tableWidth = doc.page.width - 120;
       
-      // Definir anchos de columnas
+      // Definir anchos de columnas (más compactas)
       const col1Width = 120;  // Tipo
-      const col2Width = 100;  // Cantidad
+      const col2Width = 100;   // Cantidad
       const col3Width = 120;  // Precio Unit.
       const col4Width = 120;  // Subtotal
       
-      // Encabezados de tabla con degradado
-      doc.roundedRect(tableX, tableY, tableWidth, 28, 5)
+      // Encabezados de tabla con degradado (más pequeños)
+      doc.roundedRect(tableX, tableY, tableWidth, 22, 4)
          .fillAndStroke('#8B0000', '#6B0000');
       
-      doc.fontSize(11).fillColor('#FFFFFF').font('Helvetica-Bold');
-      doc.text('Tipo', tableX + 10, tableY + 8, { width: col1Width, align: 'left' });
-      doc.text('Cantidad', tableX + col1Width + 10, tableY + 8, { width: col2Width, align: 'center' });
-      doc.text('Precio Unit.', tableX + col1Width + col2Width + 10, tableY + 8, { width: col3Width, align: 'center' });
-      doc.text('Subtotal', tableX + col1Width + col2Width + col3Width + 10, tableY + 8, { width: col4Width - 10, align: 'right' });
+      doc.fontSize(9).fillColor('#FFFFFF').font('Helvetica-Bold');
+      doc.text('Tipo', tableX + 8, tableY + 6, { width: col1Width, align: 'left' });
+      doc.text('Cantidad', tableX + col1Width + 8, tableY + 6, { width: col2Width, align: 'center' });
+      doc.text('Precio Unit.', tableX + col1Width + col2Width + 8, tableY + 6, { width: col3Width, align: 'center' });
+      doc.text('Subtotal', tableX + col1Width + col2Width + col3Width + 8, tableY + 6, { width: col4Width - 8, align: 'right' });
       
-      tableY += 28;
+      tableY += 22;
 
-      // Filas de entradas con fondo alternado
+      // Filas de entradas con fondo alternado (más compactas)
       doc.font('Helvetica');
       
       // Fila Adultos
       if (datosReserva.numEntradasAdultos > 0) {
-        doc.rect(tableX, tableY, tableWidth, 23).fillAndStroke('#F8F8F8', '#E0E0E0');
-        doc.fillColor('#000').text('Adulto', tableX + 10, tableY + 6, { width: col1Width, align: 'left' });
-        doc.text(datosReserva.numEntradasAdultos.toString(), tableX + col1Width + 10, tableY + 6, { width: col2Width, align: 'center' });
-        doc.text(`${datosReserva.sesion.precioAdulto}€`, tableX + col1Width + col2Width + 10, tableY + 6, { width: col3Width, align: 'center' });
-        doc.text(`${(datosReserva.numEntradasAdultos * datosReserva.sesion.precioAdulto).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 6, { width: col4Width - 10, align: 'right' });
-        tableY += 23;
+        doc.rect(tableX, tableY, tableWidth, 18).fillAndStroke('#F8F8F8', '#E0E0E0');
+        doc.fontSize(9).fillColor('#000').text('Adulto', tableX + 8, tableY + 5, { width: col1Width, align: 'left' });
+        doc.text(datosReserva.numEntradasAdultos.toString(), tableX + col1Width + 8, tableY + 5, { width: col2Width, align: 'center' });
+        doc.text(`${datosReserva.sesion.precioAdulto}€`, tableX + col1Width + col2Width + 8, tableY + 5, { width: col3Width, align: 'center' });
+        doc.text(`${(datosReserva.numEntradasAdultos * datosReserva.sesion.precioAdulto).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 8, tableY + 5, { width: col4Width - 8, align: 'right' });
+        tableY += 18;
       }
 
       // Fila Niños
       if (datosReserva.numEntradasNinos > 0) {
-        doc.rect(tableX, tableY, tableWidth, 23).fillAndStroke('#FFFFFF', '#E0E0E0');
-        doc.fillColor('#000').text('Niño', tableX + 10, tableY + 6, { width: col1Width, align: 'left' });
-        doc.text(datosReserva.numEntradasNinos.toString(), tableX + col1Width + 10, tableY + 6, { width: col2Width, align: 'center' });
-        doc.text(`${datosReserva.sesion.precioNino}€`, tableX + col1Width + col2Width + 10, tableY + 6, { width: col3Width, align: 'center' });
-        doc.text(`${(datosReserva.numEntradasNinos * datosReserva.sesion.precioNino).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 6, { width: col4Width - 10, align: 'right' });
-        tableY += 23;
+        doc.rect(tableX, tableY, tableWidth, 18).fillAndStroke('#FFFFFF', '#E0E0E0');
+        doc.fontSize(9).fillColor('#000').text('Niño', tableX + 8, tableY + 5, { width: col1Width, align: 'left' });
+        doc.text(datosReserva.numEntradasNinos.toString(), tableX + col1Width + 8, tableY + 5, { width: col2Width, align: 'center' });
+        doc.text(`${datosReserva.sesion.precioNino}€`, tableX + col1Width + col2Width + 8, tableY + 5, { width: col3Width, align: 'center' });
+        doc.text(`${(datosReserva.numEntradasNinos * datosReserva.sesion.precioNino).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 8, tableY + 5, { width: col4Width - 8, align: 'right' });
+        tableY += 18;
       }
 
-      // Total destacado
-      doc.roundedRect(tableX, tableY, tableWidth, 32, 5)
+      // Total destacado (más compacto)
+      doc.roundedRect(tableX, tableY, tableWidth, 25, 4)
          .fillAndStroke('#D4AF37', '#B8941F');
-      doc.fontSize(14).fillColor('#000').font('Helvetica-Bold')
-         .text('TOTAL PAGADO', tableX + 10, tableY + 9, { width: col1Width + col2Width, align: 'left' });
-      doc.fontSize(16)
-         .text(`${datosReserva.precioTotal}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 8, { width: col4Width - 10, align: 'right' });
+      doc.fontSize(11).fillColor('#000').font('Helvetica-Bold')
+         .text('TOTAL PAGADO', tableX + 8, tableY + 7, { width: col1Width + col2Width, align: 'left' });
+      doc.fontSize(13)
+         .text(`${datosReserva.precioTotal}€`, tableX + col1Width + col2Width + col3Width + 8, tableY + 6, { width: col4Width - 8, align: 'right' });
 
-      doc.y = tableY + 45;
-      doc.moveDown(1.2);
+      doc.y = tableY + 32;
+      doc.moveDown(0.4);
 
       // ============ CÓDIGO QR CON MARCO ELEGANTE ============
       doc.fontSize(14).fillColor('#8B0000').font('Helvetica-Bold')
@@ -535,6 +563,9 @@ async function enviarEmailConfirmacion(datosReserva) {
   const timestamp = new Date().getTime();
   const pdfFilename = `Entrada_BelenDeJuda_${timestamp}.pdf`;
 
+  // Ruta del logo para adjuntar como inline
+  const logoPath = path.join(__dirname, '../../src/assets/images/logo.png');
+
   const mailOptions = {
     from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -545,6 +576,11 @@ async function enviarEmailConfirmacion(datosReserva) {
         filename: pdfFilename,
         content: pdfBuffer,
         contentType: 'application/pdf'
+      },
+      {
+        filename: 'logo.png',
+        path: logoPath,
+        cid: 'logo' // Este CID se usa en el HTML como src="cid:logo"
       }
     ]
   };
@@ -601,56 +637,6 @@ router.get('/test-config', async (req, res) => {
     res.status(500).json({
       error: 'Error verificando configuración',
       message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
-
-/**
- * POST /api/email/test-send
- * Endpoint para enviar un email de prueba (solo para debugging)
- */
-router.post('/test-send', async (req, res) => {
-  try {
-    const { email } = req.body;
-    
-    if (!email) {
-      return res.status(400).json({ error: 'Email requerido' });
-    }
-    
-    console.log(`📧 Enviando email de prueba a: ${email}`);
-    
-    const mailOptions = {
-      from: `"En Belén de Judá Musical - TEST" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: '🧪 Email de Prueba - En Belén de Judá',
-      html: `
-        <h2>Email de Prueba</h2>
-        <p>Este es un email de prueba del sistema de En Belén de Judá.</p>
-        <p>Si recibes este email, la configuración está funcionando correctamente.</p>
-        <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
-      `
-    };
-    
-    const info = await transporter.sendMail(mailOptions);
-    
-    console.log('✅ Email de prueba enviado:', info.messageId);
-    
-    res.json({
-      status: 'OK',
-      message: 'Email de prueba enviado exitosamente',
-      messageId: info.messageId,
-      response: info.response,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('❌ Error enviando email de prueba:', error);
-    res.status(500).json({
-      error: 'Error enviando email de prueba',
-      message: error.message,
-      code: error.code,
-      response: error.response,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
