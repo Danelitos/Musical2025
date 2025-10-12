@@ -208,8 +208,11 @@ router.get('/checkout-session/:sessionId', async (req, res) => {
     if (session.payment_status === 'paid') {
       // Enviar email de confirmación si el pago está completado
       // (Backup si el webhook no funcionó)
+      console.log('📧 [BACKUP] Intentando enviar email desde checkout-session endpoint');
       setTimeout(() => {
-        enviarEmailConfirmacionAutomatico(session);
+        enviarEmailConfirmacionAutomatico(session).catch(err => {
+          console.error('❌ [BACKUP] Error enviando email:', err.message);
+        });
       }, 1000);
       
       res.json({
@@ -265,8 +268,11 @@ router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
       const session = event.data.object;
       console.log('✅ Pago completado:', session.id);
       
-      // Enviar email de confirmación automáticamente
-      enviarEmailConfirmacionAutomatico(session);
+      // Enviar email de confirmación automáticamente (sin await para no bloquear webhook)
+      enviarEmailConfirmacionAutomatico(session).catch(err => {
+        console.error('❌ ERROR CRÍTICO enviando email desde webhook:', err.message);
+        console.error('Stack completo:', err.stack);
+      });
       break;
     
     case 'payment_intent.succeeded':
@@ -294,9 +300,9 @@ router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
  */
 async function enviarEmailConfirmacionAutomatico(session) {
   try {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Iniciando envío de email de confirmación...');
-    }
+    console.log('📧 [WEBHOOK] Iniciando envío de email de confirmación...');
+    console.log('   Session ID:', session.id);
+    console.log('   Customer Email:', session.customer_email);
     
     // Extraer datos del metadata de la sesión
     const { 
@@ -309,6 +315,15 @@ async function enviarEmailConfirmacionAutomatico(session) {
       sesionLugar,
       sesionId 
     } = session.metadata;
+    
+    console.log('   Metadata:', {
+      customerName,
+      numEntradasAdultos,
+      numEntradasNinos,
+      sesionFecha,
+      sesionHora,
+      sesionId
+    });
     
     // Buscar información completa de la sesión
     const sesionInfo = sesiones.find(s => s.id === sesionId);
@@ -335,24 +350,44 @@ async function enviarEmailConfirmacionAutomatico(session) {
       precioTotal: session.amount_total / 100 // Convertir de centavos a euros
     };
     
+    console.log('   Datos preparados para email:', {
+      email: datosEmail.email,
+      nombre: datosEmail.nombre,
+      precioTotal: datosEmail.precioTotal
+    });
+    
     // Enviar el email
     await enviarEmailConfirmacion(datosEmail);
     
-    console.log('✅ Email de confirmación enviado a:', session.customer_email);
+    console.log('✅ [WEBHOOK] Email de confirmación enviado exitosamente a:', session.customer_email);
     
     // Actualizar entradas disponibles (en producción usar DB)
     if (sesionInfo) {
       const totalEntradasInt = parseInt(totalEntradas || (parseInt(numEntradasAdultos) + parseInt(numEntradasNinos)));
       sesionInfo.entradasDisponibles -= totalEntradasInt;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 Entradas actualizadas para sesión ${sesionId}. Disponibles: ${sesionInfo.entradasDisponibles}`);
-        console.log(`   Adultos: ${numEntradasAdultos}, Niños: ${numEntradasNinos}`);
-      }
+      console.log(`📊 [WEBHOOK] Entradas actualizadas para sesión ${sesionId}. Disponibles: ${sesionInfo.entradasDisponibles}`);
+      console.log(`   Adultos: ${numEntradasAdultos}, Niños: ${numEntradasNinos}`);
     }
     
   } catch (error) {
-    console.error('❌ Error enviando email de confirmación:', error.message);
-    // No lanzar error para no fallar el webhook
+    console.error('❌ [WEBHOOK] ERROR CRÍTICO enviando email de confirmación:');
+    console.error('   Mensaje:', error.message);
+    console.error('   Nombre del error:', error.name);
+    console.error('   Stack completo:', error.stack);
+    
+    // Intentar loguear más detalles si es un error de nodemailer
+    if (error.code) {
+      console.error('   Código de error:', error.code);
+    }
+    if (error.response) {
+      console.error('   Respuesta del servidor:', error.response);
+    }
+    if (error.responseCode) {
+      console.error('   Código de respuesta:', error.responseCode);
+    }
+    
+    // Re-lanzar el error para que se capture en el nivel superior
+    throw error;
   }
 }
 

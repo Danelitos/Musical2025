@@ -555,4 +555,105 @@ async function enviarEmailConfirmacion(datosReserva) {
   return info;
 }
 
+/**
+ * GET /api/email/test-config
+ * Endpoint para verificar la configuración del email (solo para debugging)
+ */
+router.get('/test-config', async (req, res) => {
+  try {
+    console.log('🔍 Verificando configuración de email...');
+    
+    const config = {
+      emailUser: process.env.EMAIL_USER ? '✅ Configurado' : '❌ NO configurado',
+      emailPass: process.env.EMAIL_PASS ? '✅ Configurado' : '❌ NO configurado',
+      emailHost: process.env.EMAIL_HOST || 'Gmail (por defecto)',
+      emailPort: process.env.EMAIL_PORT || '587 (por defecto)',
+    };
+    
+    console.log('Configuración:', config);
+    
+    // Intentar verificar conexión
+    let connectionStatus = 'No probada';
+    try {
+      await transporter.verify();
+      connectionStatus = '✅ Conexión exitosa';
+      console.log('✅ Conexión con servidor de email verificada');
+    } catch (error) {
+      connectionStatus = `❌ Error: ${error.message}`;
+      console.error('❌ Error verificando conexión:', error.message);
+    }
+    
+    res.json({
+      status: 'OK',
+      config: {
+        emailUser: process.env.EMAIL_USER,
+        emailUserConfigured: !!process.env.EMAIL_USER,
+        emailPassConfigured: !!process.env.EMAIL_PASS,
+        emailHost: process.env.EMAIL_HOST || 'gmail (default)',
+        emailPort: process.env.EMAIL_PORT || '587',
+        connectionStatus: connectionStatus
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en test-config:', error);
+    res.status(500).json({
+      error: 'Error verificando configuración',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+/**
+ * POST /api/email/test-send
+ * Endpoint para enviar un email de prueba (solo para debugging)
+ */
+router.post('/test-send', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email requerido' });
+    }
+    
+    console.log(`📧 Enviando email de prueba a: ${email}`);
+    
+    const mailOptions = {
+      from: `"En Belén de Judá Musical - TEST" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: '🧪 Email de Prueba - En Belén de Judá',
+      html: `
+        <h2>Email de Prueba</h2>
+        <p>Este es un email de prueba del sistema de En Belén de Judá.</p>
+        <p>Si recibes este email, la configuración está funcionando correctamente.</p>
+        <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+      `
+    };
+    
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log('✅ Email de prueba enviado:', info.messageId);
+    
+    res.json({
+      status: 'OK',
+      message: 'Email de prueba enviado exitosamente',
+      messageId: info.messageId,
+      response: info.response,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error enviando email de prueba:', error);
+    res.status(500).json({
+      error: 'Error enviando email de prueba',
+      message: error.message,
+      code: error.code,
+      response: error.response,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 module.exports = { router, enviarEmailConfirmacion };
