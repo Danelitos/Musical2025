@@ -1,7 +1,14 @@
 const express = require('express');
+const router = express.Router();
+
+// Validar que la clave de Stripe existe
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error('❌ ERROR CRÍTICO: STRIPE_SECRET_KEY no está configurada en las variables de entorno');
+  throw new Error('STRIPE_SECRET_KEY no configurada');
+}
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { enviarEmailConfirmacion } = require('./email');
-const router = express.Router();
 
 /**
  * Datos de las sesiones del musical
@@ -162,11 +169,22 @@ router.post('/create-checkout-session', async (req, res) => {
  */
 router.get('/sesiones', async (req, res) => {
   try {
+    console.log('ℹ️ Petición recibida para obtener sesiones');
+    
+    // Validar que las sesiones existen
+    if (!sesiones || sesiones.length === 0) {
+      console.warn('⚠️ No hay sesiones disponibles');
+      return res.json([]);
+    }
+    
+    console.log(`✅ Retornando ${sesiones.length} sesiones`);
     res.json(sesiones);
   } catch (error) {
     console.error('❌ Error obteniendo sesiones:', error.message);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ 
-      error: 'Error obteniendo sesiones disponibles' 
+      error: 'Error obteniendo sesiones disponibles',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
     });
   }
 });
@@ -266,15 +284,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
   res.json({received: true});
 });
 
-/**
- * GET /api/stripe/sesiones
- * Obtiene el listado de sesiones disponibles
- * 
- * @returns {array} Lista de sesiones con disponibilidad
- */
-router.get('/sesiones', (req, res) => {
-  res.json(sesiones);
-});
+
 
 /**
  * Función auxiliar: Envía email de confirmación automáticamente
