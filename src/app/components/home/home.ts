@@ -91,7 +91,7 @@ export class Home implements OnInit {
       sesionId: ['', Validators.required],
       numEntradasAdultos: [0, [Validators.min(0), Validators.max(10)]],
       numEntradasNinos: [0, [Validators.min(0), Validators.max(10)]]
-    }, { validators: this.atLeastOneTicketValidator });
+    }, { validators: this.atLeastOneTicketValidator() });
   }
 
   ngOnInit() {
@@ -162,30 +162,34 @@ export class Home implements OnInit {
 
   /**
    * Validador personalizado: al menos una entrada (adulto o niño) debe ser > 0
+   * y no puede exceder las entradas disponibles
+   * @returns Función validadora para el FormGroup
    */
-  private atLeastOneTicketValidator(group: FormGroup): {[key: string]: any} | null {
-    const adultos = group.get('numEntradasAdultos')?.value || 0;
-    const ninos = group.get('numEntradasNinos')?.value || 0;
-    const totalEntradas = adultos + ninos;
-    
-    if (totalEntradas === 0) {
-      return { atLeastOneTicket: true };
-    }
-    
-    // Validar que no exceda las entradas disponibles
-    const sesionId = group.get('sesionId')?.value;
-    if (sesionId) {
-      const sesion = this.sesiones().find(s => s.id === sesionId);
-      if (sesion && totalEntradas > sesion.entradasDisponibles) {
-        return { 
-          exceedsAvailable: { 
-            message: `Solo quedan ${sesion.entradasDisponibles} entradas disponibles para esta función` 
-          } 
-        };
+  private atLeastOneTicketValidator() {
+    return (group: FormGroup): {[key: string]: any} | null => {
+      const adultos = group.get('numEntradasAdultos')?.value || 0;
+      const ninos = group.get('numEntradasNinos')?.value || 0;
+      const totalEntradas = adultos + ninos;
+      
+      if (totalEntradas === 0) {
+        return { atLeastOneTicket: true };
       }
-    }
-    
-    return null;
+      
+      // Validar que no exceda las entradas disponibles
+      const sesionId = group.get('sesionId')?.value;
+      if (sesionId) {
+        const sesion = this.sesiones().find(s => s.id === sesionId);
+        if (sesion && totalEntradas > sesion.entradasDisponibles) {
+          return { 
+            exceedsAvailable: { 
+              message: `Solo quedan ${sesion.entradasDisponibles} entradas disponibles para esta función` 
+            } 
+          };
+        }
+      }
+      
+      return null;
+    };
   }
 
   /**

@@ -1,5 +1,9 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const PDFDocument = require('pdfkit');
+const QRCode = require('qrcode');
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 
 // Configurar transporter de email
@@ -176,7 +180,7 @@ function generateEmailTemplate(reservationData) {
                 <h4 style="margin-top: 0; color: #8B0000;">📌 Información Importante</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li>Por favor, llega al teatro 30 minutos antes del espectáculo</li>
-                    <li>Presenta este email como comprobante en taquilla</li>
+                    <li>Presenta el PDF adjunto o el código QR en taquilla</li>
                     <li>Las puertas se abren 15 minutos antes del inicio</li>
                 </ul>
             </div>
@@ -237,6 +241,271 @@ function generateEmailTemplate(reservationData) {
   `;
 }
 
+// Función para generar código QR con datos de la reserva
+async function generarCodigoQR(datosReserva) {
+  // Crear texto legible para el QR en vez de JSON
+  const datosQRTexto = `plain:
+ENTRADA - EN BELÉN DE JUDÁ
+━━━━━━━━━━━━━━━━━━━━━━
+Nombre: ${datosReserva.nombre}
+Fecha: ${datosReserva.sesion.fecha}
+Hora: ${datosReserva.sesion.hora}
+Lugar: ${datosReserva.sesion.lugar}
+━━━━━━━━━━━━━━━━━━━━━━
+Entradas Adultos: ${datosReserva.numEntradasAdultos}
+Entradas Niños: ${datosReserva.numEntradasNinos}
+Total Pagado: ${datosReserva.precioTotal}€
+━━━━━━━━━━━━━━━━━━━━━━
+Contacto: ${datosReserva.email}`;
+
+  
+  // Generar QR como base64
+  const qrDataURL = await QRCode.toDataURL(datosQRTexto, {
+    errorCorrectionLevel: 'M',
+    type: 'image/png',
+    width: 200,
+    margin: 1
+  });
+  
+  return qrDataURL;
+}
+
+// Función para generar PDF de la entrada
+async function generarPDFEntrada(datosReserva) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 0 });
+      const chunks = [];
+      
+      // Capturar el PDF en memoria
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      // Generar código QR
+      const qrCode = await generarCodigoQR(datosReserva);
+      
+      // Convertir QR de base64 a buffer
+      const qrBuffer = Buffer.from(qrCode.split(',')[1], 'base64');
+
+      // ============ ENCABEZADO CON FONDO NEGRO Y LOGO ============
+      // Fondo negro elegante en la parte superior
+      doc.rect(0, 0, doc.page.width, 180).fill('#000000');
+      
+      // Logo centrado sobre fondo negro
+      const logoPath = path.join(__dirname, '../../src/assets/images/logo.png');
+      if (fs.existsSync(logoPath)) {
+        const logoWidth = 420;
+        const logoX = (doc.page.width - logoWidth) / 2;
+        doc.image(logoPath, logoX, 30, {
+          width: logoWidth,
+          height: 120
+        });
+      } else {
+        // Si no existe el logo, poner título grande en blanco
+        doc.fontSize(32).fillColor('#FFFFFF')
+           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
+      }
+
+      // Borde dorado elegante debajo del header negro
+      doc.rect(0, 180, doc.page.width, 4).fill('#D4AF37');
+
+      // Resetear posición Y después del header
+      doc.y = 210;
+
+      // ============ TÍTULO DE CONFIRMACIÓN ============
+      doc.fontSize(24).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('ENTRADA CONFIRMADA', 50, doc.y, { align: 'center', width: doc.page.width - 100 });
+      
+      // Línea divisoria dorada
+      const lineY = doc.y;
+      doc.moveTo(80, lineY).lineTo(doc.page.width - 80, lineY).lineWidth(2).stroke('#D4AF37');
+      doc.moveDown(0.5);
+
+      // ============ SECCIÓN DE DETALLES DEL EVENTO ============
+      // Caja elegante con sombra para detalles del evento
+      const eventBoxY = doc.y;
+      doc.roundedRect(60, eventBoxY, doc.page.width - 120, 100, 8)
+         .lineWidth(1.5)
+         .strokeColor('#D4AF37')
+         .fillAndStroke('#FFF8DC', '#D4AF37');
+
+      doc.fontSize(15).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Detalles del Evento', 80, eventBoxY + 15);
+      
+      doc.fontSize(11).fillColor('#000').font('Helvetica');
+      
+      // Información del evento sin emojis
+      const detailsY = eventBoxY + 40;
+      doc.font('Helvetica-Bold').text('Fecha:', 80, detailsY);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.fecha, 160, detailsY);
+      
+      doc.font('Helvetica-Bold').fillColor('#000').text('Hora:', 80, detailsY + 18);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.hora, 160, detailsY + 18);
+      
+      doc.font('Helvetica-Bold').fillColor('#000').text('Lugar:', 80, detailsY + 36);
+      doc.font('Helvetica').fillColor('#333').text(datosReserva.sesion.lugar, 160, detailsY + 36, {
+        width: doc.page.width - 240
+      });
+
+      doc.y = eventBoxY + 115;
+      doc.moveDown(1);
+
+      // ============ TABLA DE ENTRADAS ============
+      doc.fontSize(15).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Entradas Adquiridas', 60, doc.y);
+      doc.moveDown(0.8);
+
+      let tableY = doc.y;
+      const tableX = 60;
+      const tableWidth = doc.page.width - 120;
+      
+      // Definir anchos de columnas
+      const col1Width = 120;  // Tipo
+      const col2Width = 100;  // Cantidad
+      const col3Width = 120;  // Precio Unit.
+      const col4Width = 120;  // Subtotal
+      
+      // Encabezados de tabla con degradado
+      doc.roundedRect(tableX, tableY, tableWidth, 28, 5)
+         .fillAndStroke('#8B0000', '#6B0000');
+      
+      doc.fontSize(11).fillColor('#FFFFFF').font('Helvetica-Bold');
+      doc.text('Tipo', tableX + 10, tableY + 8, { width: col1Width, align: 'left' });
+      doc.text('Cantidad', tableX + col1Width + 10, tableY + 8, { width: col2Width, align: 'center' });
+      doc.text('Precio Unit.', tableX + col1Width + col2Width + 10, tableY + 8, { width: col3Width, align: 'center' });
+      doc.text('Subtotal', tableX + col1Width + col2Width + col3Width + 10, tableY + 8, { width: col4Width - 10, align: 'right' });
+      
+      tableY += 28;
+
+      // Filas de entradas con fondo alternado
+      doc.font('Helvetica');
+      
+      // Fila Adultos
+      if (datosReserva.numEntradasAdultos > 0) {
+        doc.rect(tableX, tableY, tableWidth, 23).fillAndStroke('#F8F8F8', '#E0E0E0');
+        doc.fillColor('#000').text('Adulto', tableX + 10, tableY + 6, { width: col1Width, align: 'left' });
+        doc.text(datosReserva.numEntradasAdultos.toString(), tableX + col1Width + 10, tableY + 6, { width: col2Width, align: 'center' });
+        doc.text(`${datosReserva.sesion.precioAdulto}€`, tableX + col1Width + col2Width + 10, tableY + 6, { width: col3Width, align: 'center' });
+        doc.text(`${(datosReserva.numEntradasAdultos * datosReserva.sesion.precioAdulto).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 6, { width: col4Width - 10, align: 'right' });
+        tableY += 23;
+      }
+
+      // Fila Niños
+      if (datosReserva.numEntradasNinos > 0) {
+        doc.rect(tableX, tableY, tableWidth, 23).fillAndStroke('#FFFFFF', '#E0E0E0');
+        doc.fillColor('#000').text('Niño', tableX + 10, tableY + 6, { width: col1Width, align: 'left' });
+        doc.text(datosReserva.numEntradasNinos.toString(), tableX + col1Width + 10, tableY + 6, { width: col2Width, align: 'center' });
+        doc.text(`${datosReserva.sesion.precioNino}€`, tableX + col1Width + col2Width + 10, tableY + 6, { width: col3Width, align: 'center' });
+        doc.text(`${(datosReserva.numEntradasNinos * datosReserva.sesion.precioNino).toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 6, { width: col4Width - 10, align: 'right' });
+        tableY += 23;
+      }
+
+      // Total destacado
+      doc.roundedRect(tableX, tableY, tableWidth, 32, 5)
+         .fillAndStroke('#D4AF37', '#B8941F');
+      doc.fontSize(14).fillColor('#000').font('Helvetica-Bold')
+         .text('TOTAL PAGADO', tableX + 10, tableY + 9, { width: col1Width + col2Width, align: 'left' });
+      doc.fontSize(16)
+         .text(`${datosReserva.precioTotal}€`, tableX + col1Width + col2Width + col3Width + 10, tableY + 8, { width: col4Width - 10, align: 'right' });
+
+      doc.y = tableY + 45;
+      doc.moveDown(1.2);
+
+      // ============ CÓDIGO QR CON MARCO ELEGANTE ============
+      doc.fontSize(14).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Código de Validación', 0, doc.y, { align: 'center', width: doc.page.width });
+      doc.moveDown(0.8);
+
+      // Marco elegante para el QR
+      const qrBoxSize = 190;
+      const qrBoxX = (doc.page.width - qrBoxSize) / 2;
+      const qrBoxY = doc.y;
+      
+      doc.roundedRect(qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 8)
+         .lineWidth(2.5)
+         .strokeColor('#D4AF37')
+         .fillAndStroke('#FFFFFF', '#D4AF37');
+
+      // QR centrado dentro del marco
+      const qrSize = 160;
+      const qrX = qrBoxX + (qrBoxSize - qrSize) / 2;
+      const qrY = qrBoxY + (qrBoxSize - qrSize) / 2;
+      doc.image(qrBuffer, qrX, qrY, { width: qrSize });
+      
+      doc.y = qrBoxY + qrBoxSize + 12;
+
+      doc.fontSize(9).fillColor('#666').font('Helvetica')
+         .text('Presente este código QR en la entrada del evento', 0, doc.y, { align: 'center', width: doc.page.width });
+
+      // ============ FOOTER PÁGINA 1 ============
+      const footerY1 = doc.page.height - 40;
+      doc.fontSize(8).fillColor('#999').font('Helvetica')
+         .text(`© ${new Date().getFullYear()} En Belén de Judá Musical - Todos los derechos reservados`, 0, footerY1, {
+           align: 'center',
+           width: doc.page.width
+         });
+
+      // ============ NUEVA PÁGINA PARA INFORMACIÓN IMPORTANTE ============
+      doc.addPage();
+
+      // Fondo negro elegante en la parte superior de la página 2
+      doc.rect(0, 0, doc.page.width, 180).fill('#000000');
+      
+      // Logo centrado sobre fondo negro en página 2
+      if (fs.existsSync(logoPath)) {
+        const logoWidth = 420;
+        const logoX = (doc.page.width - logoWidth) / 2;
+        doc.image(logoPath, logoX, 30, {
+          width: logoWidth,
+          height: 120
+        });
+      } else {
+        doc.fontSize(32).fillColor('#FFFFFF')
+           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
+      }
+
+      // Borde dorado elegante debajo del header negro
+      doc.rect(0, 180, doc.page.width, 4).fill('#D4AF37');
+
+      // Posición inicial del contenido en página 2
+      doc.y = 230;
+
+      // ============ INFORMACIÓN IMPORTANTE EN PÁGINA 2 ============
+      const infoBoxY = doc.y;
+      const infoBoxHeight = 150;
+      
+      doc.roundedRect(60, infoBoxY, doc.page.width - 120, infoBoxHeight, 8)
+         .lineWidth(1.5)
+         .fillAndStroke('#FFF8DC', '#D4AF37');
+      
+      doc.fontSize(18).fillColor('#8B0000').font('Helvetica-Bold')
+         .text('Información Importante', 0, infoBoxY + 25, { align: 'center', width: doc.page.width });
+      
+      doc.moveDown(1.5);
+      
+      doc.fontSize(12).fillColor('#333').font('Helvetica')
+         .text('• Llegue 30 minutos antes del inicio del evento', 80, infoBoxY + 65, { width: doc.page.width - 160 })
+         .moveDown(0.8)
+         .text('• Presente este PDF o el código QR en taquilla', 80, doc.y, { width: doc.page.width - 160 })
+         .moveDown(0.8)
+         .text('• Las puertas se abren 15 minutos antes del espectáculo', 80, doc.y, { width: doc.page.width - 160 });
+
+      // ============ FOOTER PÁGINA 2 ============
+      const footerY2 = doc.page.height - 40;
+      doc.fontSize(8).fillColor('#999').font('Helvetica')
+         .text(`© ${new Date().getFullYear()} En Belén de Judá Musical - Todos los derechos reservados`, 0, footerY2, {
+           align: 'center',
+           width: doc.page.width
+         });
+
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // Función reutilizable para enviar email de confirmación
 async function enviarEmailConfirmacion(datosReserva) {
   const { 
@@ -245,7 +514,6 @@ async function enviarEmailConfirmacion(datosReserva) {
     sesion, 
     numEntradasAdultos, 
     numEntradasNinos, 
-    numeroConfirmacion, 
     precioTotal 
   } = datosReserva;
   
@@ -257,15 +525,28 @@ async function enviarEmailConfirmacion(datosReserva) {
     lugar: sesion.lugar,
     numEntradasAdultos: numEntradasAdultos,
     numEntradasNinos: numEntradasNinos,
-    total: precioTotal,
-    numeroConfirmacion: numeroConfirmacion
+    total: precioTotal
   };
+
+  // Generar PDF de la entrada
+  const pdfBuffer = await generarPDFEntrada(datosReserva);
+
+  // Generar nombre único para el PDF usando timestamp
+  const timestamp = new Date().getTime();
+  const pdfFilename = `Entrada_BelenDeJuda_${timestamp}.pdf`;
 
   const mailOptions = {
     from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: '✝️ Confirmación de Reserva - En Belén de Judá',
-    html: generateEmailTemplate(reservationData)
+    html: generateEmailTemplate(reservationData),
+    attachments: [
+      {
+        filename: pdfFilename,
+        content: pdfBuffer,
+        contentType: 'application/pdf'
+      }
+    ]
   };
 
   const info = await transporter.sendMail(mailOptions);

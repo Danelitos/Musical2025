@@ -322,7 +322,6 @@ async function enviarEmailConfirmacionAutomatico(session) {
       },
       numEntradasAdultos: parseInt(numEntradasAdultos),
       numEntradasNinos: parseInt(numEntradasNinos),
-      numeroConfirmacion: session.id.substring(8, 16).toUpperCase(), // ID único de confirmación
       precioTotal: session.amount_total / 100 // Convertir de centavos a euros
     };
     
