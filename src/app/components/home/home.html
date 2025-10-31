@@ -91,6 +91,7 @@
                 <span class="precio-valor">
                   Adultos: {{ sesion.precioAdulto }}€ | Niños: {{ sesion.precioNino }}€
                 </span>
+                <span class="precio-iva">(IVA incluido)</span>
               </div>
               <div class="disponibilidad">
                 <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
@@ -152,12 +153,33 @@
     <div class="trailer-container animate-fade-in-up">
       <div class="video-wrapper">
         <iframe 
-          src="https://www.youtube.com/embed/h?v=ofD_Gqufwb8&list=RDofD_Gqufwb8&start_radio=1"
+          src="https://www.youtube.com/embed/ofD_Gqufwb8?rel=0&modestbranding=1&fs=1&loop=0&controls=1&disablekb=0&playsinline=0&autohide=1&enablejsapi=1"
           title="Trailer oficial - En Belén de Judá Musical"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
+          allowfullscreen
+          (error)="onVideoError()"
+          #videoFrame>
         </iframe>
+        
+        <!-- Mensaje de error si el video no está disponible -->
+        @if (videoError()) {
+          <div class="video-error-message">
+            <mat-icon>videocam_off</mat-icon>
+            <h3>Video no disponible</h3>
+            <p>Lo sentimos, el video no está disponible en este momento.</p>
+            <p class="small-text">Por favor, inténtalo más tarde o visita nuestro canal de YouTube.</p>
+            <a href="https://www.youtube.com/@EnBelénDeJudá" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               mat-raised-button 
+               color="primary"
+               class="btn-youtube">
+              <mat-icon>smart_display</mat-icon>
+              Visitar YouTube
+            </a>
+          </div>
+        }
       </div>
     </div>
   </div>
@@ -218,21 +240,23 @@
           <div class="entradas-grid">
             <mat-form-field appearance="fill">
               <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 5 }}€)</mat-label>
-              <mat-select formControlName="numEntradasAdultos">
-                @for (num of getAvailableTickets('adultos'); track num) {
-                  <mat-option [value]="num">{{ num }}</mat-option>
-                }
-              </mat-select>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="numEntradasAdultos"
+                min="0"
+                placeholder="0">
               <mat-error>{{ getErrorMessage('numEntradasAdultos') }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="fill">
               <mat-label>Entradas Niños hasta 14 años ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 3 }}€)</mat-label>
-              <mat-select formControlName="numEntradasNinos">
-                @for (num of getAvailableTickets('ninos'); track num) {
-                  <mat-option [value]="num">{{ num }}</mat-option>
-                }
-              </mat-select>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="numEntradasNinos"
+                min="0"
+                placeholder="0">
               <mat-error>{{ getErrorMessage('numEntradasNinos') }}</mat-error>
             </mat-form-field>
           </div>

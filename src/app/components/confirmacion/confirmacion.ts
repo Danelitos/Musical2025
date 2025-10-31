@@ -132,9 +132,10 @@ export class Confirmacion implements OnInit {
 
   /**
    * Navega de vuelta a la página principal
+   * Recarga la página completa para volver al principio
    */
   volverAlInicio() {
-    this.router.navigate(['/']);
+    window.location.href = '/';
   }
 
   /**

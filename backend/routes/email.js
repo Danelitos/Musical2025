@@ -525,7 +525,7 @@ async function generarPDFEntrada(datosReserva) {
       // ============ FOOTER PÁGINA 1 ============
       const footerY1 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} En Belén de Judá Musical - Todos los derechos reservados`, 0, footerY1, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY1, {
            align: 'center',
            width: doc.page.width
          });
@@ -578,7 +578,7 @@ async function generarPDFEntrada(datosReserva) {
       // ============ FOOTER PÁGINA 2 ============
       const footerY2 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} En Belén de Judá Musical - Todos los derechos reservados`, 0, footerY2, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY2, {
            align: 'center',
            width: doc.page.width
          });

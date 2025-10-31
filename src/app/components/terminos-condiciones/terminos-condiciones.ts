@@ -12,4 +12,11 @@ import { RouterModule } from '@angular/router';
 })
 export class TerminosCondiciones {
   constructor() {}
+
+  /**
+   * Vuelve al inicio recargando la página completa
+   */
+  volverAlInicio() {
+    window.location.href = '/';
+  }
 }

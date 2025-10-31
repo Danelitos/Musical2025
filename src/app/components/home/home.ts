@@ -82,6 +82,9 @@ export class Home implements OnInit {
   /** Estado de envío del formulario */
   isSubmitting = signal(false);
 
+  /** Estado de error del video */
+  videoError = signal(false);
+
   constructor(
     private fb: FormBuilder,
     @Inject(StripeService) private stripeService: StripeService,
@@ -93,8 +96,8 @@ export class Home implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       sesionId: ['', Validators.required],
-      numEntradasAdultos: [0, [Validators.min(0), Validators.max(10)]],
-      numEntradasNinos: [0, [Validators.min(0), Validators.max(10)]],
+      numEntradasAdultos: [0, Validators.min(0)],
+      numEntradasNinos: [0, Validators.min(0)],
       aceptaTerminos: [false, Validators.requiredTrue]
     }, { validators: this.atLeastOneTicketValidator() });
   }
@@ -146,7 +149,7 @@ export class Home implements OnInit {
         {
           id: '1',
           fecha: new Date('2025-12-12'),
-          hora: '20:00',
+          hora: '19:00',
           lugar: 'Teatro Salesianos de Deusto (Bilbao)',
           precioAdulto: 5,
           precioNino: 3,
@@ -155,7 +158,7 @@ export class Home implements OnInit {
         {
           id: '2',
           fecha: new Date('2025-12-21'),
-          hora: '20:00',
+          hora: '17:00',
           lugar: 'Teatro Salesianosde Deusto (Bilbao)',
           precioAdulto: 5,
           precioNino: 3,
@@ -210,6 +213,14 @@ export class Home implements OnInit {
   }
 
   /**
+   * Maneja el error cuando el video de YouTube no está disponible
+   */
+  onVideoError() {
+    this.videoError.set(true);
+    this.logger.warn('Video de YouTube no disponible');
+  }
+
+  /**
    * Obtiene las opciones de entradas disponibles según las entradas restantes
    * @param tipo - Tipo de entrada ('adultos' o 'ninos')
    * @returns Array de números disponibles para seleccionar
@@ -217,16 +228,19 @@ export class Home implements OnInit {
   getAvailableTickets(tipo: 'adultos' | 'ninos'): number[] {
     const sesionId = this.compraForm.get('sesionId')?.value;
     if (!sesionId) {
-      return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      // Sin límite, generar opciones hasta 100 entradas
+      return Array.from({ length: 101 }, (_, i) => i);
     }
     
     const sesion = this.getSesionById(sesionId);
     if (!sesion) {
-      return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      // Sin límite, generar opciones hasta 100 entradas
+      return Array.from({ length: 101 }, (_, i) => i);
     }
     
     const entradasDisponibles = sesion.entradasDisponibles;
-    const maxEntradas = Math.min(10, entradasDisponibles);
+    // Sin límite máximo, solo limitado por disponibilidad
+    const maxEntradas = entradasDisponibles;
     
     const options: number[] = [];
     for (let i = 0; i <= maxEntradas; i++) {
@@ -450,10 +464,6 @@ export class Home implements OnInit {
     
     if (field?.hasError('min')) {
       return 'Debe seleccionar al menos 1 entrada';
-    }
-    
-    if (field?.hasError('max')) {
-      return 'Máximo 10 entradas por compra';
     }
     
     return '';

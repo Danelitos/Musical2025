@@ -18,7 +18,7 @@ const sesiones = [
   {
     id: '1',
     fecha: '2025-12-12',
-    hora: '20:00',
+    hora: '19:00',
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
     precioAdulto: 5,
     precioNino: 3,
@@ -27,7 +27,7 @@ const sesiones = [
   {
     id: '2',
     fecha: '2025-12-21',
-    hora: '20:00',
+    hora: '17:00',
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
     precioAdulto: 5,
     precioNino: 3,
@@ -111,14 +111,6 @@ router.post('/create-checkout-session', async (req, res) => {
       console.error('❌ No se seleccionaron entradas');
       return res.status(400).json({ 
         error: 'Debes seleccionar al menos una entrada' 
-      });
-    }
-
-    // Validar límite máximo de entradas por compra
-    if (totalEntradas > 10) {
-      console.error('❌ Excede límite de entradas:', totalEntradas);
-      return res.status(400).json({ 
-        error: 'Máximo 10 entradas por compra' 
       });
     }
 

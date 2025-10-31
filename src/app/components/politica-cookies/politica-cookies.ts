@@ -15,4 +15,11 @@ import { LucideAngularModule, Cookie } from 'lucide-angular';
 })
 export class PoliticaCookies {
   readonly Cookie = Cookie;
+
+  /**
+   * Vuelve al inicio recargando la página completa
+   */
+  volverAlInicio() {
+    window.location.href = '/';
+  }
 }
