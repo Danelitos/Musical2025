@@ -288,10 +288,30 @@
                   <span>{{ compraForm.get('numEntradasNinos')?.value }} × {{ getSesionById(compraForm.get('sesionId')?.value)?.precioNino }}€ = {{ (compraForm.get('numEntradasNinos')?.value || 0) * (getSesionById(compraForm.get('sesionId')?.value)?.precioNino || 0) }}€</span>
                 </div>
               }
+              
+              <!-- Desglose de IVA -->
+              @if (totalEntradas > 0) {
+                <div class="resumen-divider"></div>
+                <div class="resumen-item desglose-iva">
+                  <span>Base imponible:</span>
+                  <span>{{ desgloseTotal.baseImponible.toFixed(2) }}€</span>
+                </div>
+                <div class="resumen-item desglose-iva">
+                  <span>IVA ({{ desgloseTotal.porcentajeIVA }}%):</span>
+                  <span>{{ desgloseTotal.iva.toFixed(2) }}€</span>
+                </div>
+              }
+              
               <div class="resumen-item total">
                 <span>Total:</span>
                 <span class="precio-total">{{ precioTotal }}€</span>
               </div>
+              @if (totalEntradas > 0) {
+                <div class="iva-incluido-nota">
+                  <mat-icon>info</mat-icon>
+                  <span>Precios con IVA incluido</span>
+                </div>
+              }
             </div>
           </div>
         }

@@ -15,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { StripeService } from '../../services/stripe.service';
 import { LoggerService } from '../../services/logger.service';
 import { environment } from '../../../environments/environment';
+import { desglosarPrecio, desglosarPrecioTotal, formatearPrecio } from '../../utils/precio.utils';
 
 /**
  * Interfaz para las sesiones del musical
@@ -288,6 +289,54 @@ export class Home implements OnInit {
   }
 
   /**
+   * Obtiene el desglose de IVA para las entradas de adultos
+   * @returns Desglose con base imponible, IVA y total
+   */
+  get desgloseAdultos() {
+    const sesionId = this.compraForm.get('sesionId')?.value;
+    const numAdultos = this.compraForm.get('numEntradasAdultos')?.value || 0;
+    const sesion = this.getSesionById(sesionId);
+    
+    if (!sesion || numAdultos === 0) {
+      return { baseImponible: 0, iva: 0, total: 0, porcentajeIVA: 10, cantidad: 0, precioUnitario: 0 };
+    }
+    
+    return desglosarPrecioTotal(sesion.precioAdulto, numAdultos);
+  }
+
+  /**
+   * Obtiene el desglose de IVA para las entradas de niños
+   * @returns Desglose con base imponible, IVA y total
+   */
+  get desgloseNinos() {
+    const sesionId = this.compraForm.get('sesionId')?.value;
+    const numNinos = this.compraForm.get('numEntradasNinos')?.value || 0;
+    const sesion = this.getSesionById(sesionId);
+    
+    if (!sesion || numNinos === 0) {
+      return { baseImponible: 0, iva: 0, total: 0, porcentajeIVA: 10, cantidad: 0, precioUnitario: 0 };
+    }
+    
+    return desglosarPrecioTotal(sesion.precioNino, numNinos);
+  }
+
+  /**
+   * Obtiene el desglose completo de IVA de la compra
+   * @returns Desglose total con base imponible, IVA y total
+   */
+  get desgloseTotal() {
+    const adultos = this.desgloseAdultos;
+    const ninos = this.desgloseNinos;
+    
+    return {
+      baseImponible: parseFloat((adultos.baseImponible + ninos.baseImponible).toFixed(2)),
+      iva: parseFloat((adultos.iva + ninos.iva).toFixed(2)),
+      total: parseFloat((adultos.total + ninos.total).toFixed(2)),
+      porcentajeIVA: 10
+    };
+  }
+
+  /**
    * Obtiene el número total de entradas
    */
   get totalEntradas(): number {
@@ -312,6 +361,14 @@ export class Home implements OnInit {
           throw new Error('Sesión no encontrada');
         }
 
+        // Validación final de disponibilidad antes de enviar
+        const totalEntradasSolicitadas = (formData.numEntradasAdultos || 0) + (formData.numEntradasNinos || 0);
+        if (totalEntradasSolicitadas > sesion.entradasDisponibles) {
+          alert(`⚠️ Solo quedan ${sesion.entradasDisponibles} entradas disponibles para esta función. Por favor, ajusta tu selección.`);
+          this.isSubmitting.set(false);
+          return;
+        }
+
         // Preparar datos para Stripe Checkout
         const checkoutData = {
           customerEmail: formData.email,
@@ -333,15 +390,26 @@ export class Home implements OnInit {
 
         const result = await this.stripeService.createCheckoutSession(checkoutData);
         
-        if (result.url) {
+        if (result.error) {
+          // Mostrar error específico al usuario
+          this.logger.error('Error en checkout', result.error);
+          alert(`❌ ${result.error}`);
+          
+          // Si el error es de entradas agotadas, recargar las sesiones
+          if (result.error.includes('entradas disponibles')) {
+            await this.loadSesiones();
+          }
+        } else if (result.url) {
           this.logger.success('Sesión de checkout creada, redirigiendo a Stripe');
           // Redirigir a Stripe Checkout
           window.location.href = result.url;
+        } else {
+          throw new Error('Respuesta inesperada del servidor');
         }
         
       } catch (error) {
         this.logger.error('Error al procesar el pago', error);
-        alert('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
+        alert('❌ Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo o contacta con soporte.');
       } finally {
         this.isSubmitting.set(false);
       }

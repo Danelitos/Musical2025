@@ -1,0 +1,197 @@
+// Importar estilos base de los componentes legales
+@import '../politica-privacidad/politica-privacidad.scss';
+
+// Sobrescribir tamaño del icono de Lucide
+.legal-header {
+  lucide-icon.legal-icon {
+    font-size: 80px !important;
+    width: 80px !important;
+    height: 80px !important;
+    
+    svg {
+      width: 80px;
+      height: 80px;
+    }
+  }
+}
+
+// Estilos específicos para la tabla de cookies
+.cookies-table-container {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cookies-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 0.9rem;
+  
+  thead {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #ffd700;
+    
+    tr {
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #ffd700;
+        
+        &:first-child {
+          border-top-left-radius: 8px;
+        }
+        
+        &:last-child {
+          border-top-right-radius: 8px;
+        }
+      }
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.3s ease;
+      
+      &:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+      
+      &:hover {
+        background-color: #fff8dc;
+      }
+      
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: top;
+        
+        code {
+          background: #f0f0f0;
+          padding: 0.2rem 0.4rem;
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.85rem;
+          color: #d63384;
+          white-space: nowrap;
+        }
+      }
+      
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    
+    thead tr th,
+    tbody tr td {
+      padding: 0.75rem 0.5rem;
+    }
+    
+    thead tr th {
+      font-size: 0.75rem;
+    }
+    
+    tbody tr td code {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Enlaces a navegadores
+.browser-links {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  
+  li {
+    margin: 0.75rem 0;
+    
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1a1a2e;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid transparent;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #ffd700;
+      }
+      
+      &:hover {
+        background: rgba(212, 175, 55, 0.2);
+        border-color: #ffd700;
+        transform: translateX(5px);
+      }
+    }
+  }
+}
+
+// Icono de cookie en el header
+.legal-header {
+  .legal-icon {
+    &::before {
+      content: '🍪';
+      font-size: 3rem;
+    }
+    
+    // Ocultar el icono de Material Icons para usar el emoji
+    font-size: 0;
+  }
+}
+
+// Responsive para tablas en móviles
+@media (max-width: 640px) {
+  .cookies-table-container {
+    .cookies-table {
+      thead {
+        display: none;
+      }
+      
+      tbody tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        
+        td {
+          display: block;
+          padding: 0.75rem;
+          border-bottom: 1px solid #e0e0e0;
+          text-align: left;
+          
+          &:before {
+            content: attr(data-label);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+          }
+          
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+    }
+  }
+}

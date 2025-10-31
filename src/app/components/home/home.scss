@@ -789,6 +789,22 @@
               font-weight: 600;
             }
             
+            &.desglose-iva {
+              font-size: 0.9rem;
+              padding: 0.5rem 0;
+              border-bottom: none;
+              
+              span:first-child {
+                color: rgba(255, 255, 255, 0.6);
+                font-style: italic;
+              }
+              
+              span:last-child {
+                color: rgba(255, 255, 255, 0.7);
+                font-weight: 500;
+              }
+            }
+            
             &.total {
               border-top: 3px solid var(--primary-gold);
               border-bottom: none;
@@ -808,6 +824,32 @@
                 color: var(--primary-gold);
                 font-weight: 800;
               }
+            }
+          }
+          
+          .resumen-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0 0.5rem 0;
+          }
+          
+          .iva-incluido-nota {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--primary-gold);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              color: var(--primary-gold);
             }
           }
         }

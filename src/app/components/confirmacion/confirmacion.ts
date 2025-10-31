@@ -111,8 +111,14 @@ export class Confirmacion implements OnInit {
         // Lanzar confeti de celebración
         this.lanzarConfeti();
         
-        // Enviar email de confirmación
-        await this.enviarEmailConfirmacion();
+        // El email de confirmación se envía automáticamente desde el webhook
+        // No es necesario enviarlo desde aquí
+      } else if (paymentDetails.status === 'pending') {
+        this.logger.warn('Pago pendiente de completarse', paymentDetails);
+        this.reserva.update(r => ({ ...r, estado: 'loading' }));
+        
+        // Reintentar después de 3 segundos
+        setTimeout(() => this.ngOnInit(), 3000);
       } else {
         this.logger.warn('Pago no completado o estado inválido', paymentDetails);
         this.reserva.update(r => ({ ...r, estado: 'error' }));
@@ -121,45 +127,6 @@ export class Confirmacion implements OnInit {
     } catch (error) {
       this.logger.error('Error al procesar la confirmación', error);
       this.reserva.update(r => ({ ...r, estado: 'error' }));
-    }
-  }
-
-  /**
-   * Envía email de confirmación al cliente
-   * En producción, hace una llamada al backend para enviar el email
-   */
-  private async enviarEmailConfirmacion(): Promise<void> {
-    try {
-      const emailData = {
-        to: this.reserva().customerEmail,
-        subject: 'Confirmación de Reserva - En Belén de Judá Musical',
-        customerName: this.reserva().customerName,
-        sesionFecha: this.reserva().sesionFecha,
-        sesionHora: this.reserva().sesionHora,
-        sesionLugar: this.reserva().sesionLugar,
-        numEntradas: this.reserva().numEntradas,
-        precioTotal: this.reserva().precioTotal,
-        sessionId: this.reserva().sessionId
-      };
-
-      this.logger.info('Enviando email de confirmación', { to: emailData.to });
-      
-      // TODO: En producción, llamar al endpoint del backend
-      /*
-      await fetch('/api/send-confirmation-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData)
-      });
-      */
-      
-      this.logger.success('Email de confirmación enviado');
-      
-    } catch (error) {
-      this.logger.error('Error al enviar email de confirmación', error);
-      // No fallar la confirmación solo porque el email falle
     }
   }
 

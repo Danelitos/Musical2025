@@ -4,6 +4,87 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// ========================================
+// VALIDACIÓN DE VARIABLES DE ENTORNO
+// ========================================
+
+/**
+ * Valida que todas las variables de entorno críticas estén configuradas
+ * Si falta alguna, detiene el servidor con un error claro
+ */
+function validateEnvironmentVariables() {
+  const requiredVars = [
+    'STRIPE_SECRET_KEY',
+    'SUCCESS_URL',
+    'CANCEL_URL',
+    'FRONTEND_URL',
+    'EMAIL_USER',
+    'EMAIL_PASS'
+  ];
+
+  const missingVars = [];
+  const invalidVars = [];
+
+  for (const varName of requiredVars) {
+    if (!process.env[varName]) {
+      missingVars.push(varName);
+    } else {
+      // Validaciones específicas
+      if (varName === 'STRIPE_SECRET_KEY') {
+        const key = process.env[varName];
+        if (!key.startsWith('sk_test_') && !key.startsWith('sk_live_')) {
+          invalidVars.push(`${varName} debe comenzar con 'sk_test_' o 'sk_live_'`);
+        }
+      }
+      
+      if ((varName === 'SUCCESS_URL' || varName === 'CANCEL_URL' || varName === 'FRONTEND_URL') 
+          && !process.env[varName].startsWith('http')) {
+        invalidVars.push(`${varName} debe ser una URL válida (http:// o https://)`);
+      }
+
+      if (varName === 'EMAIL_USER' && !process.env[varName].includes('@')) {
+        invalidVars.push(`${varName} debe ser un email válido`);
+      }
+    }
+  }
+
+  // Validación opcional pero recomendada para producción
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.warn('⚠️ ADVERTENCIA: STRIPE_WEBHOOK_SECRET no configurado. Los webhooks no serán verificados.');
+    } else if (!process.env.STRIPE_WEBHOOK_SECRET.startsWith('whsec_')) {
+      console.warn('⚠️ ADVERTENCIA: STRIPE_WEBHOOK_SECRET parece inválido (debe comenzar con "whsec_")');
+    }
+
+    if (process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
+      console.warn('🚨 ADVERTENCIA CRÍTICA: Usando clave de Stripe de TEST en producción!');
+    }
+  }
+
+  if (missingVars.length > 0 || invalidVars.length > 0) {
+    console.error('\n❌ ERROR: Configuración de variables de entorno inválida\n');
+    
+    if (missingVars.length > 0) {
+      console.error('Variables faltantes:');
+      missingVars.forEach(v => console.error(`  - ${v}`));
+    }
+    
+    if (invalidVars.length > 0) {
+      console.error('\nVariables inválidas:');
+      invalidVars.forEach(v => console.error(`  - ${v}`));
+    }
+    
+    console.error('\n📝 Asegúrate de copiar .env.example a .env y configurar todos los valores.');
+    console.error('Más información en el archivo README.md\n');
+    process.exit(1);
+  }
+
+  console.log('✅ Todas las variables de entorno requeridas están configuradas');
+}
+
+// Ejecutar validación antes de iniciar el servidor
+validateEnvironmentVariables();
+
 const stripeRoutes = require('./routes/stripe');
 const { router: emailRoutes } = require('./routes/email');
 
@@ -35,7 +116,10 @@ app.use(cors({
 // MIDDLEWARE PARA PARSEAR JSON
 // ========================================
 
-// JSON parser (excepto webhooks de Stripe que usan raw)
+// Webhook de Stripe debe usar raw body para verificar firma
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+// JSON parser para el resto de rutas
 app.use('/api', express.json({ limit: '10mb' }));
 
 // ========================================

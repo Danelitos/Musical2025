@@ -104,42 +104,74 @@ export class StripeService {
    * @returns Resultado con URL de redirección o error
    */
   async createCheckoutSession(data: CheckoutData): Promise<CheckoutResult> {
-    try {
-      if (!this.stripe) {
-        await this.initializeStripe();
+    const maxRetries = 3;
+    const timeoutMs = 15000; // 15 segundos de timeout
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        if (!this.stripe) {
+          await this.initializeStripe();
+        }
+
+        if (!this.stripe) {
+          throw new Error('Stripe no se pudo inicializar');
+        }
+
+        this.logger.info(`Creando sesión de checkout (intento ${attempt}/${maxRetries})`, { 
+          email: data.customerEmail, 
+          adultos: data.numEntradasAdultos,
+          ninos: data.numEntradasNinos
+        });
+
+        // Crear promesa con timeout
+        const response = await Promise.race([
+          firstValueFrom(
+            this.http.post<{sessionId: string, url: string}>(
+              `${this.apiUrl}/stripe/create-checkout-session`, 
+              data
+            )
+          ),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout: La solicitud tardó demasiado')), timeoutMs)
+          )
+        ]);
+
+        this.logger.success('Sesión de checkout creada', { sessionId: response.sessionId });
+
+        return {
+          sessionId: response.sessionId,
+          url: response.url
+        };
+
+      } catch (error: any) {
+        this.logger.error(`Error creando sesión de checkout (intento ${attempt}/${maxRetries})`, error);
+        
+        // Si es el último intento, devolver el error
+        if (attempt === maxRetries) {
+          let errorMessage = 'Error procesando el pago. Por favor, inténtalo de nuevo.';
+          
+          // Mensajes específicos según el tipo de error
+          if (error.status === 0 || error.message?.includes('Timeout')) {
+            errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+          } else if (error.status === 400) {
+            errorMessage = error.error?.error || 'Datos de entrada inválidos. Por favor, verifica la información.';
+          } else if (error.status === 404) {
+            errorMessage = 'Sesión no disponible. Por favor, selecciona otra fecha.';
+          } else if (error.status === 500) {
+            errorMessage = 'Error en el servidor. Por favor, contacta con soporte.';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+
+          return { error: errorMessage };
+        }
+        
+        // Esperar antes de reintentar (backoff exponencial: 1s, 2s, 4s)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
       }
-
-      if (!this.stripe) {
-        throw new Error('Stripe no se pudo inicializar');
-      }
-
-      this.logger.info('Creando sesión de checkout', { 
-        email: data.customerEmail, 
-        adultos: data.numEntradasAdultos,
-        ninos: data.numEntradasNinos
-      });
-
-      // Llamar al backend para crear la sesión de checkout
-      const response = await firstValueFrom(
-        this.http.post<{sessionId: string, url: string}>(
-          `${this.apiUrl}/stripe/create-checkout-session`, 
-          data
-        )
-      );
-
-      this.logger.success('Sesión de checkout creada', { sessionId: response.sessionId });
-
-      return {
-        sessionId: response.sessionId,
-        url: response.url
-      };
-
-    } catch (error: any) {
-      this.logger.error('Error creando sesión de checkout', error);
-      return {
-        error: error.error?.message || error.message || 'Error procesando el pago'
-      };
     }
+
+    return { error: 'Error inesperado procesando el pago' };
   }
 
   /**
@@ -149,24 +181,43 @@ export class StripeService {
    * @returns Estado del pago y detalles asociados
    */
   async getCheckoutSession(sessionId: string): Promise<PaymentStatus> {
-    try {
-      this.logger.info('Recuperando estado de la sesión', { sessionId });
-      
-      const response = await firstValueFrom(
-        this.http.get<PaymentStatus>(`${this.apiUrl}/stripe/checkout-session/${sessionId}`)
-      );
-      
-      this.logger.success('Estado de sesión recuperado', { 
-        status: response.paymentStatus 
-      });
-      
-      return response;
-    } catch (error: any) {
-      this.logger.error('Error obteniendo sesión de checkout', error);
-      return {
-        status: 'error'
-      };
+    const maxRetries = 3;
+    const timeoutMs = 30000; // 30 segundos (más tiempo porque puede estar procesando el webhook)
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        this.logger.info(`Recuperando estado de la sesión (intento ${attempt}/${maxRetries})`, { sessionId });
+        
+        const response = await Promise.race([
+          firstValueFrom(
+            this.http.get<PaymentStatus>(`${this.apiUrl}/stripe/checkout-session/${sessionId}`)
+          ),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout recuperando estado del pago')), timeoutMs)
+          )
+        ]);
+        
+        this.logger.success('Estado de sesión recuperado', { 
+          status: response.paymentStatus 
+        });
+        
+        return response;
+      } catch (error: any) {
+        this.logger.error(`Error obteniendo sesión de checkout (intento ${attempt}/${maxRetries})`, error);
+        
+        if (attempt === maxRetries) {
+          return {
+            status: 'error',
+            paymentStatus: 'failed'
+          };
+        }
+        
+        // Esperar antes de reintentar
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
+      }
     }
+
+    return { status: 'error', paymentStatus: 'failed' };
   }
 
   /**

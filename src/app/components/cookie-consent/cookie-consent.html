@@ -1,0 +1,32 @@
+@if (showBanner()) {
+  <div class="cookie-consent-overlay">
+    <div class="cookie-consent-banner">
+      <div class="cookie-content">
+        <div class="cookie-icon">
+          <lucide-icon [img]="Cookie" [size]="48"></lucide-icon>
+        </div>
+        
+        <div class="cookie-text">
+          <h3>Uso de Cookies</h3>
+          <p>
+            Utilizamos cookies estrictamente necesarias para el funcionamiento del sistema de venta de entradas 
+            y para mejorar tu experiencia de navegación. Al continuar navegando, aceptas nuestro uso de cookies.
+          </p>
+          <p class="cookie-links">
+            Para más información, consulta nuestra 
+            <a routerLink="/politica-privacidad">Política de Privacidad</a>.
+          </p>
+        </div>
+      </div>
+
+      <div class="cookie-actions">
+        <button class="btn-reject" (click)="rejectCookies()">
+          Rechazar
+        </button>
+        <button class="btn-accept" (click)="acceptCookies()">
+          Aceptar Cookies
+        </button>
+      </div>
+    </div>
+  </div>
+}

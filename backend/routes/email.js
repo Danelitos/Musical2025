@@ -5,6 +5,7 @@ const QRCode = require('qrcode');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const { desglosarPrecioTotal } = require('../utils/precio.utils');
 
 // Configurar transporter de email
 const transporter = nodemailer.createTransport({
@@ -19,6 +20,23 @@ const transporter = nodemailer.createTransport({
 
 // Función para generar template de email
 function generateEmailTemplate(reservationData) {
+  // Calcular desglose de IVA para el email
+  let desgloseAdultos = { baseImponible: 0, iva: 0, total: 0 };
+  let desgloseNinos = { baseImponible: 0, iva: 0, total: 0 };
+  
+  if (reservationData.numEntradasAdultos > 0) {
+    const precioAdulto = reservationData.total / (reservationData.numEntradasAdultos + reservationData.numEntradasNinos) * reservationData.numEntradasAdultos / reservationData.numEntradasAdultos;
+    desgloseAdultos = desglosarPrecioTotal(precioAdulto || 5, reservationData.numEntradasAdultos);
+  }
+  
+  if (reservationData.numEntradasNinos > 0) {
+    const precioNino = reservationData.total / (reservationData.numEntradasAdultos + reservationData.numEntradasNinos) * reservationData.numEntradasNinos / reservationData.numEntradasNinos;
+    desgloseNinos = desglosarPrecioTotal(precioNino || 3, reservationData.numEntradasNinos);
+  }
+  
+  const baseImponibleTotal = (desgloseAdultos.baseImponible + desgloseNinos.baseImponible).toFixed(2);
+  const ivaTotal = (desgloseAdultos.iva + desgloseNinos.iva).toFixed(2);
+  
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -173,7 +191,17 @@ function generateEmailTemplate(reservationData) {
             </div>
             
             <div class="total">
-                💰 Total Pagado: ${reservationData.total}€
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; font-weight: normal; opacity: 0.9;">
+                    <span>Base imponible:</span>
+                    <span>${baseImponibleTotal}€</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: normal; opacity: 0.9;">
+                    <span>IVA (10%):</span>
+                    <span>${ivaTotal}€</span>
+                </div>
+                <div style="border-top: 2px solid rgba(255,255,255,0.3); padding-top: 10px;">
+                    💰 Total Pagado (IVA incl.): ${reservationData.total}€
+                </div>
             </div>
             
             <div class="important">
@@ -210,7 +238,7 @@ function generateEmailTemplate(reservationData) {
                                 </div>
                                 <div>
                                     <p style="color: rgba(255, 255, 255, 0.9); margin: 3px 0; line-height: 1.5;">
-                                        📧 <a href="mailto:info@belendejuda.com" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;">info@belendejuda.com</a>
+                                        📧 <a href="mailto:enbelendejuda@gmail.com" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;">enbelendejuda@gmail.com</a>
                                     </p>
                                 </div>
                             </div>
@@ -227,7 +255,7 @@ function generateEmailTemplate(reservationData) {
                         <tr>
                             <td style="text-align: center; padding: 8px 0;">
                                 <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">
-                                    &copy; ${new Date().getFullYear()} En Belén de Judá Musical. Todos los derechos reservados.
+                                    &copy; ${new Date().getFullYear()} Asociación Cultural En Belén de Judá. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -429,11 +457,39 @@ async function generarPDFEntrada(datosReserva) {
         tableY += 18;
       }
 
+      // Calcular desglose de IVA
+      const desgloseAdultos = datosReserva.numEntradasAdultos > 0 
+        ? desglosarPrecioTotal(datosReserva.sesion.precioAdulto, datosReserva.numEntradasAdultos)
+        : { baseImponible: 0, iva: 0, total: 0 };
+      
+      const desgloseNinos = datosReserva.numEntradasNinos > 0
+        ? desglosarPrecioTotal(datosReserva.sesion.precioNino, datosReserva.numEntradasNinos)
+        : { baseImponible: 0, iva: 0, total: 0 };
+      
+      const baseImponibleTotal = desgloseAdultos.baseImponible + desgloseNinos.baseImponible;
+      const ivaTotal = desgloseAdultos.iva + desgloseNinos.iva;
+
+      // Separador para desglose de IVA
+      tableY += 5;
+      doc.moveTo(tableX, tableY).lineTo(tableX + tableWidth, tableY).stroke('#E0E0E0');
+      tableY += 8;
+
+      // Base imponible
+      doc.fontSize(8).fillColor('#666').font('Helvetica')
+         .text('Base imponible:', tableX + col1Width + col2Width + 8, tableY, { width: col3Width, align: 'left' });
+      doc.text(`${baseImponibleTotal.toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 8, tableY, { width: col4Width - 8, align: 'right' });
+      tableY += 14;
+
+      // IVA (10%)
+      doc.text('IVA (10%):', tableX + col1Width + col2Width + 8, tableY, { width: col3Width, align: 'left' });
+      doc.text(`${ivaTotal.toFixed(2)}€`, tableX + col1Width + col2Width + col3Width + 8, tableY, { width: col4Width - 8, align: 'right' });
+      tableY += 18;
+
       // Total destacado (más compacto)
       doc.roundedRect(tableX, tableY, tableWidth, 25, 4)
          .fillAndStroke('#D4AF37', '#B8941F');
       doc.fontSize(11).fillColor('#000').font('Helvetica-Bold')
-         .text('TOTAL PAGADO', tableX + 8, tableY + 7, { width: col1Width + col2Width, align: 'left' });
+         .text('TOTAL PAGADO (IVA incl.)', tableX + 8, tableY + 7, { width: col1Width + col2Width + 30, align: 'left' });
       doc.fontSize(13)
          .text(`${datosReserva.precioTotal}€`, tableX + col1Width + col2Width + col3Width + 8, tableY + 6, { width: col4Width - 8, align: 'right' });
 
