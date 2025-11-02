@@ -243,8 +243,11 @@
               <input 
                 matInput 
                 type="number" 
+                inputmode="numeric"
+                pattern="[0-9]*"
                 formControlName="numEntradasAdultos"
                 min="0"
+                step="1"
                 placeholder="0">
               <mat-error>{{ getErrorMessage('numEntradasAdultos') }}</mat-error>
             </mat-form-field>
@@ -254,14 +257,17 @@
               <input 
                 matInput 
                 type="number" 
+                inputmode="numeric"
+                pattern="[0-9]*"
                 formControlName="numEntradasNinos"
                 min="0"
+                step="1"
                 placeholder="0">
               <mat-error>{{ getErrorMessage('numEntradasNinos') }}</mat-error>
             </mat-form-field>
           </div>
           
-          @if (getEntradasRestantes() !== null && getEntradasRestantes()! < 10) {
+          @if (getEntradasRestantes() !== null && getEntradasRestantes()! < 50) {
             <div class="warning-message">
               <mat-icon>warning</mat-icon>
               ¡Solo quedan {{ getEntradasRestantes() }} entradas disponibles para esta función!

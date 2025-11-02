@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 
 // Validar que la clave de Stripe existe
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -12,28 +14,71 @@ const { enviarEmailConfirmacion } = require('./email');
 
 /**
  * Datos de las sesiones del musical
- * En producción, esto debería venir de una base de datos con transacciones atómicas
+ * Se cargan desde un archivo JSON para persistir entre despliegues
+ * IMPORTANTE: Hacer commit de sesiones.json después de cada venta para no perder el estado
  */
-const sesiones = [
-  {
-    id: '1',
-    fecha: '2025-12-12',
-    hora: '19:00',
-    lugar: 'Teatro Salesianos de Deusto (Bilbao)',
-    precioAdulto: 5,
-    precioNino: 3,
-    entradasDisponibles: 550
-  },
-  {
-    id: '2',
-    fecha: '2025-12-21',
-    hora: '17:00',
-    lugar: 'Teatro Salesianos de Deusto (Bilbao)',
-    precioAdulto: 5,
-    precioNino: 3,
-    entradasDisponibles: 550
+const sesionesPath = path.join(__dirname, '..', 'data', 'sesiones.json');
+
+// Función para cargar sesiones desde el archivo
+function loadSesiones() {
+  try {
+    if (fs.existsSync(sesionesPath)) {
+      const data = fs.readFileSync(sesionesPath, 'utf8');
+      const sesiones = JSON.parse(data);
+      console.log('✅ Sesiones cargadas desde sesiones.json');
+      return sesiones;
+    } else {
+      console.warn('⚠️ sesiones.json no encontrado, usando valores por defecto');
+      return getDefaultSesiones();
+    }
+  } catch (error) {
+    console.error('❌ Error cargando sesiones.json:', error.message);
+    return getDefaultSesiones();
   }
-];
+}
+
+// Función para guardar sesiones en el archivo
+function saveSesiones(sesiones) {
+  try {
+    const dir = path.dirname(sesionesPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(sesionesPath, JSON.stringify(sesiones, null, 2), 'utf8');
+    console.log('💾 Sesiones guardadas en sesiones.json');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando sesiones.json:', error.message);
+    return false;
+  }
+}
+
+// Valores por defecto
+function getDefaultSesiones() {
+  return [
+    {
+      id: '1',
+      fecha: '2025-12-12',
+      hora: '19:00',
+      lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+      precioAdulto: 5,
+      precioNino: 3,
+      entradasDisponibles: 550
+    },
+    {
+      id: '2',
+      fecha: '2025-12-21',
+      hora: '17:00',
+      lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+      precioAdulto: 5,
+      precioNino: 3,
+      entradasDisponibles: 550
+    }
+  ];
+}
+
+// Cargar sesiones al iniciar
+let sesiones = loadSesiones();
 
 /**
  * MANEJO DE RACE CONDITIONS
@@ -137,6 +182,10 @@ router.post('/create-checkout-session', async (req, res) => {
     // Esto previene que múltiples usuarios compren las mismas últimas entradas
     const entradasPrevias = sesion.entradasDisponibles;
     sesion.entradasDisponibles -= totalEntradas;
+    
+    // Guardar el estado actualizado en el archivo
+    saveSesiones(sesiones);
+    
     console.log(`🔒 Entradas reservadas temporalmente para sesión ${sesionId}: ${totalEntradas}`);
     console.log(`   Disponibles antes: ${entradasPrevias}, Disponibles ahora: ${sesion.entradasDisponibles}`);
 
@@ -148,6 +197,7 @@ router.post('/create-checkout-session', async (req, res) => {
     if (fechaSesion < hoy) {
       // Devolver las entradas reservadas
       sesion.entradasDisponibles += totalEntradas;
+      saveSesiones(sesiones);
       console.error('❌ Intento de compra para sesión pasada:', sesion.fecha);
       return res.status(400).json({ 
         error: 'No se pueden comprar entradas para sesiones pasadas' 
@@ -236,6 +286,7 @@ router.post('/create-checkout-session', async (req, res) => {
     const sesion = sesiones.find(s => s.id === sesionId);
     if (sesion && totalEntradas) {
       sesion.entradasDisponibles += totalEntradas;
+      saveSesiones(sesiones);
       console.log(`🔓 Entradas devueltas por error: ${totalEntradas}. Nueva disponibilidad: ${sesion.entradasDisponibles}`);
     }
 
@@ -578,6 +629,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
           const sesionData = sesiones.find(s => s.id === expiredReservation.sesionId);
           if (sesionData) {
             sesionData.entradasDisponibles += expiredReservation.numEntradas;
+            saveSesiones(sesiones);
             console.log(`🔓 [WEBHOOK] Entradas devueltas por expiración: ${expiredReservation.numEntradas}`);
             console.log(`   Nueva disponibilidad para sesión ${expiredReservation.sesionId}: ${sesionData.entradasDisponibles}`);
           }
@@ -599,6 +651,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
           const sesionData = sesiones.find(s => s.id === failedReservation.sesionId);
           if (sesionData) {
             sesionData.entradasDisponibles += failedReservation.numEntradas;
+            saveSesiones(sesiones);
             console.log(`🔓 [WEBHOOK] Entradas devueltas por pago fallido: ${failedReservation.numEntradas}`);
             console.log(`   Nueva disponibilidad para sesión ${failedReservation.sesionId}: ${sesionData.entradasDisponibles}`);
           }
