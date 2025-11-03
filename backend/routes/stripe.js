@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('❌ ERROR: STRIPE_SECRET_KEY no configurada');
-  throw new Error('STRIPE_SECRET_KEY no configurada');
+// Inicializar Stripe solo si la clave está disponible
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? require('stripe')(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+if (!stripe) {
+  console.error('❌ ADVERTENCIA: STRIPE_SECRET_KEY no configurada - Las rutas de pago no funcionarán');
 }
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { enviarEmailConfirmacion } = require('./email');
 const { guardarTransaccion, obtenerDisponibilidad } = require('../services/database.service');
 
@@ -39,6 +42,14 @@ const SESIONES_CONFIG = [
  */
 router.post('/create-checkout-session', async (req, res) => {
   try {
+    // Verificar que Stripe esté disponible
+    if (!stripe) {
+      return res.status(503).json({ 
+        error: 'Servicio de pagos no disponible',
+        message: 'Stripe no está configurado correctamente'
+      });
+    }
+
     const {  
       customerEmail,
       customerName,
@@ -182,6 +193,14 @@ router.get('/sesiones', async (req, res) => {
  */
 router.get('/checkout-session/:sessionId', async (req, res) => {
   try {
+    // Verificar que Stripe esté disponible
+    if (!stripe) {
+      return res.status(503).json({ 
+        error: 'Servicio de pagos no disponible',
+        message: 'Stripe no está configurado correctamente'
+      });
+    }
+
     const { sessionId } = req.params;
 
     if (!sessionId || !sessionId.startsWith('cs_')) {
@@ -306,6 +325,14 @@ async function procesarPagoCompletado(session) {
  * POST /api/stripe/webhook
  */
 router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+  // Verificar que Stripe esté disponible
+  if (!stripe) {
+    console.error('❌ [WEBHOOK] Stripe no configurado');
+    return res.status(503).json({ 
+      error: 'Servicio de pagos no disponible'
+    });
+  }
+
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

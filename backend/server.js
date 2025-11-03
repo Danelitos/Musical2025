@@ -7,7 +7,8 @@ require('dotenv').config();
 const stripeRoutes = require('./routes/stripe');
 const { router: emailRoutes } = require('./routes/email');
 const validacionRoutes = require('./routes/validacion');
-const { conectarMongoDB, inicializarIndices } = require('./services/database.service');
+const { inicializarIndices } = require('./services/database.service');
+const { conectarMongoDB } = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
