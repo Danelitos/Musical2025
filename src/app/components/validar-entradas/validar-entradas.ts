@@ -1,0 +1,371 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Html5Qrcode } from 'html5-qrcode';
+
+interface ValidacionResponse {
+  success: boolean;
+  message?: string;
+  code: string;
+  ticketId: string;
+  error?: string;
+  detalles?: {
+    nombreCliente: string;
+    emailCliente: string;
+    totalEntradas: number;
+    entradasAdultos: number;
+    entradasNinos: number;
+    sesion: {
+      fecha: string;
+      hora: string;
+      lugar: string;
+    };
+    fechaCompra: string;
+    fechaValidacion?: string;
+    importeTotal: number;
+  };
+}
+
+interface Estadisticas {
+  totalEntradas: number;
+  entradasValidadas: number;
+  entradasPendientes: number;
+  porcentajeValidado: string;
+}
+
+@Component({
+  selector: 'app-validar-entradas',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './validar-entradas.html',
+  styleUrls: ['./validar-entradas.scss']
+})
+export class ValidarEntradasComponent implements OnInit, OnDestroy {
+  ticketId: string = '';
+  validando: boolean = false;
+  resultado: ValidacionResponse | null = null;
+  estadisticas: Estadisticas | null = null;
+  
+  // Para el escáner de QR
+  escaneandoQR: boolean = false;
+  html5QrCode: Html5Qrcode | null = null;
+  camaraIniciada: boolean = false;
+  
+  // Historial de validaciones
+  historial: ValidacionResponse[] = [];
+
+  private apiUrl = environment.apiUrl || 'http://localhost:3000/api';
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.cargarEstadisticas();
+    this.cargarHistorialLocal();
+    
+    // Actualizar estadísticas cada 30 segundos
+    setInterval(() => {
+      this.cargarEstadisticas();
+    }, 30000);
+  }
+
+  ngOnDestroy(): void {
+    // Detener la cámara si está activa
+    this.detenerEscaner();
+  }
+
+  /**
+   * Valida una entrada por su ticketId
+   */
+  async validarEntrada(): Promise<void> {
+    if (!this.ticketId.trim()) {
+      this.mostrarError('Por favor ingresa un código de entrada');
+      return;
+    }
+
+    this.validando = true;
+    this.resultado = null;
+
+    try {
+      const response = await this.http.post<ValidacionResponse>(
+        `${this.apiUrl}/validacion/validar-entrada`,
+        { ticketId: this.ticketId.trim() }
+      ).toPromise();
+
+      this.resultado = response!;
+      
+      if (response!.success) {
+        // Agregar al historial
+        this.agregarAlHistorial(response!);
+        
+        // Reproducir sonido de éxito (opcional)
+        this.reproducirSonidoExito();
+        
+        // Recargar estadísticas
+        this.cargarEstadisticas();
+      } else {
+        this.reproducirSonidoError();
+      }
+
+      // Limpiar el input después de 2 segundos
+      setTimeout(() => {
+        this.ticketId = '';
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Error validando entrada:', error);
+      
+      const errorResponse = error.error;
+      if (errorResponse && errorResponse.code) {
+        this.resultado = errorResponse;
+      } else {
+        this.mostrarError('Error de conexión. Verifica tu conexión a internet.');
+      }
+      
+      this.reproducirSonidoError();
+    } finally {
+      this.validando = false;
+    }
+  }
+
+  /**
+   * Consulta información de una entrada sin validarla
+   */
+  async consultarEntrada(): Promise<void> {
+    if (!this.ticketId.trim()) {
+      this.mostrarError('Por favor ingresa un código de entrada');
+      return;
+    }
+
+    this.validando = true;
+    this.resultado = null;
+
+    try {
+      const response = await this.http.get<any>(
+        `${this.apiUrl}/validacion/consultar-entrada/${this.ticketId.trim()}`
+      ).toPromise();
+
+      this.resultado = {
+        success: true,
+        code: 'CONSULTA_OK',
+        ticketId: response.ticketId,
+        message: response.validada 
+          ? 'Esta entrada ya fue validada' 
+          : 'Entrada válida, aún no validada',
+        detalles: response.detalles
+      };
+
+    } catch (error: any) {
+      console.error('Error consultando entrada:', error);
+      this.mostrarError('No se pudo consultar la entrada');
+    } finally {
+      this.validando = false;
+    }
+  }
+
+  /**
+   * Carga las estadísticas del servidor
+   */
+  async cargarEstadisticas(): Promise<void> {
+    try {
+      const response = await this.http.get<any>(
+        `${this.apiUrl}/validacion/estadisticas`
+      ).toPromise();
+
+      if (response.success) {
+        this.estadisticas = response.estadisticas;
+      }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  }
+
+  /**
+   * Activa el modo de escaneo de QR (requiere cámara)
+   */
+  async activarEscanerQR(): Promise<void> {
+    this.escaneandoQR = true;
+    this.resultado = null;
+    
+    try {
+      // Inicializar el escáner
+      this.html5QrCode = new Html5Qrcode('qr-reader');
+      
+      // Configuración del escáner
+      const config = {
+        fps: 10,    // Frames por segundo
+        qrbox: { width: 250, height: 250 },  // Área de escaneo
+        aspectRatio: 1.0
+      };
+      
+      // Iniciar el escáner con la cámara trasera (si está disponible)
+      await this.html5QrCode.start(
+        { facingMode: 'environment' }, // Cámara trasera
+        config,
+        (decodedText, decodedResult) => {
+          // Callback cuando se escanea un código
+          console.log('🎫 QR escaneado:', decodedText);
+          this.onQRScanned(decodedText);
+        },
+        (errorMessage) => {
+          // Errores de escaneo (se pueden ignorar, son muy frecuentes)
+          // console.log('Error de escaneo:', errorMessage);
+        }
+      );
+      
+      this.camaraIniciada = true;
+      console.log('📷 Cámara iniciada correctamente');
+      
+    } catch (error: any) {
+      console.error('❌ Error iniciando cámara:', error);
+      this.escaneandoQR = false;
+      alert('No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara o usa entrada manual.');
+    }
+  }
+
+  /**
+   * Detiene el escáner de QR
+   */
+  async detenerEscaner(): Promise<void> {
+    if (this.html5QrCode && this.camaraIniciada) {
+      try {
+        await this.html5QrCode.stop();
+        this.html5QrCode.clear();
+        this.camaraIniciada = false;
+        console.log('📷 Cámara detenida');
+      } catch (error) {
+        console.error('Error deteniendo cámara:', error);
+      }
+    }
+    this.escaneandoQR = false;
+  }
+
+  /**
+   * Maneja el escaneo exitoso de un QR
+   */
+  async onQRScanned(result: string): Promise<void> {
+    // Detener el escáner inmediatamente
+    await this.detenerEscaner();
+    
+    // Asignar el valor escaneado
+    this.ticketId = result;
+    
+    // Validar automáticamente
+    await this.validarEntrada();
+    
+    // Reproducir feedback sonoro/visual
+    this.reproducirSonidoExito();
+  }
+
+  /**
+   * Limpia el resultado actual
+   */
+  limpiarResultado(): void {
+    this.resultado = null;
+    this.ticketId = '';
+  }
+
+  /**
+   * Agrega una validación al historial local
+   */
+  private agregarAlHistorial(validacion: ValidacionResponse): void {
+    this.historial.unshift(validacion);
+    
+    // Mantener solo las últimas 20 validaciones
+    if (this.historial.length > 20) {
+      this.historial = this.historial.slice(0, 20);
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('historialValidaciones', JSON.stringify(this.historial));
+  }
+
+  /**
+   * Carga el historial desde localStorage
+   */
+  private cargarHistorialLocal(): void {
+    const historialGuardado = localStorage.getItem('historialValidaciones');
+    if (historialGuardado) {
+      try {
+        this.historial = JSON.parse(historialGuardado);
+      } catch (e) {
+        console.error('Error cargando historial:', e);
+        this.historial = [];
+      }
+    }
+  }
+
+  /**
+   * Muestra un mensaje de error temporal
+   */
+  private mostrarError(mensaje: string): void {
+    this.resultado = {
+      success: false,
+      code: 'ERROR',
+      ticketId: this.ticketId,
+      error: mensaje
+    };
+  }
+
+  /**
+   * Reproduce un sonido de éxito (opcional)
+   */
+  private reproducirSonidoExito(): void {
+    // Opcional: reproducir un beep de éxito
+    // Se puede implementar con un archivo de audio real
+  }
+
+  /**
+   * Reproduce un sonido de error (opcional)
+   */
+  private reproducirSonidoError(): void {
+    // Opcional: reproducir un beep de error
+    // Se puede implementar con un archivo de audio real
+  }
+
+  /**
+   * Formatea una fecha para mostrar
+   */
+  formatearFecha(fecha: string | undefined): string {
+    if (!fecha) return '-';
+    const d = new Date(fecha);
+    return d.toLocaleString('es-ES');
+  }
+
+  /**
+   * Obtiene la clase CSS según el código de respuesta
+   */
+  getResultadoClass(): string {
+    if (!this.resultado) return '';
+    
+    switch (this.resultado.code) {
+      case 'TICKET_VALIDATED':
+        return 'exito';
+      case 'TICKET_ALREADY_USED':
+        return 'advertencia';
+      case 'TICKET_NOT_FOUND':
+        return 'error';
+      default:
+        return 'info';
+    }
+  }
+
+  /**
+   * Obtiene el icono según el código de respuesta
+   */
+  getResultadoIcono(): string {
+    if (!this.resultado) return '';
+    
+    switch (this.resultado.code) {
+      case 'TICKET_VALIDATED':
+        return '✅';
+      case 'TICKET_ALREADY_USED':
+        return '⚠️';
+      case 'TICKET_NOT_FOUND':
+        return '❌';
+      default:
+        return 'ℹ️';
+    }
+  }
+}

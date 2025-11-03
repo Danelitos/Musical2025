@@ -271,28 +271,28 @@ function generateEmailTemplate(reservationData) {
 
 // Función para generar código QR con datos de la reserva
 async function generarCodigoQR(datosReserva) {
-  // Crear texto legible para el QR en vez de JSON
-  const datosQRTexto = `plain:
-ENTRADA - EN BELÉN DE JUDÁ
-━━━━━━━━━━━━━━━━━━━━━━
-Nombre: ${datosReserva.nombre}
-Fecha: ${datosReserva.sesion.fecha}
-Hora: ${datosReserva.sesion.hora}
-Lugar: ${datosReserva.sesion.lugar}
-━━━━━━━━━━━━━━━━━━━━━━
-Entradas Adultos: ${datosReserva.numEntradasAdultos}
-Entradas Niños: ${datosReserva.numEntradasNinos}
-Total Pagado: ${datosReserva.precioTotal}€
-━━━━━━━━━━━━━━━━━━━━━━
-Contacto: ${datosReserva.email}`;
+  // En lugar de texto plano, ahora usamos solo el ticketId único
+  // Este es el formato profesional que usan cines y eventos
+  const ticketId = datosReserva.ticketId;
+  
+  if (!ticketId) {
+    throw new Error('No se proporcionó ticketId para generar QR');
+  }
 
+  // El QR contiene solo el código único de validación
+  // Formato: BELEN-TIMESTAMP-HASH
+  const datosQR = ticketId;
   
   // Generar QR como base64
-  const qrDataURL = await QRCode.toDataURL(datosQRTexto, {
-    errorCorrectionLevel: 'M',
+  const qrDataURL = await QRCode.toDataURL(datosQR, {
+    errorCorrectionLevel: 'H', // Alta corrección de errores para mejor lectura
     type: 'image/png',
-    width: 200,
-    margin: 1
+    width: 300, // Más grande para mejor escaneabilidad
+    margin: 2,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }
   });
   
   return qrDataURL;
@@ -499,6 +499,11 @@ async function generarPDFEntrada(datosReserva) {
       // ============ CÓDIGO QR CON MARCO ELEGANTE ============
       doc.fontSize(14).fillColor('#8B0000').font('Helvetica-Bold')
          .text('Código de Validación', 0, doc.y, { align: 'center', width: doc.page.width });
+      doc.moveDown(0.5);
+
+      // Mostrar el Ticket ID en texto
+      doc.fontSize(11).fillColor('#D4AF37').font('Helvetica-Bold')
+         .text(datosReserva.ticketId, 0, doc.y, { align: 'center', width: doc.page.width });
       doc.moveDown(0.8);
 
       // Marco elegante para el QR

@@ -1,131 +1,259 @@
-# 🎭 En Belén de Judá - Musical Website
+# 🎭 En Belén de Judá - Musical Website# 🎭 En Belén de Judá - Musical Website
 
-Sistema de venta de entradas online para el musical navideño "En Belén de Judá".
 
-## 📋 Tabla de Contenidos
 
-- [Características](#características)
+[![Angular](https://img.shields.io/badge/Angular-20.2-red)](https://angular.io/)Sistema de venta de entradas online para el musical navideño "En Belén de Judá".
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+
+[![Stripe](https://img.shields.io/badge/Stripe-Payments-blue)](https://stripe.com/)## 📋 Tabla de Contenidos
+
+
+
+Sistema profesional de venta de entradas online para el musical navideño "En Belén de Judá".- [Características](#características)
+
 - [Tecnologías](#tecnologías)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Instalación](#instalación)
-- [Configuración](#configuración)
-- [Ejecución](#ejecución)
-- [Despliegue](#despliegue)
-- [Documentación Adicional](#documentación-adicional)
 
-## ✨ Características
+---- [Estructura del Proyecto](#estructura-del-proyecto)
+
+- [Instalación](#instalación)
+
+## 🚀 Quick Start- [Configuración](#configuración)
+
+- [Ejecución](#ejecución)
+
+### Desarrollo Local- [Despliegue](#despliegue)
+
+```bash- [Documentación Adicional](#documentación-adicional)
+
+# 1. Instalar dependencias
+
+npm install## ✨ Características
+
+cd backend && npm install
 
 ### Frontend (Angular)
-- ✅ **Diseño responsive** adaptado a móviles, tablets y escritorio
-- ✅ **Carrusel automático** de imágenes del musical
-- ✅ **Sistema de reservas** con selección de sesiones
+
+# 2. Configurar variables de entorno- ✅ **Diseño responsive** adaptado a móviles, tablets y escritorio
+
+cp backend/.env.example backend/.env- ✅ **Carrusel automático** de imágenes del musical
+
+# Editar backend/.env con tus claves- ✅ **Sistema de reservas** con selección de sesiones
+
 - ✅ **Integración con Stripe** para pagos seguros
-- ✅ **Generación de tickets PDF** enviados por email
-- ✅ **Desglose de IVA** (10% cultural) en todas las compras
+
+# 3. Iniciar frontend- ✅ **Generación de tickets PDF** enviados por email
+
+npm start- ✅ **Desglose de IVA** (10% cultural) en todas las compras
+
 - ✅ **Banner de cookies** con consentimiento GDPR
-- ✅ **Páginas legales** completas (Privacidad, Términos, Cookies)
-- ✅ **Footer con redes sociales** (Instagram, TikTok, YouTube)
+
+# 4. Iniciar backend (en otra terminal)- ✅ **Páginas legales** completas (Privacidad, Términos, Cookies)
+
+cd backend && npm run dev- ✅ **Footer con redes sociales** (Instagram, TikTok, YouTube)
+
+```
 
 ### Backend (Node.js + Express)
-- ✅ **API REST** con documentación completa
-- ✅ **Procesamiento de pagos** vía Stripe Checkout
+
+### Producción- ✅ **API REST** con documentación completa
+
+Ver **[Guía de Producción](docs/production/SETUP.md)**- ✅ **Procesamiento de pagos** vía Stripe Checkout
+
 - ✅ **Webhooks de Stripe** para confirmaciones automáticas
-- ✅ **Sistema de entradas disponibles** con descuento automático
+
+---- ✅ **Sistema de entradas disponibles** con descuento automático
+
 - ✅ **Envío de emails** con Nodemailer
-- ✅ **Generación de PDFs** con QR code para tickets
+
+## ✨ Características- ✅ **Generación de PDFs** con QR code para tickets
+
 - ✅ **Seguridad**: Helmet, CORS, Rate Limiting
-- ✅ **Logging detallado** para debugging
 
-## 🛠️ Tecnologías
+- 🎫 **Venta de entradas online** con Stripe Checkout- ✅ **Logging detallado** para debugging
 
-### Frontend
-- **Angular 18+** - Framework principal
-- **TypeScript** - Lenguaje de programación
+- 📧 **Confirmación por email** con PDF y QR code
+
+- 📱 **Responsive design** para móviles y tablets## 🛠️ Tecnologías
+
+- 🔒 **Pagos seguros** con Stripe (PCI compliant)
+
+- 📊 **Control de aforo** automático### Frontend
+
+- 🎨 **Diseño moderno** con Angular Material- **Angular 18+** - Framework principal
+
+- 🍪 **GDPR compliant** con banner de cookies- **TypeScript** - Lenguaje de programación
+
 - **Angular Material** - Componentes UI
-- **Lucide Icons** - Iconografía moderna
+
+---- **Lucide Icons** - Iconografía moderna
+
 - **SCSS** - Estilos avanzados
-
-### Backend
-- **Node.js 18+** - Runtime de JavaScript
-- **Express.js** - Framework web
-- **Stripe API** - Procesamiento de pagos
-- **Nodemailer** - Envío de emails
-- **PDFKit** - Generación de PDFs
-- **QRCode** - Códigos QR para tickets
-
-### Seguridad
-- **Helmet** - Protección de headers HTTP
-- **CORS** - Control de acceso cross-origin
-- **express-rate-limit** - Limitación de peticiones
-- **dotenv** - Gestión segura de variables de entorno
 
 ## 📁 Estructura del Proyecto
 
-```
+### Backend
+
+```- **Node.js 18+** - Runtime de JavaScript
+
+Musical2025/- **Express.js** - Framework web
+
+├── src/                    # Frontend Angular- **Stripe API** - Procesamiento de pagos
+
+│   ├── app/components/    # Componentes UI- **Nodemailer** - Envío de emails
+
+│   ├── app/services/      # Servicios (Stripe, Logger)- **PDFKit** - Generación de PDFs
+
+│   └── environments/      # Configuración dev/prod- **QRCode** - Códigos QR para tickets
+
+│
+
+├── backend/               # Backend Node.js### Seguridad
+
+│   ├── routes/           # API endpoints- **Helmet** - Protección de headers HTTP
+
+│   ├── data/            # Sesiones y datos- **CORS** - Control de acceso cross-origin
+
+│   └── server.js        # Servidor Express- **express-rate-limit** - Limitación de peticiones
+
+│- **dotenv** - Gestión segura de variables de entorno
+
+└── docs/                  # Documentación
+
+    ├── development/      # Guías de desarrollo## 📁 Estructura del Proyecto
+
+    └── production/       # Guías de producción
+
+``````
+
 Musical2025/
-├── src/                          # Frontend Angular
+
+---├── src/                          # Frontend Angular
+
 │   ├── app/
-│   │   ├── components/          # Componentes de la aplicación
+
+## 📚 Documentación│   │   ├── components/          # Componentes de la aplicación
+
 │   │   │   ├── home/           # Página principal con reservas
-│   │   │   ├── confirmacion/   # Confirmación post-pago
-│   │   │   ├── footer/         # Pie de página
-│   │   │   ├── cookie-consent/ # Banner de cookies
+
+### Desarrollo│   │   │   ├── confirmacion/   # Confirmación post-pago
+
+- 📖 [Configuración Local](docs/development/setup.md)│   │   │   ├── footer/         # Pie de página
+
+- 🧪 [Testing con Stripe](docs/development/testing.md)│   │   │   ├── cookie-consent/ # Banner de cookies
+
 │   │   │   ├── politica-privacidad/  # Página legal
-│   │   │   ├── terminos-condiciones/ # Página legal
-│   │   │   └── politica-cookies/     # Página legal
-│   │   ├── services/           # Servicios Angular
-│   │   │   ├── stripe.service.ts    # Integración Stripe
+
+### Producción│   │   │   ├── terminos-condiciones/ # Página legal
+
+- 🚀 [Setup de Producción](docs/production/setup.md)│   │   │   └── politica-cookies/     # Página legal
+
+- ☁️ [Configuración Vercel](docs/production/vercel.md)│   │   ├── services/           # Servicios Angular
+
+- 📋 [Checklist de Deploy](docs/production/deploy-checklist.md)│   │   │   ├── stripe.service.ts    # Integración Stripe
+
 │   │   │   └── logger.service.ts    # Sistema de logs
-│   │   └── utils/              # Utilidades
-│   │       └── precio.utils.ts # Cálculos de IVA
-│   ├── assets/                 # Recursos estáticos
+
+### Backend│   │   └── utils/              # Utilidades
+
+- 📡 [API Documentation](backend/README.md)│   │       └── precio.utils.ts # Cálculos de IVA
+
+- 🗄️ [Gestión de Datos](backend/data/README.md)│   ├── assets/                 # Recursos estáticos
+
 │   │   └── images/
-│   │       ├── logos/         # Logos e iconos
+
+---│   │       ├── logos/         # Logos e iconos
+
 │   │       └── *.jpg          # Imágenes del carrusel
-│   └── environments/          # Configuración por entorno
+
+## 🎯 Sesiones del Musical│   └── environments/          # Configuración por entorno
+
 │
-├── backend/                    # Backend Node.js
-│   ├── routes/
-│   │   ├── stripe.js          # Endpoints de Stripe
+
+**Diciembre 2025:**├── backend/                    # Backend Node.js
+
+- **Viernes 12** - 19:00h - Teatro Salesianos Deusto (Bilbao)│   ├── routes/
+
+- **Domingo 21** - 17:00h - Teatro Salesianos Deusto (Bilbao)│   │   ├── stripe.js          # Endpoints de Stripe
+
 │   │   └── email.js           # Envío de emails y PDFs
-│   ├── utils/
-│   │   └── precio.utils.js    # Cálculos de IVA (backend)
+
+**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  │   ├── utils/
+
+**Capacidad:** 550 plazas/sesión│   │   └── precio.utils.js    # Cálculos de IVA (backend)
+
 │   ├── .env.example           # Plantilla de variables de entorno
-│   ├── server.js              # Servidor Express
+
+---│   ├── server.js              # Servidor Express
+
 │   ├── package.json
-│   └── README.md              # Documentación del backend
+
+## 🛠️ Stack Tecnológico│   └── README.md              # Documentación del backend
+
 │
-├── api/                        # Serverless para Vercel
-│   └── index.js               # Entry point serverless
-├── angular.json               # Configuración de Angular
+
+**Frontend:** Angular 20, TypeScript, Angular Material, Stripe.js  ├── api/                        # Serverless para Vercel
+
+**Backend:** Node.js, Express, Stripe SDK, Nodemailer, PDFKit  │   └── index.js               # Entry point serverless
+
+**Deploy:** Vercel (Frontend + Backend Serverless)├── angular.json               # Configuración de Angular
+
 ├── package.json               # Dependencias del frontend
-├── tsconfig.json              # Configuración de TypeScript
+
+---├── tsconfig.json              # Configuración de TypeScript
+
 ├── vercel.json                # Configuración de Vercel
-└── README.md                  # Este archivo
 
-```
+## 🔐 Seguridad└── README.md                  # Este archivo
 
-## 📦 Instalación
 
-### Prerrequisitos
 
-- **Node.js** 18+ ([Descargar](https://nodejs.org/))
+✅ Variables de entorno protegidas  ```
+
+✅ Webhooks firmados (Stripe)  
+
+✅ Rate limiting  ## 📦 Instalación
+
+✅ CORS configurado  
+
+✅ HTTPS obligatorio### Prerrequisitos
+
+
+
+---- **Node.js** 18+ ([Descargar](https://nodejs.org/))
+
 - **npm** 8+ (incluido con Node.js)
-- **Angular CLI** 18+ (`npm install -g @angular/cli`)
 
-### 1. Clonar el repositorio
+## 📊 Monitoreo- **Angular CLI** 18+ (`npm install -g @angular/cli`)
 
-```bash
+
+
+- **Pagos:** https://dashboard.stripe.com### 1. Clonar el repositorio
+
+- **Logs:** Vercel Dashboard → Logs
+
+- **Entradas:** `npm run check-entradas````bash
+
 git clone https://github.com/Danelitos/Musical2025.git
-cd Musical2025
+
+---cd Musical2025
+
 ```
+
+## 📜 Licencia
 
 ### 2. Instalar dependencias
 
+Copyright © 2025 En Belén de Judá. Todos los derechos reservados.
+
 #### Frontend
-```bash
+
+---```bash
+
 npm install
-```
+
+**Hecho con ❤️ por el equipo de En Belén de Judá** 🎭✨```
+
 
 #### Backend
 ```bash

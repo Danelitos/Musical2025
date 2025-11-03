@@ -9,7 +9,7 @@ import { LucideAngularModule, Cookie } from 'lucide-angular';
 @Component({
   selector: 'app-politica-cookies',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatCardModule, MatButtonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, MatIconModule, MatCardModule, MatButtonModule, LucideAngularModule],
   templateUrl: './politica-cookies.html',
   styleUrl: './politica-cookies.scss'
 })

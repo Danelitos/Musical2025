@@ -87,6 +87,8 @@ validateEnvironmentVariables();
 
 const stripeRoutes = require('./routes/stripe');
 const { router: emailRoutes } = require('./routes/email');
+const validacionRoutes = require('./routes/validacion');
+const { conectarMongoDB, inicializarIndices } = require('./services/database.service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -128,6 +130,7 @@ app.use('/api', express.json({ limit: '10mb' }));
 
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/email', emailRoutes);
+app.use('/api/validacion', validacionRoutes);
 
 /**
  * GET /api/health
@@ -167,6 +170,30 @@ app.use('*', (req, res) => {
 // INICIAR SERVIDOR
 // ========================================
 
+/**
+ * Inicializa MongoDB y el servidor
+ */
+async function iniciarServidor() {
+  try {
+    // Conectar a MongoDB
+    console.log('🔌 Iniciando conexión a MongoDB...');
+    await conectarMongoDB();
+    
+    // Inicializar índices (solo se ejecuta si no existen)
+    await inicializarIndices();
+    
+    console.log('✅ Base de datos lista');
+    
+  } catch (error) {
+    console.error('❌ ERROR conectando a MongoDB:', error.message);
+    console.error('⚠️ El servidor continuará funcionando sin MongoDB');
+    console.error('   Las transacciones NO se guardarán en la base de datos');
+  }
+}
+
+// Inicializar MongoDB antes de iniciar el servidor
+iniciarServidor();
+
 // Solo iniciar el servidor si no estamos en Vercel (serverless)
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
@@ -177,6 +204,7 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`   🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
     console.log(`   🔐 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configurado' : '❌ No configurado'}`);
     console.log(`   📧 Email: ${process.env.EMAIL_USER ? '✅ Configurado' : '❌ No configurado'}`);
+    console.log(`   💾 MongoDB: ${process.env.MONGODB_URI ? '✅ Configurado' : '⚠️ No configurado (opcional)'}`);
     console.log(`   🌐 Entorno: ${process.env.NODE_ENV || 'development'}`);
     console.log(`   ======================================\n`);
   });
