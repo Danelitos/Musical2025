@@ -25,9 +25,10 @@ const clientOptions = {
     deprecationErrors: true,
   },
   maxPoolSize: 10, // Máximo de conexiones en el pool
-  minPoolSize: 2,  // Mínimo de conexiones mantenidas
-  connectTimeoutMS: 10000, // Timeout de conexión: 10 segundos
+  minPoolSize: 1,  // Reducido de 2 a 1 para serverless
+  connectTimeoutMS: 5000, // Reducido de 10s a 5s para serverless
   socketTimeoutMS: 45000,  // Timeout de socket: 45 segundos
+  serverSelectionTimeoutMS: 5000, // Timeout para seleccionar servidor
 };
 
 /**

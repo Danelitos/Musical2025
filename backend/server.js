@@ -74,16 +74,24 @@ function validateEnvironmentVariables() {
       invalidVars.forEach(v => console.error(`  - ${v}`));
     }
     
-    console.error('\n📝 Asegúrate de copiar .env.example a .env y configurar todos los valores.');
+    console.error('\n📝 Asegúrate de configurar las variables de entorno en Vercel.');
     console.error('Más información en el archivo README.md\n');
+    
+    // En Vercel, lanzar error en lugar de process.exit
+    if (process.env.VERCEL) {
+      throw new Error('Variables de entorno no configuradas correctamente');
+    }
     process.exit(1);
   }
 
   console.log('✅ Todas las variables de entorno requeridas están configuradas');
 }
 
-// Ejecutar validación antes de iniciar el servidor
-validateEnvironmentVariables();
+// Ejecutar validación solo en desarrollo
+// En Vercel la validación se hace en cada request
+if (!process.env.VERCEL) {
+  validateEnvironmentVariables();
+}
 
 const stripeRoutes = require('./routes/stripe');
 const { router: emailRoutes } = require('./routes/email');
@@ -173,7 +181,17 @@ app.use('*', (req, res) => {
 /**
  * Inicializa MongoDB y el servidor
  */
+let mongoInicializado = false;
+let mongoInicializando = false;
+
 async function iniciarServidor() {
+  // Si ya está inicializado o inicializando, no hacer nada
+  if (mongoInicializado || mongoInicializando) {
+    return;
+  }
+  
+  mongoInicializando = true;
+  
   try {
     // Conectar a MongoDB
     console.log('🔌 Iniciando conexión a MongoDB...');
@@ -183,19 +201,49 @@ async function iniciarServidor() {
     await inicializarIndices();
     
     console.log('✅ Base de datos lista');
+    mongoInicializado = true;
     
   } catch (error) {
     console.error('❌ ERROR conectando a MongoDB:', error.message);
+    
+    // En Vercel, fallar de forma visible
+    if (process.env.VERCEL) {
+      console.error('🚨 CRÍTICO: MongoDB no disponible en Vercel');
+      throw error; // Esto hará que las funciones serverless fallen visiblemente
+    }
+    
     console.error('⚠️ El servidor continuará funcionando sin MongoDB');
     console.error('   Las transacciones NO se guardarán en la base de datos');
+  } finally {
+    mongoInicializando = false;
   }
 }
 
-// Inicializar MongoDB antes de iniciar el servidor
-iniciarServidor();
+// En desarrollo, inicializar inmediatamente
+// En Vercel, inicializar de forma lazy en el primer request
+if (!process.env.VERCEL) {
+  iniciarServidor().catch(err => {
+    console.error('💥 Error fatal iniciando servidor:', err);
+  });
+}
+
+// Middleware para inicializar MongoDB en Vercel (lazy initialization)
+if (process.env.VERCEL) {
+  app.use(async (req, res, next) => {
+    if (!mongoInicializado && !mongoInicializando) {
+      try {
+        await iniciarServidor();
+      } catch (error) {
+        console.error('❌ Error inicializando MongoDB en request:', error);
+        // Continuar sin MongoDB para que al menos responda
+      }
+    }
+    next();
+  });
+}
 
 // Solo iniciar el servidor si no estamos en Vercel (serverless)
-if (process.env.NODE_ENV !== 'production') {
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`\n🎭 ======================================`);
     console.log(`   Musical "En Belén de Judá" - Backend`);
