@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -42,7 +42,7 @@ interface Estadisticas {
   templateUrl: './validar-entradas.html',
   styleUrls: ['./validar-entradas.scss']
 })
-export class ValidarEntradasComponent implements OnInit, OnDestroy {
+export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChecked {
   ticketId: string = '';
   validando: boolean = false;
   resultado: ValidacionResponse | null = null;
@@ -52,6 +52,7 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy {
   escaneandoQR: boolean = false;
   html5QrCode: Html5Qrcode | null = null;
   camaraIniciada: boolean = false;
+  intentandoIniciarCamara: boolean = false;
   
   // Historial de validaciones
   historial: ValidacionResponse[] = [];
@@ -68,6 +69,16 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy {
     setInterval(() => {
       this.cargarEstadisticas();
     }, 30000);
+  }
+
+  ngAfterViewChecked(): void {
+    // Iniciar la cámara cuando el elemento esté en el DOM
+    if (this.escaneandoQR && !this.camaraIniciada && !this.intentandoIniciarCamara) {
+      const elemento = document.getElementById('qr-reader');
+      if (elemento) {
+        this.iniciarCamara();
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -184,9 +195,17 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy {
   /**
    * Activa el modo de escaneo de QR (requiere cámara)
    */
-  async activarEscanerQR(): Promise<void> {
+  activarEscanerQR(): void {
     this.escaneandoQR = true;
     this.resultado = null;
+    // La cámara se iniciará automáticamente en ngAfterViewChecked
+  }
+
+  /**
+   * Inicia la cámara para escanear QR
+   */
+  private async iniciarCamara(): Promise<void> {
+    this.intentandoIniciarCamara = true;
     
     try {
       // Inicializar el escáner
@@ -220,7 +239,9 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('❌ Error iniciando cámara:', error);
       this.escaneandoQR = false;
-      alert('No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara o usa entrada manual.');
+      alert('No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara en tu navegador o usa entrada manual.');
+    } finally {
+      this.intentandoIniciarCamara = false;
     }
   }
 
