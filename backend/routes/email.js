@@ -207,9 +207,9 @@ function generateEmailTemplate(reservationData) {
             <div class="important">
                 <h4 style="margin-top: 0; color: #8B0000;">📌 Información Importante</h4>
                 <ul style="margin: 0; padding-left: 20px;">
-                    <li>Por favor, llega al teatro 30 minutos antes del espectáculo</li>
+                    <li>Por favor, llega al teatro 40 minutos antes del espectáculo</li>
                     <li>Presenta el PDF adjunto o el código QR en taquilla</li>
-                    <li>Las puertas se abren 15 minutos antes del inicio</li>
+                    <li>Las puertas se abren 30 minutos antes del inicio</li>
                 </ul>
             </div>
             
@@ -574,11 +574,11 @@ async function generarPDFEntrada(datosReserva) {
       doc.moveDown(1.5);
       
       doc.fontSize(12).fillColor('#333').font('Helvetica')
-         .text('• Llegue 30 minutos antes del inicio del evento', 80, infoBoxY + 65, { width: doc.page.width - 160 })
+         .text('• Llegue 40 minutos antes del inicio del evento', 80, infoBoxY + 65, { width: doc.page.width - 160 })
          .moveDown(0.8)
          .text('• Presente este PDF o el código QR en taquilla', 80, doc.y, { width: doc.page.width - 160 })
          .moveDown(0.8)
-         .text('• Las puertas se abren 15 minutos antes del espectáculo', 80, doc.y, { width: doc.page.width - 160 });
+         .text('• Las puertas se abren 30 minutos antes del espectáculo', 80, doc.y, { width: doc.page.width - 160 });
 
       // ============ FOOTER PÁGINA 2 ============
       const footerY2 = doc.page.height - 40;

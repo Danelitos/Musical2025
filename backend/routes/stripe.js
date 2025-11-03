@@ -172,20 +172,11 @@ router.get('/sesiones', async (req, res) => {
   try {
     const sesionesActualizadas = await Promise.all(
       SESIONES_CONFIG.map(async (sesion) => {
-        try {
-          const disponibilidad = await obtenerDisponibilidad(sesion.id, sesion.capacidadTotal);
-          return {
-            ...sesion,
-            entradasDisponibles: disponibilidad
-          };
-        } catch (error) {
-          // Si falla MongoDB, devolver capacidad total como disponible
-          console.warn(`⚠️ No se pudo obtener disponibilidad para sesión ${sesion.id}, usando capacidad total`);
-          return {
-            ...sesion,
-            entradasDisponibles: sesion.capacidadTotal
-          };
-        }
+        const disponibilidad = await obtenerDisponibilidad(sesion.id, sesion.capacidadTotal);
+        return {
+          ...sesion,
+          entradasDisponibles: disponibilidad
+        };
       })
     );
     

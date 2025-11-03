@@ -2,313 +2,598 @@
 
 
 
-[![Angular](https://img.shields.io/badge/Angular-20.2-red)](https://angular.io/)Sistema de venta de entradas online para el musical navideño "En Belén de Judá".
+[![Angular](https://img.shields.io/badge/Angular-20.2-red)](https://angular.io/)[![Angular](https://img.shields.io/badge/Angular-20.2-red)](https://angular.io/)
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
 
-[![Stripe](https://img.shields.io/badge/Stripe-Payments-blue)](https://stripe.com/)## 📋 Tabla de Contenidos
+[![Stripe](https://img.shields.io/badge/Stripe-Payments-blue)](https://stripe.com/)[![Stripe](https://img.shields.io/badge/Stripe-Payments-blue)](https://stripe.com/)
+
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://www.mongodb.com/)[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://www.mongodb.com/)
 
 
 
-Sistema profesional de venta de entradas online para el musical navideño "En Belén de Judá".- [Características](#características)
+Sistema profesional de venta de entradas online para el musical navideño "En Belén de Judá".Sistema profesional de venta de entradas online para el musical navideño "En Belén de Judá".
 
-- [Tecnologías](#tecnologías)
 
----- [Estructura del Proyecto](#estructura-del-proyecto)
 
-- [Instalación](#instalación)
+## 📋 Tabla de Contenidos## 📋 Tabla de Contenidos
 
-## 🚀 Quick Start- [Configuración](#configuración)
 
-- [Ejecución](#ejecución)
 
-### Desarrollo Local- [Despliegue](#despliegue)
+- [🚀 Quick Start](#-quick-start)- [🚀 Quick Start](#-quick-start)
 
-```bash- [Documentación Adicional](#documentación-adicional)
+- [✨ Características](#-características)- [✨ Características](#-características)
 
-# 1. Instalar dependencias
+- [🛠️ Tecnologías](#️-tecnologías)- [🛠️ Tecnologías](#️-tecnologías)
 
-npm install## ✨ Características
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 
-cd backend && npm install
+- [⚙️ Configuración](#️-configuración)- [⚙️ Configuración](#️-configuración)
 
-### Frontend (Angular)
+- [🚢 Despliegue](#-despliegue)- [🚢 Despliegue](#-despliegue)
 
-# 2. Configurar variables de entorno- ✅ **Diseño responsive** adaptado a móviles, tablets y escritorio
 
-cp backend/.env.example backend/.env- ✅ **Carrusel automático** de imágenes del musical
 
-# Editar backend/.env con tus claves- ✅ **Sistema de reservas** con selección de sesiones
+------
 
-- ✅ **Integración con Stripe** para pagos seguros
 
-# 3. Iniciar frontend- ✅ **Generación de tickets PDF** enviados por email
 
-npm start- ✅ **Desglose de IVA** (10% cultural) en todas las compras
+## 🚀 Quick Start## 🚀 Quick Start
 
-- ✅ **Banner de cookies** con consentimiento GDPR
 
-# 4. Iniciar backend (en otra terminal)- ✅ **Páginas legales** completas (Privacidad, Términos, Cookies)
 
-cd backend && npm run dev- ✅ **Footer con redes sociales** (Instagram, TikTok, YouTube)
+### Desarrollo Local### Desarrollo Local
 
-```
 
-### Backend (Node.js + Express)
 
-### Producción- ✅ **API REST** con documentación completa
+```bash```bash
 
-Ver **[Guía de Producción](docs/production/SETUP.md)**- ✅ **Procesamiento de pagos** vía Stripe Checkout
+# 1. Instalar dependencias# 1. Instalar dependencias
 
-- ✅ **Webhooks de Stripe** para confirmaciones automáticas
+npm installnpm install
 
----- ✅ **Sistema de entradas disponibles** con descuento automático
+cd backend && npm install && cd ..cd backend && npm install && cd ..
 
-- ✅ **Envío de emails** con Nodemailer
 
-## ✨ Características- ✅ **Generación de PDFs** con QR code para tickets
 
-- ✅ **Seguridad**: Helmet, CORS, Rate Limiting
+# 2. Configurar variables de entorno# 2. Configurar variables de entorno
 
-- 🎫 **Venta de entradas online** con Stripe Checkout- ✅ **Logging detallado** para debugging
+cp backend/.env.example backend/.envcp backend/.env.example backend/.env
 
-- 📧 **Confirmación por email** con PDF y QR code
+# Editar backend/.env con tus claves# Editar backend/.env con tus claves
 
-- 📱 **Responsive design** para móviles y tablets## 🛠️ Tecnologías
 
-- 🔒 **Pagos seguros** con Stripe (PCI compliant)
 
-- 📊 **Control de aforo** automático### Frontend
+# 3. Iniciar frontend# 3. Iniciar frontend
 
-- 🎨 **Diseño moderno** con Angular Material- **Angular 18+** - Framework principal
+npm startnpm start
 
-- 🍪 **GDPR compliant** con banner de cookies- **TypeScript** - Lenguaje de programación
 
-- **Angular Material** - Componentes UI
 
----- **Lucide Icons** - Iconografía moderna
+# 4. Iniciar backend (en otra terminal)# 4. Iniciar backend (en otra terminal)
 
-- **SCSS** - Estilos avanzados
-
-## 📁 Estructura del Proyecto
-
-### Backend
-
-```- **Node.js 18+** - Runtime de JavaScript
-
-Musical2025/- **Express.js** - Framework web
-
-├── src/                    # Frontend Angular- **Stripe API** - Procesamiento de pagos
-
-│   ├── app/components/    # Componentes UI- **Nodemailer** - Envío de emails
-
-│   ├── app/services/      # Servicios (Stripe, Logger)- **PDFKit** - Generación de PDFs
-
-│   └── environments/      # Configuración dev/prod- **QRCode** - Códigos QR para tickets
-
-│
-
-├── backend/               # Backend Node.js### Seguridad
-
-│   ├── routes/           # API endpoints- **Helmet** - Protección de headers HTTP
-
-│   ├── data/            # Sesiones y datos- **CORS** - Control de acceso cross-origin
-
-│   └── server.js        # Servidor Express- **express-rate-limit** - Limitación de peticiones
-
-│- **dotenv** - Gestión segura de variables de entorno
-
-└── docs/                  # Documentación
-
-    ├── development/      # Guías de desarrollo## 📁 Estructura del Proyecto
-
-    └── production/       # Guías de producción
+cd backend && npm run devcd backend && npm run dev
 
 ``````
 
+
+
+### Producción### Producción
+
+
+
+🌐 **Sitio en producción**: [enbelendejuda.com](https://enbelendejuda.com)🌐 **Sitio en producción**: [enbelendejuda.com](https://enbelendejuda.com)
+
+
+
+Ver **[Guía de Producción](backend/PRODUCTION-ENV.md)** para despliegue en Vercel.Ver **[Guía de Producción](backend/PRODUCTION-ENV.md)** para despliegue en Vercel.
+
+
+
+------
+
+
+
+## ✨ Características## ✨ Características
+
+
+
+### Frontend (Angular)### Frontend (Angular)
+
+- ✅ Diseño responsive adaptado a móviles, tablets y escritorio- ✅ Diseño responsive adaptado a móviles, tablets y escritorio
+
+- ✅ Carrusel automático de imágenes del musical- ✅ Carrusel automático de imágenes del musical
+
+- ✅ Sistema de reservas con selección de sesiones- ✅ Sistema de reservas con selección de sesiones
+
+- ✅ Integración con Stripe para pagos seguros- ✅ Integración con Stripe para pagos seguros
+
+- ✅ Desglose de IVA (10% cultural) en todas las compras- ✅ Desglose de IVA (10% cultural) en todas las compras
+
+- ✅ Banner de cookies con consentimiento GDPR- ✅ Banner de cookies con consentimiento GDPR
+
+- ✅ Páginas legales completas (Privacidad, Términos, Cookies)- ✅ Páginas legales completas (Privacidad, Términos, Cookies)
+
+- ✅ Footer con redes sociales (Instagram, TikTok, YouTube)- ✅ Footer con redes sociales (Instagram, TikTok, YouTube)
+
+- ✅ Validación de entradas con escáner QR- ✅ Validación de entradas con escáner QR
+
+
+
+### Backend (Node.js + Express)### Backend (Node.js + Express)
+
+- ✅ API REST con documentación completa- ✅ API REST con documentación completa
+
+- ✅ Procesamiento de pagos vía Stripe Checkout- ✅ Procesamiento de pagos vía Stripe Checkout
+
+- ✅ Webhooks de Stripe para confirmaciones automáticas- ✅ Webhooks de Stripe para confirmaciones automáticas
+
+- ✅ Sistema de entradas disponibles con control de aforo- ✅ Sistema de entradas disponibles con control de aforo
+
+- ✅ Envío de emails con Nodemailer- ✅ Envío de emails con Nodemailer
+
+- ✅ Generación de tickets PDF con QR code- ✅ Generación de tickets PDF con QR code
+
+- ✅ Seguridad: Helmet, CORS, Rate Limiting- ✅ Seguridad: Helmet, CORS, Rate Limiting
+
+- ✅ Almacenamiento en MongoDB Atlas- ✅ Almacenamiento en MongoDB Atlas
+
+- ✅ Logging detallado para debugging- ✅ Logging detallado para debugging
+
+
+
+------
+
+
+
+## 🛠️ Tecnologías## 🛠️ Tecnologías
+
+
+
+### Frontend### Frontend
+
+- **Angular 20+** - Framework principal- **Angular 20+** - Framework principal
+
+- **TypeScript** - Lenguaje de programación- **TypeScript** - Lenguaje de programación
+
+- **Angular Material** - Componentes UI- **Angular Material** - Componentes UI
+
+- **Lucide Icons** - Iconografía moderna- **Lucide Icons** - Iconografía moderna
+
+- **SCSS** - Estilos avanzados- **SCSS** - Estilos avanzados
+
+
+
+### Backend### Backend
+
+- **Node.js 18+** - Runtime de JavaScript- **Node.js 18+** - Runtime de JavaScript
+
+- **Express.js** - Framework web- **Express.js** - Framework web
+
+- **MongoDB** - Base de datos NoSQL
+
+- **Stripe** - Procesamiento de pagos├── src/                    # Frontend Angular- **Stripe API** - Procesamiento de pagos
+
+- **Nodemailer** - Envío de emails
+
+- **PDFKit** - Generación de tickets PDF│   ├── app/components/    # Componentes UI- **Nodemailer** - Envío de emails
+
+- **QRCode** - Generación de códigos QR
+
+- **Helmet** - Seguridad HTTP headers│   ├── app/services/      # Servicios (Stripe, Logger)- **PDFKit** - Generación de PDFs
+
+- **CORS** - Control de acceso cross-origin
+
+- **express-rate-limit** - Limitación de peticiones│   └── environments/      # Configuración dev/prod- **QRCode** - Códigos QR para tickets
+
+
+
+### Despliegue│
+
+- **Vercel** - Hosting y serverless functions
+
+- **MongoDB Atlas** - Base de datos en la nube├── backend/               # Backend Node.js### Seguridad
+
+
+
+---│   ├── routes/           # API endpoints- **Helmet** - Protección de headers HTTP
+
+
+
+## 📁 Estructura del Proyecto│   ├── data/            # Sesiones y datos- **CORS** - Control de acceso cross-origin
+
+
+
+```│   └── server.js        # Servidor Express- **express-rate-limit** - Limitación de peticiones
+
 Musical2025/
 
----├── src/                          # Frontend Angular
+├── src/                          # 🎨 Frontend Angular│- **dotenv** - Gestión segura de variables de entorno
 
 │   ├── app/
 
-## 📚 Documentación│   │   ├── components/          # Componentes de la aplicación
+│   │   ├── components/          # Componentes UI└── docs/                  # Documentación
 
 │   │   │   ├── home/           # Página principal con reservas
 
-### Desarrollo│   │   │   ├── confirmacion/   # Confirmación post-pago
+│   │   │   ├── confirmacion/   # Confirmación post-pago    ├── development/      # Guías de desarrollo## 📁 Estructura del Proyecto
 
-- 📖 [Configuración Local](docs/development/setup.md)│   │   │   ├── footer/         # Pie de página
+│   │   │   ├── validar-entradas/ # Escáner QR para validación
 
-- 🧪 [Testing con Stripe](docs/development/testing.md)│   │   │   ├── cookie-consent/ # Banner de cookies
+│   │   │   ├── footer/         # Pie de página    └── production/       # Guías de producción
 
-│   │   │   ├── politica-privacidad/  # Página legal
+│   │   │   ├── cookie-consent/ # Banner de cookies
 
-### Producción│   │   │   ├── terminos-condiciones/ # Página legal
+│   │   │   ├── politica-privacidad/``````
 
-- 🚀 [Setup de Producción](docs/production/setup.md)│   │   │   └── politica-cookies/     # Página legal
+│   │   │   ├── politica-cookies/
 
-- ☁️ [Configuración Vercel](docs/production/vercel.md)│   │   ├── services/           # Servicios Angular
+│   │   │   └── terminos-condiciones/Musical2025/
 
-- 📋 [Checklist de Deploy](docs/production/deploy-checklist.md)│   │   │   ├── stripe.service.ts    # Integración Stripe
+│   │   ├── services/           # Servicios Angular
 
-│   │   │   └── logger.service.ts    # Sistema de logs
+│   │   │   ├── stripe.service.ts---├── src/                          # Frontend Angular
 
-### Backend│   │   └── utils/              # Utilidades
+│   │   │   └── logger.service.ts
 
-- 📡 [API Documentation](backend/README.md)│   │       └── precio.utils.ts # Cálculos de IVA
+│   │   └── utils/              # Utilidades│   ├── app/
 
-- 🗄️ [Gestión de Datos](backend/data/README.md)│   ├── assets/                 # Recursos estáticos
+│   │       └── precio.utils.ts
 
-│   │   └── images/
+│   ├── assets/images/          # Imágenes y logos## 📚 Documentación│   │   ├── components/          # Componentes de la aplicación
 
----│   │       ├── logos/         # Logos e iconos
+│   └── environments/           # Configuración por entorno
 
-│   │       └── *.jpg          # Imágenes del carrusel
+││   │   │   ├── home/           # Página principal con reservas
 
-## 🎯 Sesiones del Musical│   └── environments/          # Configuración por entorno
+├── backend/                    # ⚙️ Backend Node.js + Express
+
+│   ├── config/### Desarrollo│   │   │   ├── confirmacion/   # Confirmación post-pago
+
+│   │   └── database.js        # Configuración MongoDB
+
+│   ├── models/- 📖 [Configuración Local](docs/development/setup.md)│   │   │   ├── footer/         # Pie de página
+
+│   │   └── transaccion.model.js
+
+│   ├── routes/- 🧪 [Testing con Stripe](docs/development/testing.md)│   │   │   ├── cookie-consent/ # Banner de cookies
+
+│   │   ├── stripe.js          # Endpoints de Stripe
+
+│   │   ├── email.js           # Envío de emails y PDFs│   │   │   ├── politica-privacidad/  # Página legal
+
+│   │   └── validacion.js      # Validación de tickets
+
+│   ├── services/### Producción│   │   │   ├── terminos-condiciones/ # Página legal
+
+│   │   └── database.service.js
+
+│   ├── utils/- 🚀 [Setup de Producción](docs/production/setup.md)│   │   │   └── politica-cookies/     # Página legal
+
+│   │   └── precio.utils.js
+
+│   ├── .env.example           # Plantilla de variables- ☁️ [Configuración Vercel](docs/production/vercel.md)│   │   ├── services/           # Servicios Angular
+
+│   ├── server.js              # Servidor Express
+
+│   └── PRODUCTION-ENV.md      # Guía de producción- 📋 [Checklist de Deploy](docs/production/deploy-checklist.md)│   │   │   ├── stripe.service.ts    # Integración Stripe
 
 │
 
-**Diciembre 2025:**├── backend/                    # Backend Node.js
+├── api/                        # 🚀 Serverless para Vercel│   │   │   └── logger.service.ts    # Sistema de logs
 
-- **Viernes 12** - 19:00h - Teatro Salesianos Deusto (Bilbao)│   ├── routes/
+│   └── index.js               # Entry point serverless
 
-- **Domingo 21** - 17:00h - Teatro Salesianos Deusto (Bilbao)│   │   ├── stripe.js          # Endpoints de Stripe
+│### Backend│   │   └── utils/              # Utilidades
 
-│   │   └── email.js           # Envío de emails y PDFs
+├── angular.json
 
-**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  │   ├── utils/
+├── package.json- 📡 [API Documentation](backend/README.md)│   │       └── precio.utils.ts # Cálculos de IVA
 
-**Capacidad:** 550 plazas/sesión│   │   └── precio.utils.js    # Cálculos de IVA (backend)
+├── tsconfig.json
 
-│   ├── .env.example           # Plantilla de variables de entorno
+├── vercel.json                # Configuración de Vercel- 🗄️ [Gestión de Datos](backend/data/README.md)│   ├── assets/                 # Recursos estáticos
 
----│   ├── server.js              # Servidor Express
+└── README.md
 
-│   ├── package.json
-
-## 🛠️ Stack Tecnológico│   └── README.md              # Documentación del backend
-
-│
-
-**Frontend:** Angular 20, TypeScript, Angular Material, Stripe.js  ├── api/                        # Serverless para Vercel
-
-**Backend:** Node.js, Express, Stripe SDK, Nodemailer, PDFKit  │   └── index.js               # Entry point serverless
-
-**Deploy:** Vercel (Frontend + Backend Serverless)├── angular.json               # Configuración de Angular
-
-├── package.json               # Dependencias del frontend
-
----├── tsconfig.json              # Configuración de TypeScript
-
-├── vercel.json                # Configuración de Vercel
-
-## 🔐 Seguridad└── README.md                  # Este archivo
+```│   │   └── images/
 
 
+
+------│   │       ├── logos/         # Logos e iconos
+
+
+
+## ⚙️ Configuración│   │       └── *.jpg          # Imágenes del carrusel
+
+
+
+### Variables de Entorno (Backend)## 🎯 Sesiones del Musical│   └── environments/          # Configuración por entorno
+
+
+
+Crear `backend/.env` con:│
+
+
+
+```env**Diciembre 2025:**├── backend/                    # Backend Node.js
+
+# MongoDB
+
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/- **Viernes 12** - 19:00h - Teatro Salesianos Deusto (Bilbao)│   ├── routes/
+
+
+
+# Stripe- **Domingo 21** - 17:00h - Teatro Salesianos Deusto (Bilbao)│   │   ├── stripe.js          # Endpoints de Stripe
+
+STRIPE_SECRET_KEY=sk_test_...
+
+STRIPE_WEBHOOK_SECRET=whsec_...│   │   └── email.js           # Envío de emails y PDFs
+
+STRIPE_PRICE_ADULT_ID=price_...
+
+STRIPE_PRICE_CHILD_ID=price_...**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  │   ├── utils/
+
+
+
+# Email (SMTP)**Capacidad:** 550 plazas/sesión│   │   └── precio.utils.js    # Cálculos de IVA (backend)
+
+EMAIL_HOST=smtp.gmail.com
+
+EMAIL_PORT=587│   ├── .env.example           # Plantilla de variables de entorno
+
+EMAIL_USER=tu-email@gmail.com
+
+EMAIL_PASS=tu-app-password---│   ├── server.js              # Servidor Express
+
+
+
+# Configuración│   ├── package.json
+
+NODE_ENV=development
+
+PORT=3000## 🛠️ Stack Tecnológico│   └── README.md              # Documentación del backend
+
+FRONTEND_URL=http://localhost:4200
+
+```│
+
+
+
+### Stripe - Configuración de Productos**Frontend:** Angular 20, TypeScript, Angular Material, Stripe.js  ├── api/                        # Serverless para Vercel
+
+
+
+1. **Crear productos en Stripe Dashboard**:**Backend:** Node.js, Express, Stripe SDK, Nodemailer, PDFKit  │   └── index.js               # Entry point serverless
+
+   - Entrada Adulto: 5€ (IVA incluido)
+
+   - Entrada Niño: 3€ (IVA incluido)**Deploy:** Vercel (Frontend + Backend Serverless)├── angular.json               # Configuración de Angular
+
+
+
+2. **Configurar webhook** en `https://tu-dominio.com/api/stripe/webhook`├── package.json               # Dependencias del frontend
+
+
+
+3. **Añadir metadatos** a los productos:---├── tsconfig.json              # Configuración de TypeScript
+
+   ```json
+
+   {├── vercel.json                # Configuración de Vercel
+
+     "tipo": "adulto" | "niño",
+
+     "iva_porcentaje": "10",## 🔐 Seguridad└── README.md                  # Este archivo
+
+     "precio_sin_iva": "4.55" | "2.73"
+
+   }
+
+   ```
 
 ✅ Variables de entorno protegidas  ```
 
+---
+
 ✅ Webhooks firmados (Stripe)  
+
+## 🚢 Despliegue
 
 ✅ Rate limiting  ## 📦 Instalación
 
+### Producción en Vercel
+
 ✅ CORS configurado  
 
-✅ HTTPS obligatorio### Prerrequisitos
+1. **Conectar repositorio** a Vercel
+
+2. **Configurar variables de entorno** en Vercel Dashboard✅ HTTPS obligatorio### Prerrequisitos
+
+3. **Añadir dominio personalizado** (opcional)
+
+4. **Configurar MongoDB Atlas**:
+
+   - Añadir IP `0.0.0.0/0` en Network Access (para Vercel)
+
+   - Verificar string de conexión---- **Node.js** 18+ ([Descargar](https://nodejs.org/))
 
 
 
----- **Node.js** 18+ ([Descargar](https://nodejs.org/))
-
-- **npm** 8+ (incluido con Node.js)
-
-## 📊 Monitoreo- **Angular CLI** 18+ (`npm install -g @angular/cli`)
+### Comandos útiles- **npm** 8+ (incluido con Node.js)
 
 
 
-- **Pagos:** https://dashboard.stripe.com### 1. Clonar el repositorio
+```bash## 📊 Monitoreo- **Angular CLI** 18+ (`npm install -g @angular/cli`)
+
+# Build de producción
+
+npm run build
+
+
+
+# Test local del build- **Pagos:** https://dashboard.stripe.com### 1. Clonar el repositorio
+
+npx http-server dist/belen-juda-musical/browser
 
 - **Logs:** Vercel Dashboard → Logs
 
-- **Entradas:** `npm run check-entradas````bash
+# Deploy manual (si no está en auto-deploy)
+
+vercel --prod- **Entradas:** `npm run check-entradas````bash
+
+```
 
 git clone https://github.com/Danelitos/Musical2025.git
 
+---
+
 ---cd Musical2025
+
+## 🎯 Sesiones del Musical
 
 ```
 
-## 📜 Licencia
+**Diciembre 2025:**
+
+- **Viernes 12** - 19:00h - Teatro Salesianos Deusto (Bilbao)## 📜 Licencia
+
+- **Domingo 21** - 17:00h - Teatro Salesianos Deusto (Bilbao)
 
 ### 2. Instalar dependencias
 
-Copyright © 2025 En Belén de Judá. Todos los derechos reservados.
+**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  
 
-#### Frontend
-
----```bash
-
-npm install
-
-**Hecho con ❤️ por el equipo de En Belén de Judá** 🎭✨```
+**Capacidad:** 550 plazas/sesiónCopyright © 2025 En Belén de Judá. Todos los derechos reservados.
 
 
-#### Backend
-```bash
+
+---#### Frontend
+
+
+
+## 🔐 Seguridad---```bash
+
+
+
+- ✅ Variables de entorno protegidas (.env en .gitignore)npm install
+
+- ✅ Webhooks firmados con Stripe signature
+
+- ✅ Rate limiting en endpoints críticos**Hecho con ❤️ por el equipo de En Belén de Judá** 🎭✨```
+
+- ✅ CORS configurado correctamente
+
+- ✅ Helmet para headers de seguridad
+
+- ✅ Validación de datos en backend#### Backend
+
+- ✅ Sin logs de datos sensibles```bash
+
 cd backend
-npm install
+
+---npm install
+
 cd ..
-```
 
-## ⚙️ Configuración
+## 📊 Monitoreo```
 
-### Frontend (Angular)
+
+
+- **Vercel Analytics** - Métricas de rendimiento## ⚙️ Configuración
+
+- **Stripe Dashboard** - Transacciones y pagos
+
+- **MongoDB Atlas** - Estado de la base de datos### Frontend (Angular)
+
+- **Logs de Vercel** - Debugging en producción
 
 Edita `src/environments/environment.ts`:
 
-```typescript
-export const environment = {
-  production: false,
-  stripePublicKey: 'pk_test_tu_clave_publica_aqui',
-  apiUrl: 'http://localhost:3000/api'
-};
-```
+---
 
-### Backend (Node.js)
+```typescript
+
+## 🐛 Debuggingexport const environment = {
+
+  production: false,
+
+### Problemas comunes  stripePublicKey: 'pk_test_tu_clave_publica_aqui',
+
+  apiUrl: 'http://localhost:3000/api'
+
+**Error de conexión MongoDB:**};
+
+```bash```
+
+# Verificar IP en MongoDB Atlas Network Access
+
+# Debe incluir 0.0.0.0/0 para Vercel### Backend (Node.js)
+
+```
 
 1. Crea el archivo `.env` en la carpeta `backend/`:
 
+**Webhook no funciona:**
+
+```bash```bash
+
+# Verificar STRIPE_WEBHOOK_SECRETcd backend
+
+# Comprobar URL del webhook en Stripe Dashboardcp .env.example .env
+
+``````
+
+
+
+**Email no se envía:**2. Edita `backend/.env` con tus valores reales:
+
 ```bash
-cd backend
-cp .env.example .env
-```
 
-2. Edita `backend/.env` con tus valores reales:
+# Verificar credenciales SMTP```env
 
-```env
-STRIPE_SECRET_KEY=sk_test_tu_clave_secreta
-STRIPE_WEBHOOK_SECRET=whsec_tu_webhook_secret
+# Gmail requiere "App Password", no la contraseña normalSTRIPE_SECRET_KEY=sk_test_tu_clave_secreta
+
+```STRIPE_WEBHOOK_SECRET=whsec_tu_webhook_secret
+
 EMAIL_USER=tu-email@gmail.com
-EMAIL_PASS=tu-app-password
+
+---EMAIL_PASS=tu-app-password
+
 ```
+
+## 📝 Licencia
 
 Ver `backend/README.md` para instrucciones detalladas.
 
+© 2025 En Belén de Judá - Todos los derechos reservados
+
 ## 🚀 Ejecución
+
+---
 
 ### Desarrollo
 
-#### Terminal 1 - Frontend
-```bash
-npm start
-# o
-ng serve
-```
-Frontend disponible en: http://localhost:4200
+## 👥 Contacto
 
-#### Terminal 2 - Backend
+#### Terminal 1 - Frontend
+
+- 📧 Email: [Configurar en variables de entorno]```bash
+
+- 📱 Instagram: [@enbelendejuda_](https://instagram.com/enbelendejuda_)npm start
+
+- 🎵 TikTok: [@enbelendejuda](https://tiktok.com/@enbelendejuda)# o
+
+- 📺 YouTube: [En Belén de Judá](https://youtube.com/@enbelendejuda)ng serve
+
+```
+
+---Frontend disponible en: http://localhost:4200
+
+
+
+**Hecho con ❤️ para el musical navideño "En Belén de Judá"**#### Terminal 2 - Backend
+
 ```bash
 cd backend
 npm start

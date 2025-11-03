@@ -10,6 +10,7 @@
 /out-tsc
 /bazel-out
 .angular/cache
+.angular/
 
 # ========================================
 # Dependencies
@@ -19,6 +20,7 @@
 npm-debug.log
 yarn-error.log
 package-lock.json
+yarn.lock
 
 # ========================================
 # Environment Variables
@@ -28,6 +30,7 @@ package-lock.json
 .env.*.local
 .env.production
 /backend/.env
+*.env
 
 # ========================================
 # IDEs and Editors
@@ -98,6 +101,23 @@ logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ========================================
+# Temporal & Cache
+# ========================================
+*.tmp
+*.temp
+.cache/
+.vercel/
+
+# ========================================
+# Backups
+# ========================================
+*.backup
+*.bak
+*.old
 yarn-error.log*
 lerna-debug.log*
 
