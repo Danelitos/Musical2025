@@ -324,7 +324,7 @@ async function procesarPagoCompletado(session) {
 /**
  * POST /api/stripe/webhook
  */
-router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+router.post('/webhook', async (req, res) => {
   // Verificar que Stripe esté disponible
   if (!stripe) {
     console.error('❌ [WEBHOOK] Stripe no configurado');
