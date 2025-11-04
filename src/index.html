@@ -4,13 +4,35 @@
   <meta charset="utf-8">
   <title>En Belén de Judá - Musical</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Viewport optimizado para móviles - previene zoom en inputs y asegura responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  
+  <!-- Optimización para iOS Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Belén de Judá">
+  
+  <!-- Optimización para Android Chrome -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#8B0000">
+  
+  <!-- Prevenir formato automático de números en iOS -->
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
   
   <!-- Favicon para diferentes navegadores y dispositivos -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="favicon.png">
+  
+  <!-- Apple Touch Icons para diferentes dispositivos iOS -->
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="favicon.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="favicon.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="favicon.png">
+  
+  <!-- PWA Manifest para instalación en móviles -->
+  <link rel="manifest" href="manifest.json">
   
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
