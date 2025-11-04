@@ -48,21 +48,17 @@
         background-repeat: no-repeat;
         opacity: 0;
         transition: opacity 1s ease-in-out;
-        
-        // Precarga inmediata de la primera imagen (poster)
-        &.preload {
-          // Forzar carga inmediata de la imagen de fondo
-          will-change: opacity;
-          
-          // Asegurar que se renderice aunque no esté activa
-          &:not(.active) {
-            display: block;
-            visibility: hidden;
-          }
-        }
+        pointer-events: none;
         
         &.active {
           opacity: 1;
+          pointer-events: auto;
+          z-index: 1;
+        }
+        
+        // Precarga la primera imagen
+        &.preload {
+          will-change: opacity;
         }
         
         .carousel-overlay {
@@ -88,7 +84,7 @@
       transform: translateX(-50%);
       display: flex;
       gap: 0.5rem;
-      z-index: 2;
+      z-index: 10;
       
       .indicator {
         width: 12px;
@@ -97,12 +93,18 @@
         border: 2px solid var(--primary-gold);
         background: transparent;
         cursor: pointer;
-        transition: var(--transition-smooth);
+        transition: all 0.3s ease;
+        padding: 0;
+        outline: none;
         
-        &.active,
-        &:hover {
+        &.active {
           background: var(--primary-gold);
           transform: scale(1.2);
+        }
+        
+        &:hover:not(.active) {
+          background: rgba(212, 175, 55, 0.5);
+          transform: scale(1.1);
         }
       }
     }

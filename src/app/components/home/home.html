@@ -20,9 +20,12 @@
     <!-- Indicadores del carrusel -->
     <div class="carousel-indicators">
       @for (image of carouselImages(); track image.src; let i = $index) {
-        <button class="indicator" 
-                [class.active]="i === currentImageIndex()"
-                (click)="currentImageIndex.set(i)">
+        <button 
+          class="indicator" 
+          [class.active]="i === currentImageIndex()"
+          (click)="currentImageIndex.set(i)"
+          [attr.aria-label]="'Ver imagen ' + (i + 1)"
+          type="button">
         </button>
       }
     </div>

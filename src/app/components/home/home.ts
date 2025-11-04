@@ -207,9 +207,10 @@ export class Home implements OnInit {
    */
   startCarousel() {
     setInterval(() => {
-      this.currentImageIndex.update(index => 
-        (index + 1) % this.carouselImages().length
-      );
+      this.currentImageIndex.update(index => {
+        const nextIndex = (index + 1) % this.carouselImages().length;
+        return nextIndex;
+      });
     }, 5000);
   }
 
