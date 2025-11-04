@@ -49,6 +49,18 @@
         opacity: 0;
         transition: opacity 1s ease-in-out;
         
+        // Precarga inmediata de la primera imagen (poster)
+        &.preload {
+          // Forzar carga inmediata de la imagen de fondo
+          will-change: opacity;
+          
+          // Asegurar que se renderice aunque no esté activa
+          &:not(.active) {
+            display: block;
+            visibility: hidden;
+          }
+        }
+        
         &.active {
           opacity: 1;
         }

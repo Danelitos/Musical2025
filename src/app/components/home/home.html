@@ -10,6 +10,7 @@
       @for (image of carouselImages(); track image.src; let i = $index) {
         <div class="carousel-slide" 
              [class.active]="i === currentImageIndex()"
+             [class.preload]="i === 0"
              [style.background-image]="'url(' + image.src + ')'">
           <div class="carousel-overlay"></div>
         </div>
