@@ -121,6 +121,36 @@ async function obtenerTransaccionPorId(transaccionId) {
 }
 
 /**
+ * Obtiene una transacción por su Stripe Session ID
+ * 
+ * @param {string} stripeSessionId - ID de la sesión de Stripe
+ * @returns {Promise<object|null>} Transacción encontrada o null
+ */
+async function obtenerTransaccionPorStripeSessionId(stripeSessionId) {
+  try {
+    const db = await obtenerDB();
+    const coleccion = db.collection(COLECCION_TRANSACCIONES);
+    
+    const transaccion = await coleccion.findOne({ 
+      stripeSessionId: stripeSessionId 
+    });
+    
+    if (!transaccion) {
+      console.warn(`⚠️ [DB] Transacción no encontrada para session: ${stripeSessionId}`);
+      return null;
+    }
+    
+    console.log(`✅ [DB] Transacción encontrada - Ticket: ${transaccion.ticketId}`);
+    
+    return transaccion;
+    
+  } catch (error) {
+    console.error(`❌ [DB] ERROR obteniendo transacción por session ID:`, error.message);
+    throw error;
+  }
+}
+
+/**
  * Inicializa índices de MongoDB
  */
 async function inicializarIndices() {
@@ -157,5 +187,6 @@ module.exports = {
   guardarTransaccion,
   obtenerDisponibilidad,
   obtenerTransaccionPorId,
+  obtenerTransaccionPorStripeSessionId,
   inicializarIndices
 };

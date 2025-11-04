@@ -160,8 +160,25 @@
           </mat-card-content>
         </mat-card>
         
+        <!-- Aviso sobre descarga alternativa -->
+        <mat-card class="download-notice elegant-card">
+          <mat-card-content>
+            <div class="notice-content">
+              <mat-icon class="notice-icon">info</mat-icon>
+              <div class="notice-text">
+                <strong>¿No recibes el email?</strong>
+                <p>Si no recibes el correo de confirmación en los próximos minutos, puedes descargar tu entrada directamente desde aquí.</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        
         <!-- Acciones con diseño mejorado -->
         <div class="action-buttons">
+          <button mat-flat-button class="btn-download elegant-btn" (click)="descargarEntradas()">
+            <mat-icon>download</mat-icon>
+            <span>Descargar Entrada PDF</span>
+          </button>
           <button mat-flat-button class="btn-primary elegant-btn" (click)="volverAlInicio()">
             <mat-icon>home</mat-icon>
             <span>Volver al Inicio</span>

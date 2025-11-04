@@ -43,6 +43,7 @@ export interface PaymentStatus {
   currency?: string;
   paymentStatus?: string;
   metadata?: any;
+  ticketId?: string; // Ticket ID de MongoDB
 }
 
 /**

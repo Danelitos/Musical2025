@@ -202,6 +202,17 @@ router.get('/checkout-session/:sessionId', verificarStripe, async (req, res) => 
     });
 
     if (session.payment_status === 'paid') {
+      // Intentar obtener el ticketId de MongoDB
+      let ticketId = null;
+      try {
+        const { obtenerTransaccionPorStripeSessionId } = require('../services/database.service');
+        const transaccion = await obtenerTransaccionPorStripeSessionId(sessionId);
+        ticketId = transaccion?.ticketId || null;
+      } catch (error) {
+        console.warn('⚠️ No se pudo obtener ticketId de MongoDB:', error.message);
+        // No es crítico, continuamos sin el ticketId
+      }
+      
       res.json({
         status: 'success',
         customerEmail: session.customer_email,
@@ -209,7 +220,8 @@ router.get('/checkout-session/:sessionId', verificarStripe, async (req, res) => 
         currency: session.currency,
         paymentStatus: session.payment_status,
         metadata: session.metadata,
-        lineItems: session.line_items.data
+        lineItems: session.line_items.data,
+        ticketId: ticketId // Incluir ticketId si está disponible
       });
     } else {
       res.json({
@@ -273,6 +285,13 @@ async function procesarPagoCompletado(session) {
         currency: session.currency
       }
     });
+    
+    // ⚠️ IMPORTANTE: Si es duplicado, NO enviar email de nuevo
+    if (resultadoGuardado.duplicado) {
+      console.log(`⚠️ [WEBHOOK] Transacción duplicada detectada - Session: ${session.id}`);
+      console.log(`ℹ️ [WEBHOOK] Email NO enviado (ya fue enviado anteriormente)`);
+      return; // Salir sin enviar email
+    }
     
     console.log(`✅ [WEBHOOK] Transacción guardada en MongoDB - ID: ${resultadoGuardado.insertedId}`);
     

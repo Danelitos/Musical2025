@@ -676,4 +676,45 @@ router.get('/test-config', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/email/generar-pdf
+ * Endpoint para generar y descargar el PDF de la entrada sin enviar email
+ */
+router.post('/generar-pdf', async (req, res) => {
+  try {
+    const { datosReserva } = req.body;
+    
+    if (!datosReserva) {
+      return res.status(400).json({ 
+        error: 'Datos de reserva requeridos',
+        message: 'Debe proporcionar los datos de la reserva para generar el PDF' 
+      });
+    }
+
+    console.log('📄 Generando PDF de entrada...');
+    
+    // Generar el PDF
+    const pdfBuffer = await generarPDFEntrada(datosReserva);
+    
+    // Configurar headers para descarga
+    const filename = `Entrada_BelenDeJuda_${datosReserva.ticketId || Date.now()}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    // Enviar el PDF
+    res.send(pdfBuffer);
+    
+    console.log('✅ PDF generado y enviado exitosamente');
+    
+  } catch (error) {
+    console.error('❌ Error generando PDF:', error);
+    res.status(500).json({
+      error: 'Error generando PDF',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 module.exports = { router, enviarEmailConfirmacion };

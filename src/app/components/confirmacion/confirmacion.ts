@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { StripeService } from '../../services/stripe.service';
 import { LoggerService } from '../../services/logger.service';
+import { environment } from '../../../environments/environment';
 
 /**
  * Interfaz para los detalles de la reserva confirmada
@@ -21,6 +22,7 @@ interface ReservaDetalles {
   numEntradasNinos: number;
   numEntradas: number;
   precioTotal: number;
+  ticketId?: string; // Ticket ID de MongoDB
   estado: 'loading' | 'success' | 'error';
 }
 
@@ -58,6 +60,7 @@ export class Confirmacion implements OnInit {
     numEntradasNinos: 0,
     numEntradas: 0,
     precioTotal: 0,
+    ticketId: undefined,
     estado: 'loading'
   });
 
@@ -71,6 +74,11 @@ export class Confirmacion implements OnInit {
   /**
    * Inicializa el componente y recupera los detalles del pago
    * Obtiene el session_id de la URL y consulta el estado del pago
+   * 
+   * NOTA: Esta función solo CONSULTA información, no procesa el pago.
+   * El procesamiento y envío de email se hace en el webhook del backend,
+   * que se ejecuta UNA SOLA VEZ cuando Stripe confirma el pago.
+   * Por lo tanto, recargar esta página es seguro y no causa duplicados.
    */
   async ngOnInit() {
     const sessionId = this.route.snapshot.queryParams['session_id'];
@@ -103,6 +111,7 @@ export class Confirmacion implements OnInit {
           numEntradasNinos: numEntradasNinos,
           numEntradas: totalEntradas,
           precioTotal: paymentDetails.amountTotal || 7,
+          ticketId: paymentDetails.ticketId, // Incluir ticketId de MongoDB
           estado: 'success'
         });
         
@@ -140,12 +149,71 @@ export class Confirmacion implements OnInit {
 
   /**
    * Descarga las entradas en formato PDF
-   * TODO: Implementar generación de PDF con entradas
+   * Genera el PDF en el backend y lo descarga automáticamente
    */
-  descargarEntradas() {
-    this.logger.info('Solicitud de descarga de entradas');
-    // En producción, esto generaría y descargaría un PDF con las entradas
-    alert('Función de descarga de entradas disponible próximamente. Recibirás las entradas por email.');
+  async descargarEntradas() {
+    try {
+      this.logger.info('Iniciando descarga de entradas en PDF');
+      
+      const reservaActual = this.reserva();
+      
+      // Usar el ticketId de MongoDB si está disponible, sino generar uno temporal
+      const ticketId = reservaActual.ticketId || 
+                       reservaActual.sessionId.substring(0, 12).toUpperCase();
+      
+      // Preparar datos para el PDF
+      const datosReserva = {
+        ticketId: ticketId,
+        nombre: reservaActual.customerName,
+        email: reservaActual.customerEmail,
+        sesion: {
+          fecha: reservaActual.sesionFecha,
+          hora: reservaActual.sesionHora,
+          lugar: reservaActual.sesionLugar,
+          precioAdulto: 5, // Precio por defecto
+          precioNino: 3    // Precio por defecto
+        },
+        numEntradasAdultos: reservaActual.numEntradasAdultos,
+        numEntradasNinos: reservaActual.numEntradasNinos,
+        precioTotal: reservaActual.precioTotal.toFixed(2)
+      };
+
+      // Llamar al backend para generar el PDF
+      const response = await fetch(`${environment.apiUrl}/email/generar-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ datosReserva })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+
+      // Obtener el PDF como blob
+      const blob = await response.blob();
+      
+      // Crear URL temporal para el blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crear elemento <a> temporal para descargar
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Entrada_BelenDeJuda_${ticketId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpiar
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      this.logger.success('PDF descargado exitosamente');
+      
+    } catch (error) {
+      this.logger.error('Error al descargar las entradas', error);
+      alert('Hubo un error al descargar el PDF. Por favor, verifica tu email o contacta con soporte.');
+    }
   }
 
   /**
