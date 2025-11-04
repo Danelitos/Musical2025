@@ -249,11 +249,11 @@ export class Confirmacion implements OnInit {
    * Usa Web Share API si está disponible, sino copia al portapapeles
    */
   compartirReserva() {
-    const texto = `¡Voy a ver "En Belén de Judá" el ${this.reserva().sesionFecha} a las ${this.reserva().sesionHora}! 🎭✨ Un musical navideño que promete ser mágico.`;
+    const texto = `¡Voy a ver "En Belén De Judá" el ${this.reserva().sesionFecha} a las ${this.reserva().sesionHora}! 🎭✨ Un musical navideño que promete ser mágico.`;
     
     if (navigator.share) {
       navigator.share({
-        title: 'Mi reserva para "En Belén de Judá"',
+        title: 'Mi reserva para "En Belén De Judá"',
         text: texto,
         url: window.location.origin
       }).then(() => {

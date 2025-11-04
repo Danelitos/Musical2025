@@ -10,5 +10,5 @@ import { CookieConsent } from './components/cookie-consent/cookie-consent';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('En Belén de Judá - Musical');
+  protected readonly title = signal('En Belén De Judá - Musical');
 }

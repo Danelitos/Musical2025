@@ -38,7 +38,7 @@ function generateEmailTemplate(reservationData) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Reserva - En Belén de Judá</title>
+    <title>Confirmación de Reserva - En Belén De Judá</title>
     <style>
         body { font-family: 'Georgia', serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; }
@@ -138,14 +138,18 @@ function generateEmailTemplate(reservationData) {
 <body>
     <div class="container">
         <div class="header">
-            <img src="cid:logo" alt="Logo En Belén de Judá">
+            <img src="cid:logo" alt="Logo En Belén De Judá">
         </div>
         
         <div class="content">
             <h2 style="color: #8B0000;">¡Hola ${reservationData.customerName}!</h2>
             
-            <p>Nos complace confirmar tu reserva para el musical <strong>"En Belén de Judá"</strong>. 
+            <p>Nos complace confirmar tu reserva para el musical <strong>"En Belén De Judá"</strong>. 
             Prepárate para vivir una experiencia mágica que tocará tu corazón en esta Navidad.</p>
+            
+            <p style="margin-top: 20px; color: #8B0000; font-weight: bold;">
+                ¡Gracias por confiar en nosotros y ser parte de esta experiencia única! 🙏✨
+            </p>
             
             <div class="ticket-info">
                 <h3 style="margin-top: 0; color: #8B0000;">📋 Detalles de tu Reserva</h3>
@@ -201,10 +205,10 @@ function generateEmailTemplate(reservationData) {
             
             <div class="important">
                 <h4 style="margin-top: 0; color: #8B0000;">📌 Información Importante</h4>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li>Por favor, llega al teatro 40 minutos antes del espectáculo</li>
-                    <li>Presenta el PDF adjunto o el código QR en taquilla</li>
-                    <li>Las puertas se abren 30 minutos antes del inicio</li>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                    <li>Las puertas se abrirán <strong>30 minutos antes</strong> del inicio del espectáculo.</li>
+                    <li>A tu llegada, <strong>presenta el código QR o el PDF adjunto en la entrada o taquilla</strong> para validar tus entradas.</li>
+                    <li>Las entradas no están numeradas, por lo que los asientos se ocuparán por orden de llegada. Para disfrutar de un buen lugar, <strong>te aconsejamos venir lo antes posible.</strong></li>
                 </ul>
             </div>
             
@@ -250,7 +254,7 @@ function generateEmailTemplate(reservationData) {
                         <tr>
                             <td style="text-align: center; padding: 8px 0;">
                                 <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">
-                                    &copy; ${new Date().getFullYear()} Asociación Cultural En Belén de Judá. Todos los derechos reservados.
+                                    &copy; ${new Date().getFullYear()} Asociación Cultural En Belén De Judá. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -327,7 +331,7 @@ async function generarPDFEntrada(datosReserva) {
       } else {
         // Si no existe el logo, poner título grande en blanco
         doc.fontSize(32).fillColor('#FFFFFF')
-           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
+           .text('En Belén De Judá', 0, 70, { align: 'center', width: doc.page.width });
       }
 
       // Borde dorado elegante debajo del header negro
@@ -525,7 +529,7 @@ async function generarPDFEntrada(datosReserva) {
       // ============ FOOTER PÁGINA 1 ============
       const footerY1 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY1, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén De Judá - Todos los derechos reservados`, 0, footerY1, {
            align: 'center',
            width: doc.page.width
          });
@@ -546,7 +550,7 @@ async function generarPDFEntrada(datosReserva) {
         });
       } else {
         doc.fontSize(32).fillColor('#FFFFFF')
-           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
+           .text('En Belén De Judá', 0, 70, { align: 'center', width: doc.page.width });
       }
 
       // Borde dorado elegante debajo del header negro
@@ -569,16 +573,16 @@ async function generarPDFEntrada(datosReserva) {
       doc.moveDown(1.5);
       
       doc.fontSize(12).fillColor('#333').font('Helvetica')
-         .text('• Llegue 40 minutos antes del inicio del evento', 80, infoBoxY + 65, { width: doc.page.width - 160 })
+         .text('• Las puertas se abrirán 30 minutos antes del inicio del espectáculo.', 80, infoBoxY + 65, { width: doc.page.width - 160 })
          .moveDown(0.8)
-         .text('• Presente este PDF o el código QR en taquilla', 80, doc.y, { width: doc.page.width - 160 })
+         .text('• A tu llegada, presenta el código QR o el PDF adjunto en la entrada o taquilla para validar tus entradas.', 80, doc.y, { width: doc.page.width - 160 })
          .moveDown(0.8)
-         .text('• Las puertas se abren 30 minutos antes del espectáculo', 80, doc.y, { width: doc.page.width - 160 });
+         .text('• Las entradas no están numeradas, por lo que los asientos se ocuparán por ord', 80, doc.y, { width: doc.page.width - 160 });
 
       // ============ FOOTER PÁGINA 2 ============
       const footerY2 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY2, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén De Judá - Todos los derechos reservados`, 0, footerY2, {
            align: 'center',
            width: doc.page.width
          });
@@ -612,9 +616,9 @@ async function enviarEmailConfirmacion(datosReserva) {
   const logoPath = path.join(__dirname, '../../src/assets/images/logo.png');
 
   const mailOptions = {
-    from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
+    from: `"En Belén De Judá Musical" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: '✝️ Confirmación de Reserva - En Belén de Judá',
+    subject: '✝️ Confirmación de Reserva - En Belén De Judá',
     html: generateEmailTemplate(reservationData),
     attachments: [
       {
