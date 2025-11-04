@@ -118,10 +118,9 @@ async function iniciarServidor() {
   }
 }
 
-// Inicializar MongoDB de forma asíncrona (no bloqueante)
-// En serverless, esto se ejecutará en cada petición
-if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-  // En Vercel, inicializar de forma lazy (cuando llegue la primera petición)
+// Inicializar MongoDB según el entorno
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+  // En producción/Vercel, inicializar de forma lazy
   let mongoInitialized = false;
   app.use(async (req, res, next) => {
     if (!mongoInitialized) {
@@ -131,7 +130,7 @@ if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
     next();
   });
 } else {
-  // En desarrollo local, inicializar inmediatamente
+  // En desarrollo, inicializar inmediatamente
   iniciarServidor();
 }
 

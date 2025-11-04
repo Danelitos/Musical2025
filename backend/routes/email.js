@@ -20,19 +20,14 @@ const transporter = nodemailer.createTransport({
 
 // Función para generar template de email
 function generateEmailTemplate(reservationData) {
-  // Calcular desglose de IVA para el email
-  let desgloseAdultos = { baseImponible: 0, iva: 0, total: 0 };
-  let desgloseNinos = { baseImponible: 0, iva: 0, total: 0 };
+  // Calcular desglose de IVA para el email usando las utilidades
+  const desgloseAdultos = reservationData.numEntradasAdultos > 0 
+    ? desglosarPrecioTotal(reservationData.precioAdulto || 5, reservationData.numEntradasAdultos)
+    : { baseImponible: 0, iva: 0, total: 0 };
   
-  if (reservationData.numEntradasAdultos > 0) {
-    const precioAdulto = reservationData.total / (reservationData.numEntradasAdultos + reservationData.numEntradasNinos) * reservationData.numEntradasAdultos / reservationData.numEntradasAdultos;
-    desgloseAdultos = desglosarPrecioTotal(precioAdulto || 5, reservationData.numEntradasAdultos);
-  }
-  
-  if (reservationData.numEntradasNinos > 0) {
-    const precioNino = reservationData.total / (reservationData.numEntradasAdultos + reservationData.numEntradasNinos) * reservationData.numEntradasNinos / reservationData.numEntradasNinos;
-    desgloseNinos = desglosarPrecioTotal(precioNino || 3, reservationData.numEntradasNinos);
-  }
+  const desgloseNinos = reservationData.numEntradasNinos > 0
+    ? desglosarPrecioTotal(reservationData.precioNino || 3, reservationData.numEntradasNinos)
+    : { baseImponible: 0, iva: 0, total: 0 };
   
   const baseImponibleTotal = (desgloseAdultos.baseImponible + desgloseNinos.baseImponible).toFixed(2);
   const ivaTotal = (desgloseAdultos.iva + desgloseNinos.iva).toFixed(2);
@@ -597,14 +592,7 @@ async function generarPDFEntrada(datosReserva) {
 
 // Función reutilizable para enviar email de confirmación
 async function enviarEmailConfirmacion(datosReserva) {
-  const { 
-    email, 
-    nombre, 
-    sesion, 
-    numEntradasAdultos, 
-    numEntradasNinos, 
-    precioTotal 
-  } = datosReserva;
+  const { email, nombre, sesion, numEntradasAdultos, numEntradasNinos, precioTotal } = datosReserva;
   
   const reservationData = {
     customerEmail: email,
@@ -612,19 +600,15 @@ async function enviarEmailConfirmacion(datosReserva) {
     fecha: sesion.fecha,
     hora: sesion.hora,
     lugar: sesion.lugar,
-    numEntradasAdultos: numEntradasAdultos,
-    numEntradasNinos: numEntradasNinos,
+    numEntradasAdultos,
+    numEntradasNinos,
+    precioAdulto: sesion.precioAdulto,
+    precioNino: sesion.precioNino,
     total: precioTotal
   };
 
-  // Generar PDF de la entrada
   const pdfBuffer = await generarPDFEntrada(datosReserva);
-
-  // Generar nombre único para el PDF usando timestamp
-  const timestamp = new Date().getTime();
-  const pdfFilename = `Entrada_BelenDeJuda_${timestamp}.pdf`;
-
-  // Ruta del logo para adjuntar como inline
+  const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
   const logoPath = path.join(__dirname, '../../src/assets/images/logo.png');
 
   const mailOptions = {
@@ -660,17 +644,7 @@ router.get('/test-config', async (req, res) => {
   try {
     console.log('🔍 Verificando configuración de email...');
     
-    const config = {
-      emailUser: process.env.EMAIL_USER ? '✅ Configurado' : '❌ NO configurado',
-      emailPass: process.env.EMAIL_PASS ? '✅ Configurado' : '❌ NO configurado',
-      emailHost: process.env.EMAIL_HOST || 'Gmail (por defecto)',
-      emailPort: process.env.EMAIL_PORT || '587 (por defecto)',
-    };
-    
-    console.log('Configuración:', config);
-    
-    // Intentar verificar conexión
-    let connectionStatus = 'No probada';
+    let connectionStatus;
     try {
       await transporter.verify();
       connectionStatus = '✅ Conexión exitosa';
@@ -683,12 +657,11 @@ router.get('/test-config', async (req, res) => {
     res.json({
       status: 'OK',
       config: {
-        emailUser: process.env.EMAIL_USER,
         emailUserConfigured: !!process.env.EMAIL_USER,
         emailPassConfigured: !!process.env.EMAIL_PASS,
         emailHost: process.env.EMAIL_HOST || 'gmail (default)',
         emailPort: process.env.EMAIL_PORT || '587',
-        connectionStatus: connectionStatus
+        connectionStatus
       },
       timestamp: new Date().toISOString()
     });

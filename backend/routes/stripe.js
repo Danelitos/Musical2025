@@ -38,26 +38,24 @@ const SESIONES_CONFIG = [
 ];
 
 /**
+ * Middleware para verificar Stripe
+ */
+function verificarStripe(req, res, next) {
+  if (!stripe) {
+    return res.status(503).json({ 
+      error: 'Servicio de pagos no disponible',
+      message: 'Stripe no está configurado correctamente'
+    });
+  }
+  next();
+}
+
+/**
  * POST /api/stripe/create-checkout-session
  */
-router.post('/create-checkout-session', async (req, res) => {
+router.post('/create-checkout-session', verificarStripe, async (req, res) => {
   try {
-    // Verificar que Stripe esté disponible
-    if (!stripe) {
-      return res.status(503).json({ 
-        error: 'Servicio de pagos no disponible',
-        message: 'Stripe no está configurado correctamente'
-      });
-    }
-
-    const {  
-      customerEmail,
-      customerName,
-      sesionId,
-      numEntradasAdultos = 0,
-      numEntradasNinos = 0,
-      sesionInfo
-    } = req.body;
+    const { customerEmail, customerName, sesionId, numEntradasAdultos = 0, numEntradasNinos = 0, sesionInfo } = req.body;
 
     // Validaciones
     if (!customerEmail || !customerName || !sesionId) {
@@ -191,16 +189,8 @@ router.get('/sesiones', async (req, res) => {
 /**
  * GET /api/stripe/checkout-session/:sessionId
  */
-router.get('/checkout-session/:sessionId', async (req, res) => {
+router.get('/checkout-session/:sessionId', verificarStripe, async (req, res) => {
   try {
-    // Verificar que Stripe esté disponible
-    if (!stripe) {
-      return res.status(503).json({ 
-        error: 'Servicio de pagos no disponible',
-        message: 'Stripe no está configurado correctamente'
-      });
-    }
-
     const { sessionId } = req.params;
 
     if (!sessionId || !sessionId.startsWith('cs_')) {
@@ -324,15 +314,7 @@ async function procesarPagoCompletado(session) {
 /**
  * POST /api/stripe/webhook
  */
-router.post('/webhook', async (req, res) => {
-  // Verificar que Stripe esté disponible
-  if (!stripe) {
-    console.error('❌ [WEBHOOK] Stripe no configurado');
-    return res.status(503).json({ 
-      error: 'Servicio de pagos no disponible'
-    });
-  }
-
+router.post('/webhook', verificarStripe, async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
  */
 
 // URI de conexión - debe estar en variables de entorno
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Danel:pueblerine2025@enbelendejuda.w64tzdv.mongodb.net/?appName=EnBelenDeJuda';
+const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = 'musical-belen-juda';
 
 // Cliente de MongoDB (singleton)
@@ -38,37 +38,25 @@ const clientOptions = {
  */
 async function conectarMongoDB() {
   if (client && db) {
-    // Reutilizar conexión existente
-    return client;
+    return client; // Reutilizar conexión existente
+  }
+
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI no está configurado en las variables de entorno');
   }
 
   try {
     console.log('🔌 Conectando a MongoDB Atlas...');
-    
-    // Crear nuevo cliente
     client = new MongoClient(MONGODB_URI, clientOptions);
-    
-    // Conectar
     await client.connect();
-    
-    // Verificar conexión con ping
     await client.db('admin').command({ ping: 1 });
-    
-    // Obtener referencia a la base de datos
     db = client.db(DB_NAME);
-    
-    console.log(`✅ Conectado exitosamente a MongoDB Atlas`);
-    console.log(`   Base de datos: ${DB_NAME}`);
-    
+    console.log(`✅ Conectado a MongoDB - Base de datos: ${DB_NAME}`);
     return client;
-    
   } catch (error) {
     console.error('❌ ERROR conectando a MongoDB:', error.message);
-    
-    // Limpiar referencias en caso de error
     client = null;
     db = null;
-    
     throw error;
   }
 }
