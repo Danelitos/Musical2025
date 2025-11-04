@@ -264,18 +264,99 @@ export class Home implements OnInit {
 
   /**
    * Scroll suave a la sección de reservas
+   * Implementa fallback para dispositivos Android con problemas de smooth scroll
    */
   scrollToReservas() {
     const element = document.getElementById('reservas-section');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (!element) return;
+
+    // Intentar scroll suave primero
+    try {
+      // Verificar si el navegador soporta smooth scrolling
+      if ('scrollBehavior' in document.documentElement.style) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: usar scroll directo para navegadores antiguos
+        this.smoothScrollTo(element);
+      }
+    } catch (error) {
+      // Si falla, usar scroll inmediato como último recurso
+      element.scrollIntoView({ block: 'start' });
+    }
+
+    // Timeout adicional para asegurar el scroll en Android
+    setTimeout(() => {
+      window.scrollTo({
+        top: element.offsetTop - 80, // 80px de offset para el header
+        behavior: 'smooth'
+      });
+    }, 100);
   }
 
   /**
    * Scroll suave a la sección de compra
+   * Implementa fallback para dispositivos Android con problemas de smooth scroll
    */
   scrollToCompra() {
     const element = document.getElementById('compra-section');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (!element) return;
+
+    // Intentar scroll suave primero
+    try {
+      // Verificar si el navegador soporta smooth scrolling
+      if ('scrollBehavior' in document.documentElement.style) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: usar scroll directo para navegadores antiguos
+        this.smoothScrollTo(element);
+      }
+    } catch (error) {
+      // Si falla, usar scroll inmediato como último recurso
+      element.scrollIntoView({ block: 'start' });
+    }
+
+    // Timeout adicional para asegurar el scroll en Android
+    setTimeout(() => {
+      window.scrollTo({
+        top: element.offsetTop - 80, // 80px de offset para el header
+        behavior: 'smooth'
+      });
+    }, 100);
+  }
+
+  /**
+   * Implementación manual de smooth scroll como fallback
+   * para navegadores que no soportan smooth scrolling nativo
+   */
+  private smoothScrollTo(element: HTMLElement) {
+    const targetPosition = element.offsetTop - 80; // 80px de offset
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    const duration = 800; // milisegundos
+    let start: number | null = null;
+
+    const animation = (currentTime: number) => {
+      if (start === null) start = currentTime;
+      const timeElapsed = currentTime - start;
+      const run = this.easeInOutQuad(timeElapsed, startPosition, distance, duration);
+      window.scrollTo(0, run);
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  }
+
+  /**
+   * Función de easing para smooth scroll manual
+   * Proporciona una animación suave de aceleración/desaceleración
+   */
+  private easeInOutQuad(t: number, b: number, c: number, d: number): number {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
   }
 
   /**
