@@ -175,9 +175,22 @@
         
         <!-- Acciones con diseño mejorado -->
         <div class="action-buttons">
-          <button mat-flat-button class="btn-download elegant-btn" (click)="descargarEntradas()">
-            <mat-icon>download</mat-icon>
-            <span>Descargar Entrada PDF</span>
+          <button 
+            mat-flat-button 
+            class="btn-download elegant-btn" 
+            (click)="descargarEntradas()"
+            [disabled]="descargandoPDF()">
+            @if (descargandoPDF()) {
+              <span class="btn-content">
+                <span class="spinner-small"></span>
+                <span>Generando PDF...</span>
+              </span>
+            } @else {
+              <span class="btn-content">
+                <mat-icon>download</mat-icon>
+                <span>Descargar Entrada PDF</span>
+              </span>
+            }
           </button>
           <button mat-flat-button class="btn-primary elegant-btn" (click)="volverAlInicio()">
             <mat-icon>home</mat-icon>

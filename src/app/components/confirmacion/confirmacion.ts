@@ -64,6 +64,12 @@ export class Confirmacion implements OnInit {
     estado: 'loading'
   });
 
+  /** Estado de descarga del PDF */
+  descargandoPDF = signal<boolean>(false);
+
+  /** Cache del PDF generado */
+  private pdfCacheado: { blob: Blob; filename: string } | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -150,16 +156,30 @@ export class Confirmacion implements OnInit {
   /**
    * Descarga las entradas en formato PDF
    * Genera el PDF en el backend y lo descarga automáticamente
+   * Usa caché para descargas instantáneas en solicitudes posteriores
    */
   async descargarEntradas() {
+    // Evitar múltiples descargas simultáneas
+    if (this.descargandoPDF()) {
+      return;
+    }
+
     try {
-      this.logger.info('Iniciando descarga de entradas en PDF');
-      
       const reservaActual = this.reserva();
-      
-      // Usar el ticketId de MongoDB si está disponible, sino generar uno temporal
       const ticketId = reservaActual.ticketId || 
                        reservaActual.sessionId.substring(0, 12).toUpperCase();
+      const filename = `Entrada_BelenDeJuda_${ticketId}.pdf`;
+
+      // Si ya tenemos el PDF cacheado, descarga instantánea
+      if (this.pdfCacheado) {
+        this.logger.info('Usando PDF cacheado - descarga instantánea');
+        this.descargarBlob(this.pdfCacheado.blob, filename);
+        return;
+      }
+
+      // Si no está cacheado, generarlo
+      this.descargandoPDF.set(true);
+      this.logger.info('Generando PDF por primera vez...');
       
       // Preparar datos para el PDF
       const datosReserva = {
@@ -170,8 +190,8 @@ export class Confirmacion implements OnInit {
           fecha: reservaActual.sesionFecha,
           hora: reservaActual.sesionHora,
           lugar: reservaActual.sesionLugar,
-          precioAdulto: 5, // Precio por defecto
-          precioNino: 3    // Precio por defecto
+          precioAdulto: 5,
+          precioNino: 3
         },
         numEntradasAdultos: reservaActual.numEntradasAdultos,
         numEntradasNinos: reservaActual.numEntradasNinos,
@@ -194,26 +214,34 @@ export class Confirmacion implements OnInit {
       // Obtener el PDF como blob
       const blob = await response.blob();
       
-      // Crear URL temporal para el blob
-      const url = window.URL.createObjectURL(blob);
+      // Cachear el PDF para descargas futuras
+      this.pdfCacheado = { blob, filename };
       
-      // Crear elemento <a> temporal para descargar
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Entrada_BelenDeJuda_${ticketId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
+      // Descargar el PDF
+      this.descargarBlob(blob, filename);
       
-      // Limpiar
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      this.logger.success('PDF descargado exitosamente');
+      this.logger.success('PDF generado y descargado exitosamente (ahora cacheado)');
       
     } catch (error) {
       this.logger.error('Error al descargar las entradas', error);
       alert('Hubo un error al descargar el PDF. Por favor, verifica tu email o contacta con soporte.');
+    } finally {
+      this.descargandoPDF.set(false);
     }
+  }
+
+  /**
+   * Descarga un blob como archivo
+   */
+  private descargarBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   }
 
   /**
