@@ -264,111 +264,20 @@ export class Home implements OnInit {
   }
 
   /**
-   * Scroll suave a la sección de reservas
+   * Selecciona una sesión y navega al formulario de compra
    */
-  scrollToReservas() {
-    this.scrollToElement('reservas-section');
-  }
-
-  /**
-   * Scroll suave a la sección de compra
-   */
-  scrollToCompra() {
-    this.scrollToElement('compra-section');
-  }
-
-  /**
-   * Función universal de scroll compatible con todos los navegadores
-   * @param elementId - ID del elemento al que hacer scroll
-   */
-  private scrollToElement(elementId: string) {
-    const element = document.getElementById(elementId);
-    if (!element) {
-      console.warn(`Elemento ${elementId} no encontrado`);
+  seleccionarSesion(sesionId: string, event: Event) {
+    // Prevenir la navegación si la sesión está agotada
+    const sesion = this.sesiones().find(s => s.id === sesionId);
+    if (!sesion || sesion.entradasDisponibles === 0) {
+      event.preventDefault();
       return;
     }
-
-    // Obtener la posición actual del scroll
-    const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
     
-    // Obtener la posición del elemento
-    const elementRect = element.getBoundingClientRect();
-    const elementTop = elementRect.top + currentScroll;
-    const offsetPosition = elementTop - 80; // 80px de margen superior
-
-    // Método 1: Intentar con scrollIntoView (más compatible)
-    try {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start',
-        inline: 'nearest'
-      });
-      // Ajustar el offset después del scroll
-      setTimeout(() => {
-        window.scrollBy(0, -80);
-      }, 100);
-      return;
-    } catch (e) {
-      console.log('scrollIntoView no soportado, usando método alternativo');
-    }
-
-    // Método 2: Intentar con window.scrollTo
-    try {
-      window.scrollTo({
-        top: offsetPosition,
-        left: 0,
-        behavior: 'smooth'
-      });
-      return;
-    } catch (e) {
-      console.log('window.scrollTo smooth no soportado, usando animación manual');
-    }
-
-    // Método 3: Animación manual para navegadores muy antiguos
-    this.smoothScrollFallback(offsetPosition);
-  }
-
-  /**
-   * Animación de scroll manual para navegadores que no soportan smooth scroll
-   * @param targetPosition - Posición objetivo en píxeles
-   */
-  private smoothScrollFallback(targetPosition: number) {
-    const startPosition = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
-    const distance = targetPosition - startPosition;
-    const duration = 800; // Duración en milisegundos
-    let start: number | null = null;
-
-    const animation = (currentTime: number) => {
-      if (start === null) start = currentTime;
-      const timeElapsed = currentTime - start;
-      const run = this.easeInOutQuad(timeElapsed, startPosition, distance, duration);
-      
-      // Usar múltiples métodos para máxima compatibilidad
-      window.scrollTo(0, run);
-      document.documentElement.scrollTop = run;
-      document.body.scrollTop = run;
-      
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animation);
-      }
-    };
-
-    requestAnimationFrame(animation);
-  }
-
-  /**
-   * Función de easing para animación suave
-   * @param t - tiempo transcurrido
-   * @param b - posición inicial
-   * @param c - cambio en posición
-   * @param d - duración
-   * @returns posición actual
-   */
-  private easeInOutQuad(t: number, b: number, c: number, d: number): number {
-    t /= d / 2;
-    if (t < 1) return c / 2 * t * t + b;
-    t--;
-    return -c / 2 * (t * (t - 2) - 1) + b;
+    // Asignar el sesionId al formulario
+    this.compraForm.patchValue({ sesionId });
+    
+    // El navegador se encargará del scroll automáticamente por el href="#compra-section"
   }
 
   /**

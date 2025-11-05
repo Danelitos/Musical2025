@@ -29,10 +29,10 @@
   
   <!-- Call to Action principal -->
   <div class="cta-container animate-fade-in-up">
-    <button class="btn-primary" (click)="scrollToReservas()">
+    <a href="#reservas-section" class="btn-primary">
       <mat-icon>confirmation_number</mat-icon>
       Reserva tus Entradas
-    </button>
+    </a>
   </div>
 </header>
 
@@ -103,15 +103,17 @@
           </mat-card-content>
           
           <mat-card-actions>
-            <button class="btn-secondary" 
-                    [disabled]="sesion.entradasDisponibles === 0"
-                    (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra()">
+            <a href="#compra-section" 
+               class="btn-secondary" 
+               [class.disabled]="sesion.entradasDisponibles === 0"
+               [attr.disabled]="sesion.entradasDisponibles === 0 ? true : null"
+               (click)="seleccionarSesion(sesion.id, $event)">
               @if (sesion.entradasDisponibles > 0) {
                 Seleccionar esta función
               } @else {
                 Agotado
               }
-            </button>
+            </a>
           </mat-card-actions>
         </mat-card>
       }
