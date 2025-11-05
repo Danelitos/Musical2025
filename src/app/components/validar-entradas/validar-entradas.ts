@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Html5Qrcode } from 'html5-qrcode';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface ValidacionResponse {
   success: boolean;
@@ -40,13 +41,29 @@ interface Estadisticas {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './validar-entradas.html',
-  styleUrls: ['./validar-entradas.scss']
+  styleUrls: ['./validar-entradas.scss'],
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ transform: 'scale(0.7)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ transform: 'scale(0.7)', opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChecked {
   ticketId: string = '';
   validando: boolean = false;
   resultado: ValidacionResponse | null = null;
   estadisticas: Estadisticas | null = null;
+  
+  // Para la notificación flotante
+  mostrarNotificacion: boolean = false;
+  timerNotificacion: any = null;
+  contadorEscaneos: number = 0;
   
   // Para el escáner de QR
   escaneandoQR: boolean = false;
@@ -115,14 +132,29 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
         
         // Recargar estadísticas
         this.cargarEstadisticas();
+        
+        // Incrementar contador si estamos escaneando
+        if (this.escaneandoQR) {
+          this.contadorEscaneos++;
+        }
       } else {
         this.reproducirSonidoError();
       }
 
-      // Limpiar el input después de 2 segundos
-      setTimeout(() => {
+      // Mostrar notificación flotante si estamos en modo escaneo QR
+      if (this.escaneandoQR) {
+        this.mostrarNotificacionFlotante();
+      }
+
+      // Limpiar el input después de 2 segundos (solo si no estamos escaneando)
+      if (!this.escaneandoQR) {
+        setTimeout(() => {
+          this.ticketId = '';
+        }, 2000);
+      } else {
+        // En modo escaneo, limpiar inmediatamente para el siguiente escaneo
         this.ticketId = '';
-      }, 2000);
+      }
 
     } catch (error: any) {
       console.error('Error validando entrada:', error);
@@ -135,14 +167,23 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
       }
       
       this.reproducirSonidoError();
+      
+      // Mostrar notificación flotante también en errores si estamos en modo escaneo QR
+      if (this.escaneandoQR) {
+        this.mostrarNotificacionFlotante();
+        // Limpiar para el siguiente escaneo
+        this.ticketId = '';
+      }
     } finally {
       this.validando = false;
     }
   }
 
+  /* MÉTODOS DESACTIVADOS - Ya no se usa entrada manual
   /**
    * Consulta información de una entrada sin validarla
    */
+  /*
   async consultarEntrada(): Promise<void> {
     if (!this.ticketId.trim()) {
       this.mostrarError('Por favor ingresa un código de entrada');
@@ -174,6 +215,7 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
       this.validando = false;
     }
   }
+  */
 
   /**
    * Carga las estadísticas del servidor
@@ -198,6 +240,8 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
   activarEscanerQR(): void {
     this.escaneandoQR = true;
     this.resultado = null;
+    this.contadorEscaneos = 0;
+    this.cerrarNotificacion();
     // La cámara se iniciará automáticamente en ngAfterViewChecked
   }
 
@@ -279,13 +323,16 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
     this.reproducirSonidoExito();
   }
 
+  /* MÉTODO DESACTIVADO - Ya no se usa entrada manual
   /**
    * Limpia el resultado actual
    */
+  /*
   limpiarResultado(): void {
     this.resultado = null;
     this.ticketId = '';
   }
+  */
 
   /**
    * Agrega una validación al historial local
@@ -387,6 +434,71 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
         return '❌';
       default:
         return 'ℹ️';
+    }
+  }
+
+  /**
+   * Muestra la notificación flotante
+   */
+  mostrarNotificacionFlotante(): void {
+    // Limpiar cualquier timer anterior
+    if (this.timerNotificacion) {
+      clearTimeout(this.timerNotificacion);
+    }
+
+    // Mostrar la notificación
+    this.mostrarNotificacion = true;
+
+    // Auto-ocultar después de 3 segundos
+    this.timerNotificacion = setTimeout(() => {
+      this.cerrarNotificacion();
+    }, 3000);
+  }
+
+  /**
+   * Cierra la notificación flotante
+   */
+  cerrarNotificacion(): void {
+    this.mostrarNotificacion = false;
+    if (this.timerNotificacion) {
+      clearTimeout(this.timerNotificacion);
+      this.timerNotificacion = null;
+    }
+  }
+
+  /**
+   * Obtiene la clase CSS para la notificación
+   */
+  getNotificacionClass(): string {
+    if (!this.resultado) return '';
+    
+    switch (this.resultado.code) {
+      case 'TICKET_VALIDATED':
+        return 'notificacion-exito';
+      case 'TICKET_ALREADY_USED':
+        return 'notificacion-advertencia';
+      case 'TICKET_NOT_FOUND':
+        return 'notificacion-error';
+      default:
+        return 'notificacion-info';
+    }
+  }
+
+  /**
+   * Obtiene el título para la notificación
+   */
+  getNotificacionTitulo(): string {
+    if (!this.resultado) return '';
+    
+    switch (this.resultado.code) {
+      case 'TICKET_VALIDATED':
+        return '¡Entrada Validada!';
+      case 'TICKET_ALREADY_USED':
+        return '¡Ya Validada!';
+      case 'TICKET_NOT_FOUND':
+        return 'Entrada No Encontrada';
+      default:
+        return this.resultado.message || this.resultado.error || 'Resultado';
     }
   }
 }

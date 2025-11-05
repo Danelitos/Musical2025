@@ -5,14 +5,141 @@
   font-family: 'Georgia', serif;
 }
 
+/* NOTIFICACIÓN FLOTANTE */
+.notificacion-flotante {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: 90%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: popIn 0.3s ease-out;
+
+  .notificacion-contenido {
+    position: relative;
+  }
+
+  .btn-cerrar-notificacion {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.4);
+      transform: scale(1.1);
+    }
+  }
+
+  .notificacion-icono {
+    font-size: 5rem;
+    margin-bottom: 15px;
+    animation: bounce 0.5s ease-out;
+  }
+
+  .notificacion-titulo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 15px;
+    color: white;
+  }
+
+  .notificacion-detalles {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+
+    p {
+      margin: 8px 0;
+      color: white;
+    }
+
+    .ticket-id {
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .cliente-nombre {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .entradas-info {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+  }
+
+  .notificacion-mensaje {
+    p {
+      color: white;
+      font-size: 1.1rem;
+      margin: 10px 0;
+    }
+  }
+
+  &.notificacion-exito {
+    background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
+  }
+
+  &.notificacion-advertencia {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  }
+
+  &.notificacion-error {
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+  }
+
+  &.notificacion-info {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+
 /* HEADER */
 .header {
   text-align: center;
-  padding: 30px 20px;
+  padding: 10px 10px;
   background: linear-gradient(135deg, #8B0000 0%, #D4AF37 100%);
   color: white;
   border-radius: 10px;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 
   h1 {
     margin: 0;
@@ -31,7 +158,7 @@
 .estadisticas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  gap: 15px;
   margin-bottom: 30px;
 
   .stat-card {
@@ -83,19 +210,19 @@
   background: white;
   border: 2px solid #D4AF37;
   border-radius: 10px;
-  padding: 30px;
-  margin-bottom: 30px;
+  padding: 10px;
+  margin-bottom: 10px;
 
   h2 {
-    margin: 0 0 20px;
+    margin: 0 0 10px;
     color: #8B0000;
     font-size: 1.5rem;
   }
 
   .btn-escanear-grande {
     width: 100%;
-    padding: 30px;
-    font-size: 1.5rem;
+    padding: 10px;
+    font-size: 1.2rem;
     font-weight: bold;
     background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
     color: white;
@@ -145,14 +272,39 @@
     }
 
     .instruccion-escaner {
-      margin-top: 15px;
-      font-size: 1.1rem;
+      margin-top: 10px;
+      font-size: 0.8rem;
       color: #666;
       font-weight: bold;
       animation: pulse 2s infinite;
+
+      small {
+        display: block;
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #4CAF50;
+        
+        strong {
+          font-size: 1.3rem;
+          color: #2E7D32;
+        }
+      }
     }
   }
 
+  .info-escaner {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    padding: 10px;
+    background: #F5F5F5;
+    border-radius: 8px;
+    margin-top: 2px;
+    border: 2px dashed #D4AF37;
+  }
+
+  /* ESTILOS DESACTIVADOS - Ya no se usa entrada manual */
+  /*
   .separador {
     text-align: center;
     margin: 20px 0;
@@ -262,6 +414,7 @@
       }
     }
   }
+  */
 }
 
 /* RESULTADO */
@@ -272,6 +425,11 @@
   margin-bottom: 30px;
   border: 3px solid;
   animation: slideIn 0.3s ease-out;
+
+  /* Ocultar completamente la sección de resultado ya que solo usamos la notificación flotante */
+  &.resultado-oculto {
+    display: none !important;
+  }
 
   &.exito {
     border-color: #4CAF50;
@@ -437,7 +595,7 @@
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
 
         .estadisticas {
@@ -463,6 +621,30 @@
             .valor {
             text-align: left !important;
             margin-top: 5px;
+            }
+        }
+
+        /* Notificación flotante en móvil */
+        .notificacion-flotante {
+            width: 95%;
+            padding: 25px 20px;
+
+            .notificacion-icono {
+                font-size: 4rem;
+            }
+
+            .notificacion-titulo {
+                font-size: 1.5rem;
+            }
+
+            .notificacion-detalles {
+                .cliente-nombre {
+                    font-size: 1.1rem;
+                }
+
+                .entradas-info {
+                    font-size: 1rem;
+                }
             }
         }
     }

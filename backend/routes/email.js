@@ -254,7 +254,7 @@ function generateEmailTemplate(reservationData) {
                         <tr>
                             <td style="text-align: center; padding: 8px 0;">
                                 <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">
-                                    &copy; ${new Date().getFullYear()} Asociación Cultural En Belén De Judá. Todos los derechos reservados.
+                                    &copy; ${new Date().getFullYear()} Asociación Cultural En Belén de Judá. Todos los derechos reservados.
                                 </p>
                             </td>
                         </tr>
@@ -529,7 +529,7 @@ async function generarPDFEntrada(datosReserva) {
       // ============ FOOTER PÁGINA 1 ============
       const footerY1 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén De Judá - Todos los derechos reservados`, 0, footerY1, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY1, {
            align: 'center',
            width: doc.page.width
          });
@@ -582,7 +582,7 @@ async function generarPDFEntrada(datosReserva) {
       // ============ FOOTER PÁGINA 2 ============
       const footerY2 = doc.page.height - 40;
       doc.fontSize(8).fillColor('#999').font('Helvetica')
-         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén De Judá - Todos los derechos reservados`, 0, footerY2, {
+         .text(`© ${new Date().getFullYear()} Asociación Cultural En Belén de Judá - Todos los derechos reservados`, 0, footerY2, {
            align: 'center',
            width: doc.page.width
          });
@@ -613,7 +613,7 @@ async function enviarEmailConfirmacion(datosReserva) {
 
   const pdfBuffer = await generarPDFEntrada(datosReserva);
   const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
-  const logoPath = path.join(__dirname, '../../src/assets/images/logo.png');
+  const logoPath = path.join(__dirname, '../../src/assets/images/logo-fondo-negro.png');
 
   const mailOptions = {
     from: `"En Belén De Judá Musical" <${process.env.EMAIL_USER}>`,

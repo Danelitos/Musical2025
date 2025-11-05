@@ -5,6 +5,37 @@
     <p class="subtitulo">En Belén De Judá - Musical</p>
   </header>
 
+  <!-- FORMULARIO DE VALIDACIÓN - SOLO ESCANEO QR -->
+  <section class="validacion-form">
+    <h2>Escanear Código QR</h2>
+    
+    <!-- Botón grande para activar escáner -->
+    <button 
+      *ngIf="!escaneandoQR"
+      class="btn-escanear-grande" 
+      (click)="activarEscanerQR()"
+      [disabled]="validando"
+    >
+      📷 INICIAR ESCANEO DE ENTRADAS
+    </button>
+
+    <!-- Lector de QR (se muestra cuando está escaneando) -->
+    <div *ngIf="escaneandoQR" class="qr-reader-container">
+      <div id="qr-reader"></div>
+      <button class="btn-cancelar-escaner" (click)="detenerEscaner()">
+        ✖ Finalizar Escaneo
+      </button>
+      <p class="instruccion-escaner">
+        Apunta la cámara al código QR de la entrada<br>
+        <small>✅ Entradas escaneadas: <strong>{{ contadorEscaneos }}</strong></small>
+      </p>
+    </div>
+
+    <p class="info-escaner" *ngIf="!escaneandoQR">
+      👆 Pulsa el botón para activar la cámara y comenzar a validar entradas
+    </p>
+  </section>
+
   <!-- ESTADÍSTICAS -->
   <section class="estadisticas" *ngIf="estadisticas">
     <div class="stat-card">
@@ -25,134 +56,32 @@
     </div>
   </section>
 
-  <!-- FORMULARIO DE VALIDACIÓN -->
-  <section class="validacion-form">
-    <h2>Escanear o Ingresar Código</h2>
-    
-    <!-- Botón grande para activar escáner -->
-    <button 
-      *ngIf="!escaneandoQR"
-      class="btn-escanear-grande" 
-      (click)="activarEscanerQR()"
-      [disabled]="validando"
-    >
-      📷 ESCANEAR CÓDIGO QR
-    </button>
-
-    <!-- Lector de QR (se muestra cuando está escaneando) -->
-    <div *ngIf="escaneandoQR" class="qr-reader-container">
-      <div id="qr-reader"></div>
-      <button class="btn-cancelar-escaner" (click)="detenerEscaner()">
-        ✖ Cancelar Escaneo
-      </button>
-      <p class="instruccion-escaner">Apunta la cámara al código QR de la entrada</p>
-    </div>
-
-    <!-- Separador -->
-    <div class="separador" *ngIf="!escaneandoQR">
-      <span>O ingresa manualmente</span>
-    </div>
-    
-    <div class="input-group" *ngIf="!escaneandoQR">
-      <input 
-        type="text" 
-        [(ngModel)]="ticketId" 
-        placeholder="BELEN-XXXXX-XXXXX"
-        class="ticket-input"
-        (keyup.enter)="validarEntrada()"
-        [disabled]="validando"
-        autofocus
-      />
-    </div>
-
-    <div class="botones" *ngIf="!escaneandoQR">
-      <button 
-        class="btn-validar" 
-        (click)="validarEntrada()"
-        [disabled]="validando || !ticketId.trim()"
-      >
-        <span *ngIf="!validando">✓ Validar Entrada</span>
-        <span *ngIf="validando">⏳ Validando...</span>
-      </button>
-
-      <button 
-        class="btn-consultar" 
-        (click)="consultarEntrada()"
-        [disabled]="validando || !ticketId.trim()"
-      >
-        🔍 Solo Consultar
-      </button>
-
-      <button 
-        class="btn-limpiar" 
-        (click)="limpiarResultado()"
-        [disabled]="validando"
-      >
-        🗑️ Limpiar
-      </button>
-    </div>
-  </section>
-
-  <!-- RESULTADO DE VALIDACIÓN -->
-  <section class="resultado" *ngIf="resultado" [ngClass]="getResultadoClass()">
-    <div class="resultado-header">
-      <span class="resultado-icono">{{ getResultadoIcono() }}</span>
-      <h3>{{ resultado.message || resultado.error }}</h3>
-    </div>
-
-    <div class="resultado-detalles" *ngIf="resultado.detalles">
-      <div class="detalle-row">
-        <span class="label">Ticket ID:</span>
-        <span class="valor codigo">{{ resultado.ticketId }}</span>
+  <!-- NOTIFICACIÓN FLOTANTE DE RESULTADO (cuando se escanea QR) -->
+  <div class="notificacion-flotante" 
+       *ngIf="mostrarNotificacion && resultado"
+       [ngClass]="getNotificacionClass()"
+       [@slideInOut]>
+    <div class="notificacion-contenido">
+      <button class="btn-cerrar-notificacion" (click)="cerrarNotificacion()">✖</button>
+      
+      <div class="notificacion-icono">{{ getResultadoIcono() }}</div>
+      
+      <h2 class="notificacion-titulo">{{ getNotificacionTitulo() }}</h2>
+      
+      <div class="notificacion-detalles" *ngIf="resultado.detalles">
+        <p class="ticket-id">{{ resultado.ticketId }}</p>
+        <p class="cliente-nombre">{{ resultado.detalles.nombreCliente }}</p>
+        <p class="entradas-info">
+          {{ resultado.detalles.totalEntradas }} 
+          {{ resultado.detalles.totalEntradas === 1 ? 'entrada' : 'entradas' }}
+        </p>
       </div>
-
-      <div class="detalle-row">
-        <span class="label">Cliente:</span>
-        <span class="valor">{{ resultado.detalles.nombreCliente }}</span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Email:</span>
-        <span class="valor">{{ resultado.detalles.emailCliente }}</span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Sesión:</span>
-        <span class="valor">
-          {{ resultado.detalles.sesion.fecha }} - {{ resultado.detalles.sesion.hora }}
-        </span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Lugar:</span>
-        <span class="valor">{{ resultado.detalles.sesion.lugar }}</span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Entradas:</span>
-        <span class="valor">
-          {{ resultado.detalles.totalEntradas }}
-          ({{ resultado.detalles.entradasAdultos }} adultos, 
-          {{ resultado.detalles.entradasNinos }} niños)
-        </span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Importe Total:</span>
-        <span class="valor destacado">{{ resultado.detalles.importeTotal }}€</span>
-      </div>
-
-      <div class="detalle-row">
-        <span class="label">Fecha de Compra:</span>
-        <span class="valor">{{ formatearFecha(resultado.detalles.fechaCompra) }}</span>
-      </div>
-
-      <div class="detalle-row" *ngIf="resultado.detalles.fechaValidacion">
-        <span class="label">Validada el:</span>
-        <span class="valor">{{ formatearFecha(resultado.detalles.fechaValidacion) }}</span>
+      
+      <div class="notificacion-mensaje" *ngIf="!resultado.detalles">
+        <p>{{ resultado.message || resultado.error }}</p>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- HISTORIAL -->
   <section class="historial" *ngIf="historial.length > 0">

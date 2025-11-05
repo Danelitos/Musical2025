@@ -268,7 +268,12 @@ export class Home implements OnInit {
    */
   scrollToReservas() {
     const element = document.getElementById('reservas-section');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (!element) return;
+    try {
+      element?.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
+    }
   }
 
   /**
@@ -276,7 +281,12 @@ export class Home implements OnInit {
    */
   scrollToCompra() {
     const element = document.getElementById('compra-section');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (!element) return;
+    try {
+      element?.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+      window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
+    }
   }
 
   /**
