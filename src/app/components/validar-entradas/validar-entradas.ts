@@ -112,6 +112,9 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
       return;
     }
 
+    console.log('🔍 Iniciando validación de:', this.ticketId);
+    console.log('Modo escaneo QR:', this.escaneandoQR);
+
     this.validando = true;
     this.resultado = null;
 
@@ -121,9 +124,12 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
         { ticketId: this.ticketId.trim() }
       ).toPromise();
 
+      console.log('📬 Respuesta recibida:', response);
+
       this.resultado = response!;
       
       if (response!.success) {
+        console.log('✅ Validación exitosa');
         // Agregar al historial
         this.agregarAlHistorial(response!);
         
@@ -136,13 +142,16 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
         // Incrementar contador si estamos escaneando
         if (this.escaneandoQR) {
           this.contadorEscaneos++;
+          console.log('📊 Contador actualizado:', this.contadorEscaneos);
         }
       } else {
+        console.log('⚠️ Validación con advertencia');
         this.reproducirSonidoError();
       }
 
       // Mostrar notificación flotante si estamos en modo escaneo QR
       if (this.escaneandoQR) {
+        console.log('📱 Llamando a mostrarNotificacionFlotante()...');
         this.mostrarNotificacionFlotante();
       }
 
@@ -154,10 +163,11 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
       } else {
         // En modo escaneo, limpiar inmediatamente para el siguiente escaneo
         this.ticketId = '';
+        console.log('🧹 Input limpiado para siguiente escaneo');
       }
 
     } catch (error: any) {
-      console.error('Error validando entrada:', error);
+      console.error('❌ Error validando entrada:', error);
       
       const errorResponse = error.error;
       if (errorResponse && errorResponse.code) {
@@ -170,12 +180,14 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
       
       // Mostrar notificación flotante también en errores si estamos en modo escaneo QR
       if (this.escaneandoQR) {
+        console.log('📱 Llamando a mostrarNotificacionFlotante() (error)...');
         this.mostrarNotificacionFlotante();
         // Limpiar para el siguiente escaneo
         this.ticketId = '';
       }
     } finally {
       this.validando = false;
+      console.log('🏁 Validación finalizada');
     }
   }
 
@@ -310,17 +322,20 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
    * Maneja el escaneo exitoso de un QR
    */
   async onQRScanned(result: string): Promise<void> {
-    // Detener el escáner inmediatamente
-    await this.detenerEscaner();
+    // NO detener el escáner para poder escanear múltiples códigos
+    // Solo si ya está validando, ignorar este escaneo
+    if (this.validando) {
+      console.log('Ya se está validando una entrada, ignorando escaneo...');
+      return;
+    }
     
     // Asignar el valor escaneado
     this.ticketId = result;
     
+    console.log('🎫 QR Escaneado:', result);
+    
     // Validar automáticamente
     await this.validarEntrada();
-    
-    // Reproducir feedback sonoro/visual
-    this.reproducirSonidoExito();
   }
 
   /* MÉTODO DESACTIVADO - Ya no se usa entrada manual
@@ -441,6 +456,13 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
    * Muestra la notificación flotante
    */
   mostrarNotificacionFlotante(): void {
+    console.log('🔔 Mostrando notificación flotante');
+    console.log('Estado actual:', {
+      mostrarNotificacion: this.mostrarNotificacion,
+      resultado: this.resultado,
+      escaneandoQR: this.escaneandoQR
+    });
+    
     // Limpiar cualquier timer anterior
     if (this.timerNotificacion) {
       clearTimeout(this.timerNotificacion);
@@ -449,8 +471,11 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
     // Mostrar la notificación
     this.mostrarNotificacion = true;
 
+    console.log('✅ Notificación activada. mostrarNotificacion =', this.mostrarNotificacion);
+
     // Auto-ocultar después de 3 segundos
     this.timerNotificacion = setTimeout(() => {
+      console.log('⏰ Auto-cerrando notificación después de 3 segundos');
       this.cerrarNotificacion();
     }, 3000);
   }
