@@ -106,6 +106,7 @@ export class Home implements OnInit {
   ngOnInit() {
     this.startCarousel();
     this.loadSesiones();
+    this.setupSmoothScrollForAnchors();
     
     // Revalidar cuando cambie la sesión seleccionada
     this.compraForm.get('sesionId')?.valueChanges.subscribe(() => {
@@ -120,6 +121,68 @@ export class Home implements OnInit {
     this.compraForm.get('numEntradasNinos')?.valueChanges.subscribe(() => {
       this.compraForm.updateValueAndValidity();
     });
+  }
+
+  /**
+   * Configura el scroll suave para todos los enlaces con anclas
+   * Compatible con todos los navegadores y dispositivos móviles
+   */
+  private setupSmoothScrollForAnchors() {
+    // Interceptar clics en enlaces con href="#..."
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a[href^="#"]') as HTMLAnchorElement;
+      
+      if (anchor && anchor.getAttribute('href')?.startsWith('#')) {
+        const href = anchor.getAttribute('href');
+        if (!href || href === '#') return;
+        
+        e.preventDefault();
+        
+        const targetId = href.substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          this.scrollToElementSmooth(targetElement);
+        }
+      }
+    }, { passive: false });
+  }
+
+  /**
+   * Realiza scroll suave a un elemento de forma universal
+   * Compatible con todos los navegadores móviles (Oppo, Xiaomi, etc.)
+   */
+  private scrollToElementSmooth(element: HTMLElement) {
+    const targetPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    const duration = 800;
+    let start: number | null = null;
+
+    const animation = (currentTime: number) => {
+      if (start === null) start = currentTime;
+      const timeElapsed = currentTime - start;
+      const run = this.easeInOutQuad(timeElapsed, startPosition, distance, duration);
+      
+      window.scrollTo(0, run);
+      
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  }
+
+  /**
+   * Función de easing para animación suave
+   */
+  private easeInOutQuad(t: number, b: number, c: number, d: number): number {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
   }
   
   /**
