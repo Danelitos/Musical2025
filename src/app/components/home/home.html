@@ -87,10 +87,11 @@
           <mat-card-content>
             <div class="sesion-info">
               <div class="precio">
-                <span class="precio-label">Precio:</span>
-                <span class="precio-valor">
-                  Adultos: {{ sesion.precioAdulto }}€ | Niños: {{ sesion.precioNino }}€
-                </span>
+                <span class="precio-label">Precios:</span>
+                <div class="precio-detalle">
+                  <span class="precio-linea">Adultos: {{ sesion.precioAdulto }}€</span>
+                  <span class="precio-linea">Niños: {{ sesion.precioNino }}€</span>
+                </div>
                 <span class="precio-iva">(IVA incluido)</span>
               </div>
               <div class="disponibilidad">
@@ -239,7 +240,7 @@
           
           <div class="entradas-grid">
             <mat-form-field appearance="fill">
-              <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 5 }}€)</mat-label>
+              <mat-label>Entradas Adultos ({{ getSesionById(compraForm.get('sesionId')?.value)?.precioAdulto || 6 }}€)</mat-label>
               <input 
                 matInput 
                 type="number" 

@@ -190,7 +190,7 @@ export class Confirmacion implements OnInit {
           fecha: reservaActual.sesionFecha,
           hora: reservaActual.sesionHora,
           lugar: reservaActual.sesionLugar,
-          precioAdulto: 5,
+          precioAdulto: 6,
           precioNino: 3
         },
         numEntradasAdultos: reservaActual.numEntradasAdultos,

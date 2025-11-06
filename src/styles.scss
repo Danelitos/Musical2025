@@ -78,8 +78,6 @@ body {
 html, body {
   height: 100%;
   font-family: 'Georgia', 'Times New Roman', serif;
-  // scroll-behavior: smooth solo funciona en navegadores modernos
-  // Para compatibilidad con iOS Safari usamos implementación JavaScript
   scroll-behavior: smooth;
   overflow-x: hidden;
 }

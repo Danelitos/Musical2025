@@ -332,7 +332,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...│   │   └── email.js           # Envío
 
 STRIPE_PRICE_ADULT_ID=price_...
 
-STRIPE_PRICE_CHILD_ID=price_...**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  │   ├── utils/
+STRIPE_PRICE_CHILD_ID=price_...**Precios:** Adultos 6€ | Niños 3€ (IVA incluido)  │   ├── utils/
 
 
 
@@ -366,7 +366,7 @@ FRONTEND_URL=http://localhost:4200
 
 1. **Crear productos en Stripe Dashboard**:**Backend:** Node.js, Express, Stripe SDK, Nodemailer, PDFKit  │   └── index.js               # Entry point serverless
 
-   - Entrada Adulto: 5€ (IVA incluido)
+   - Entrada Adulto: 6€ (IVA incluido)
 
    - Entrada Niño: 3€ (IVA incluido)**Deploy:** Vercel (Frontend + Backend Serverless)├── angular.json               # Configuración de Angular
 
@@ -462,7 +462,7 @@ git clone https://github.com/Danelitos/Musical2025.git
 
 ### 2. Instalar dependencias
 
-**Precios:** Adultos 5€ | Niños 3€ (IVA incluido)  
+**Precios:** Adultos 6€ | Niños 3€ (IVA incluido)  
 
 **Capacidad:** 550 plazas/sesiónCopyright © 2025 En Belén de Judá. Todos los derechos reservados.
 
@@ -681,8 +681,8 @@ El backend es compatible con:
 
 Todas las entradas incluyen IVA del **10%** (IVA reducido para espectáculos culturales):
 
-- Entrada adulto: **5€** (incluye 0.45€ de IVA)
-- Entrada niño: **3€** (incluye 0.27€ de IVA)
+- Entrada adulto: **6€** (incluye 0,55€ de IVA)
+- Entrada niño: **3€** (incluye 0,27€ de IVA)
 
 El desglose se muestra en:
 - ✅ Resumen de compra (frontend)

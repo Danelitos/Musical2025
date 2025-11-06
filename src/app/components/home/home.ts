@@ -152,7 +152,7 @@ export class Home implements OnInit {
           fecha: new Date('2025-12-12'),
           hora: '19:00',
           lugar: 'Teatro Salesianos de Deusto (Bilbao)',
-          precioAdulto: 5,
+          precioAdulto: 6,
           precioNino: 3,
           entradasDisponibles: 550
         },
@@ -161,7 +161,7 @@ export class Home implements OnInit {
           fecha: new Date('2025-12-21'),
           hora: '17:00',
           lugar: 'Teatro Salesianosde Deusto (Bilbao)',
-          precioAdulto: 5,
+          precioAdulto: 6,
           precioNino: 3,
           entradasDisponibles: 550
         }

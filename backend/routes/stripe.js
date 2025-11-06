@@ -22,7 +22,7 @@ const SESIONES_CONFIG = [
     fecha: '2025-12-12',
     hora: '19:00',
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
-    precioAdulto: 5,
+    precioAdulto: 6,
     precioNino: 3,
     capacidadTotal: 550
   },
@@ -31,7 +31,7 @@ const SESIONES_CONFIG = [
     fecha: '2025-12-21',
     hora: '17:00',
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
-    precioAdulto: 5,
+    precioAdulto: 6,
     precioNino: 3,
     capacidadTotal: 550
   }
@@ -276,7 +276,7 @@ async function procesarPagoCompletado(session) {
       numEntradasAdultos: parseInt(numEntradasAdultos),
       numEntradasNinos: parseInt(numEntradasNinos),
       totalEntradas: parseInt(numEntradasAdultos) + parseInt(numEntradasNinos),
-      precioAdulto: sesionConfig?.precioAdulto || 5,
+      precioAdulto: sesionConfig?.precioAdulto || 6,
       precioNino: sesionConfig?.precioNino || 3,
       importeTotal: session.amount_total / 100,
       estadoPago: 'paid',
@@ -314,7 +314,7 @@ async function procesarPagoCompletado(session) {
         fecha: sesionFecha,
         hora: sesionHora,
         lugar: sesionLugar,
-        precioAdulto: sesionConfig?.precioAdulto || 5,
+        precioAdulto: sesionConfig?.precioAdulto || 6,
         precioNino: sesionConfig?.precioNino || 3
       },
       numEntradasAdultos: parseInt(numEntradasAdultos),
