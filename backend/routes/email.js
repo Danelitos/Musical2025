@@ -56,7 +56,7 @@ function generateEmailTemplate(reservationData) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Reserva - En Belén De Judá</title>
+    <title>Confirmación de Reserva - En Belén de Judá</title>
     <style>
         body { font-family: 'Georgia', serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; }
@@ -160,13 +160,13 @@ function generateEmailTemplate(reservationData) {
 <body>
     <div class="container">
         <div class="header">
-            ${logoBase64 ? `<img src="${logoBase64}" alt="Logo En Belén De Judá">` : '<h1 style="color: white; margin: 20px 0;">En Belén De Judá</h1>'}
+            ${logoBase64 ? `<img src="${logoBase64}" alt="Logo En Belén de Judá">` : '<h1 style="color: white; margin: 20px 0;">En Belén de Judá</h1>'}
         </div>
         
         <div class="content">
             <h2 style="color: #8B0000;">¡Hola ${reservationData.customerName}!</h2>
             
-            <p>Nos complace confirmar tu reserva para el musical <strong>"En Belén De Judá"</strong>. 
+            <p>Nos complace confirmar tu reserva para el musical <strong>"En Belén de Judá"</strong>. 
             Prepárate para vivir una experiencia mágica que tocará tu corazón en esta Navidad.</p>
             
             <p style="margin-top: 20px; color: #8B0000; font-weight: bold;">
@@ -353,7 +353,7 @@ async function generarPDFEntrada(datosReserva) {
       } else {
         // Si no existe el logo, poner título grande en blanco
         doc.fontSize(32).fillColor('#FFFFFF')
-           .text('En Belén De Judá', 0, 70, { align: 'center', width: doc.page.width });
+           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
       }
 
       // Borde dorado elegante debajo del header negro
@@ -572,7 +572,7 @@ async function generarPDFEntrada(datosReserva) {
         });
       } else {
         doc.fontSize(32).fillColor('#FFFFFF')
-           .text('En Belén De Judá', 0, 70, { align: 'center', width: doc.page.width });
+           .text('En Belén de Judá', 0, 70, { align: 'center', width: doc.page.width });
       }
 
       // Borde dorado elegante debajo del header negro
@@ -599,7 +599,7 @@ async function generarPDFEntrada(datosReserva) {
          .moveDown(0.8)
          .text('• A tu llegada, presenta el código QR o el PDF adjunto en la entrada o taquilla para validar tus entradas.', 80, doc.y, { width: doc.page.width - 160 })
          .moveDown(0.8)
-         .text('• Las entradas no están numeradas, por lo que los asientos se ocuparán por ord', 80, doc.y, { width: doc.page.width - 160 });
+         .text('• Las entradas no están numeradas, por lo que los asientos se ocuparán por orden de llegada. Para disfrutar de un buen lugar, te aconsejamos venir lo antes posible.', 80, doc.y, { width: doc.page.width - 160 });
 
       // ============ FOOTER PÁGINA 2 ============
       const footerY2 = doc.page.height - 40;
@@ -637,9 +637,9 @@ async function enviarEmailConfirmacion(datosReserva) {
   const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
 
   const mailOptions = {
-    from: `"En Belén De Judá Musical" <${process.env.EMAIL_USER}>`,
+    from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: '✝️ Confirmación de Reserva - En Belén De Judá',
+    subject: '✝️ Confirmación de Reserva - En Belén de Judá',
     html: generateEmailTemplate(reservationData),
     attachments: [
       {

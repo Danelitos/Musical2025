@@ -2,6 +2,12 @@
 
 API REST para la gestión de venta de entradas del musical "En Belén de Judá".
 
+## 🎉 Estado del Proyecto
+
+✅ **PROYECTO COMPLETADO** - La aplicación web está finalizada y en producción.
+
+🌐 **Sitio web:** [enbelendejuda.com](https://enbelendejuda.com)
+
 ## 📋 Endpoints Disponibles
 
 ### 🎟️ Stripe - Gestión de Pagos

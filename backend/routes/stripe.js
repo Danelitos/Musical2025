@@ -103,7 +103,7 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: `Musical "En Belén De Judá" - Entrada Adulto`,
+            name: `Musical "En Belén de Judá" - Entrada Adulto`,
             description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
           },
           unit_amount: sesion.precioAdulto * 100,
@@ -117,7 +117,7 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: `Musical "En Belén De Judá" - Entrada Niño (hasta 14 años)`,
+            name: `Musical "En Belén de Judá" - Entrada Niño (hasta 14 años)`,
             description: `${sesionInfo.fecha} a las ${sesionInfo.hora} - ${sesionInfo.lugar}`,
           },
           unit_amount: sesion.precioNino * 100,

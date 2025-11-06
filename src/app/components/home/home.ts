@@ -65,7 +65,7 @@ export class Home implements OnInit {
   /** Imágenes del carrusel principal */
   carouselImages = signal([
     { src: 'assets/images/poster.jpg', alt: 'Póster del Musical 2024' },
-    { src: 'assets/images/carousel1.jpg', alt: 'Escena del musical En Belén De Judá' },
+    { src: 'assets/images/carousel1.jpg', alt: 'Escena del musical En Belén de Judá' },
     { src: 'assets/images/carousel2.jpg', alt: 'Actores del musical' },
     { src: 'assets/images/carousel3.jpg', alt: 'Público disfrutando del espectáculo' },
     { src: 'assets/images/carousel4.jpg', alt: 'Puesta en escena navideña' }
