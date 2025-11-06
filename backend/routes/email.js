@@ -36,7 +36,7 @@ function getImageAsBase64(imagePath) {
 function generateEmailTemplate(reservationData) {
   // Calcular desglose de IVA para el email usando las utilidades
   const desgloseAdultos = reservationData.numEntradasAdultos > 0 
-    ? desglosarPrecioTotal(reservationData.precioAdulto || 6, reservationData.numEntradasAdultos)
+    ? desglosarPrecioTotal(reservationData.precioAdulto || 5, reservationData.numEntradasAdultos)
     : { baseImponible: 0, iva: 0, total: 0 };
   
   const desgloseNinos = reservationData.numEntradasNinos > 0
@@ -583,7 +583,7 @@ async function generarPDFEntrada(datosReserva) {
 
       // ============ INFORMACIÓN IMPORTANTE EN PÁGINA 2 ============
       const infoBoxY = doc.y;
-      const infoBoxHeight = 150;
+      const infoBoxHeight = 175;
       
       doc.roundedRect(60, infoBoxY, doc.page.width - 120, infoBoxHeight, 8)
          .lineWidth(1.5)
