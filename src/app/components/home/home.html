@@ -29,10 +29,10 @@
   
   <!-- Call to Action principal -->
   <div class="cta-container animate-fade-in-up">
-    <a href="#reservas-section" class="btn-primary">
+    <button class="btn-primary" (click)="scrollToReservas()">
       <mat-icon>confirmation_number</mat-icon>
       Reserva tus Entradas
-    </a>
+    </button>
   </div>
 </header>
 
@@ -71,7 +71,7 @@
   <div class="container">
     <h2 class="title-secondary text-center animate-fade-in-up">Próximas Funciones</h2>
     <p class="subtitle text-center animate-fade-in-up">
-      Elige la fecha que mejor se adapte a ti y vive la magia de la Navidad
+      Elige la fecha que mejor se adapte a ti y vive la historia de la navidad como nunca te la han contado.
     </p>
     
     <div class="sesiones-grid">
@@ -103,17 +103,15 @@
           </mat-card-content>
           
           <mat-card-actions>
-            <a href="#compra-section" 
-               class="btn-secondary" 
-               [class.disabled]="sesion.entradasDisponibles === 0"
-               [attr.disabled]="sesion.entradasDisponibles === 0 ? true : null"
-               (click)="seleccionarSesion(sesion.id, $event)">
+            <button class="btn-secondary" 
+                    [disabled]="sesion.entradasDisponibles === 0"
+                    (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra()">
               @if (sesion.entradasDisponibles > 0) {
                 Seleccionar esta función
               } @else {
                 Agotado
               }
-            </a>
+            </button>
           </mat-card-actions>
         </mat-card>
       }

@@ -25,8 +25,12 @@
       <button class="btn-cancelar-escaner" (click)="detenerEscaner()">
         ✖ Finalizar Escaneo
       </button>
-      <p class="instruccion-escaner">
+      <p class="instruccion-escaner" *ngIf="!escanerPausado">
         Apunta la cámara al código QR de la entrada<br>
+        <small>✅ Entradas escaneadas: <strong>{{ contadorEscaneos }}</strong></small>
+      </p>
+      <p class="instruccion-escaner pausado" *ngIf="escanerPausado">
+        ⏸️ Escáner pausado - Confirma el resultado para continuar<br>
         <small>✅ Entradas escaneadas: <strong>{{ contadorEscaneos }}</strong></small>
       </p>
     </div>
@@ -56,13 +60,18 @@
     </div>
   </section>
 
-  <!-- NOTIFICACIÓN FLOTANTE DE RESULTADO (cuando se escanea QR) -->
+  <!-- BACKDROP Y NOTIFICACIÓN FLOTANTE DE RESULTADO (cuando se escanea QR) -->
+  <div class="notificacion-backdrop" 
+       *ngIf="mostrarNotificacion && resultado"
+       [@slideInOut]
+       (click)="cerrarNotificacion()">
+  </div>
+  
   <div class="notificacion-flotante" 
        *ngIf="mostrarNotificacion && resultado"
        [ngClass]="getNotificacionClass()"
        [@slideInOut]>
     <div class="notificacion-contenido">
-      <button class="btn-cerrar-notificacion" (click)="cerrarNotificacion()">✖</button>
       
       <div class="notificacion-icono">{{ getResultadoIcono() }}</div>
       
@@ -72,14 +81,24 @@
         <p class="ticket-id">{{ resultado.ticketId }}</p>
         <p class="cliente-nombre">{{ resultado.detalles.nombreCliente }}</p>
         <p class="entradas-info">
-          {{ resultado.detalles.totalEntradas }} 
-          {{ resultado.detalles.totalEntradas === 1 ? 'entrada' : 'entradas' }}
+          <strong>{{ resultado.detalles.totalEntradas }}</strong> 
+          {{ resultado.detalles.totalEntradas === 1 ? 'entrada' : 'entradas' }} en total
+        </p>
+        <p class="validacion-info" *ngIf="resultado.code === 'TICKET_VALIDATED'">
+          <span class="badge-validadas">✓ Todas las entradas de este QR han sido validadas</span>
+        </p>
+        <p class="validacion-info" *ngIf="resultado.code === 'TICKET_ALREADY_USED'">
+          <span class="badge-ya-validadas">⚠ Este QR ya fue validado previamente</span>
         </p>
       </div>
       
       <div class="notificacion-mensaje" *ngIf="!resultado.detalles">
         <p>{{ resultado.message || resultado.error }}</p>
       </div>
+
+      <button class="btn-aceptar-notificacion" (click)="cerrarNotificacion()">
+        {{ resultado.code === 'TICKET_VALIDATED' ? '✓ ACEPTAR' : 'CONTINUAR' }}
+      </button>
     </div>
   </div>
 

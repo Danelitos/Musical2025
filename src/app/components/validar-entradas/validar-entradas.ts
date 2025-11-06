@@ -70,6 +70,7 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
   html5QrCode: Html5Qrcode | null = null;
   camaraIniciada: boolean = false;
   intentandoIniciarCamara: boolean = false;
+  escanerPausado: boolean = false; // Pausar escaneo hasta que se acepte el resultado
   
   // Historial de validaciones
   historial: ValidacionResponse[] = [];
@@ -253,6 +254,7 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
     this.escaneandoQR = true;
     this.resultado = null;
     this.contadorEscaneos = 0;
+    this.escanerPausado = false; // Resetear el estado de pausa
     this.cerrarNotificacion();
     // La cámara se iniciará automáticamente en ngAfterViewChecked
   }
@@ -322,12 +324,20 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
    * Maneja el escaneo exitoso de un QR
    */
   async onQRScanned(result: string): Promise<void> {
-    // NO detener el escáner para poder escanear múltiples códigos
-    // Solo si ya está validando, ignorar este escaneo
-    if (this.validando) {
-      console.log('Ya se está validando una entrada, ignorando escaneo...');
+    // NO escanear si está pausado esperando confirmación
+    if (this.escanerPausado) {
+      console.log('⏸️ Escáner pausado, esperando confirmación del usuario...');
       return;
     }
+    
+    // NO escanear si ya está validando
+    if (this.validando) {
+      console.log('⌛ Ya se está validando una entrada, ignorando escaneo...');
+      return;
+    }
+    
+    // Pausar el escáner para evitar escaneos múltiples
+    this.escanerPausado = true;
     
     // Asignar el valor escaneado
     this.ticketId = result;
@@ -473,11 +483,8 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
 
     console.log('✅ Notificación activada. mostrarNotificacion =', this.mostrarNotificacion);
 
-    // Auto-ocultar después de 3 segundos
-    this.timerNotificacion = setTimeout(() => {
-      console.log('⏰ Auto-cerrando notificación después de 3 segundos');
-      this.cerrarNotificacion();
-    }, 3000);
+    // NO auto-ocultar - el usuario debe confirmar manualmente
+    // (Se ha eliminado el timer automático)
   }
 
   /**
@@ -488,6 +495,12 @@ export class ValidarEntradasComponent implements OnInit, OnDestroy, AfterViewChe
     if (this.timerNotificacion) {
       clearTimeout(this.timerNotificacion);
       this.timerNotificacion = null;
+    }
+    
+    // Reanudar el escáner para permitir siguiente escaneo
+    if (this.escaneandoQR) {
+      console.log('▶️ Reanudando escáner para siguiente QR');
+      this.escanerPausado = false;
     }
   }
 

@@ -264,25 +264,69 @@ export class Home implements OnInit {
   }
 
   /**
-   * Selecciona una sesión y navega al formulario de compra
+   * Scroll suave a la sección de reservas con fallback para navegadores antiguos
    */
-  seleccionarSesion(sesionId: string, event: Event) {
-    event.preventDefault();
+  scrollToReservas() {
+    const element = document.getElementById('reservas-section');
+    if (!element) return;
     
-    // Prevenir la navegación si la sesión está agotada
-    const sesion = this.sesiones().find(s => s.id === sesionId);
-    if (!sesion || sesion.entradasDisponibles === 0) {
-      return;
+    // Intentar scroll nativo smooth primero
+    try {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      // Fallback para navegadores que no soportan smooth scroll (Safari iOS antiguo)
+      this.smoothScrollTo(element);
     }
+  }
+
+  /**
+   * Scroll suave a la sección de compra con fallback para navegadores antiguos
+   */
+  scrollToCompra() {
+    const element = document.getElementById('compra-section');
+    if (!element) return;
     
-    // Asignar el sesionId al formulario
-    this.compraForm.patchValue({ sesionId });
-    
-    // Hacer scroll suave al formulario de compra
-    const compraSection = document.getElementById('compra-section');
-    if (compraSection) {
-      compraSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Intentar scroll nativo smooth primero
+    try {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      // Fallback para navegadores que no soportan smooth scroll (Safari iOS antiguo)
+      this.smoothScrollTo(element);
     }
+  }
+
+  /**
+   * Implementación de smooth scroll manual para navegadores sin soporte nativo
+   * Compatible con iOS Safari y navegadores antiguos
+   */
+  private smoothScrollTo(element: HTMLElement) {
+    const targetPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    const duration = 800; // milisegundos
+    let start: number | null = null;
+
+    const animation = (currentTime: number) => {
+      if (start === null) start = currentTime;
+      const timeElapsed = currentTime - start;
+      const run = this.easeInOutQuad(timeElapsed, startPosition, distance, duration);
+      window.scrollTo(0, run);
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  }
+
+  /**
+   * Función de easing para suavizar el scroll
+   */
+  private easeInOutQuad(t: number, b: number, c: number, d: number): number {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
   }
 
   /**

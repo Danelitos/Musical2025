@@ -18,6 +18,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Función para convertir imagen a base64
+function getImageAsBase64(imagePath) {
+  try {
+    const imageBuffer = fs.readFileSync(imagePath);
+    const base64Image = imageBuffer.toString('base64');
+    const ext = path.extname(imagePath).toLowerCase();
+    const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+    return `data:${mimeType};base64,${base64Image}`;
+  } catch (error) {
+    console.error('Error leyendo imagen:', error);
+    return '';
+  }
+}
+
 // Función para generar template de email
 function generateEmailTemplate(reservationData) {
   // Calcular desglose de IVA para el email usando las utilidades
@@ -31,6 +45,10 @@ function generateEmailTemplate(reservationData) {
   
   const baseImponibleTotal = (desgloseAdultos.baseImponible + desgloseNinos.baseImponible).toFixed(2);
   const ivaTotal = (desgloseAdultos.iva + desgloseNinos.iva).toFixed(2);
+  
+  // Convertir logo a base64 para máxima compatibilidad con clientes de email móviles
+  const logoPath = path.join(__dirname, '../../src/assets/images/logo-fondo-negro.png');
+  const logoBase64 = getImageAsBase64(logoPath);
   
   return `
 <!DOCTYPE html>
@@ -51,8 +69,12 @@ function generateEmailTemplate(reservationData) {
         }
         .header img {
             width: 400px;
+            max-width: 100%;
             height: auto;
             margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .content { padding: 30px; }
@@ -138,7 +160,7 @@ function generateEmailTemplate(reservationData) {
 <body>
     <div class="container">
         <div class="header">
-            <img src="cid:logo" alt="Logo En Belén De Judá">
+            ${logoBase64 ? `<img src="${logoBase64}" alt="Logo En Belén De Judá">` : '<h1 style="color: white; margin: 20px 0;">En Belén De Judá</h1>'}
         </div>
         
         <div class="content">
@@ -613,7 +635,6 @@ async function enviarEmailConfirmacion(datosReserva) {
 
   const pdfBuffer = await generarPDFEntrada(datosReserva);
   const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
-  const logoPath = path.join(__dirname, '../../src/assets/images/logo-fondo-negro.png');
 
   const mailOptions = {
     from: `"En Belén De Judá Musical" <${process.env.EMAIL_USER}>`,
@@ -625,12 +646,8 @@ async function enviarEmailConfirmacion(datosReserva) {
         filename: pdfFilename,
         content: pdfBuffer,
         contentType: 'application/pdf'
-      },
-      {
-        filename: 'logo.png',
-        path: logoPath,
-        cid: 'logo' // Este CID se usa en el HTML como src="cid:logo"
       }
+      // Logo ya no se adjunta - está embebido en base64 en el HTML
     ]
   };
 
