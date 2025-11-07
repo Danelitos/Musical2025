@@ -33,6 +33,12 @@
       <mat-icon>confirmation_number</mat-icon>
       Reserva tus Entradas
     </button>
+    @if (showScrollHintHeader()) {
+      <p class="scroll-hint">
+        <mat-icon>info</mat-icon>
+        ¿No funciona? Desliza hacia abajo
+      </p>
+    }
   </div>
 </header>
 
@@ -106,13 +112,19 @@
           <mat-card-actions>
             <button class="btn-secondary" 
                     [disabled]="sesion.entradasDisponibles === 0"
-                    (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra()">
+                    (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra(sesion.id)">
               @if (sesion.entradasDisponibles > 0) {
                 Seleccionar esta función
               } @else {
                 Agotado
               }
             </button>
+            @if (sesion.entradasDisponibles > 0 && showScrollHintCard() === sesion.id) {
+              <p class="scroll-hint">
+                <mat-icon>info</mat-icon>
+                ¿No funciona? Desliza hacia abajo
+              </p>
+            }
           </mat-card-actions>
         </mat-card>
       }

@@ -86,6 +86,12 @@ export class Home implements OnInit {
   /** Estado de error del video */
   videoError = signal(false);
 
+  /** Controla la visibilidad del mensaje de scroll en el botón principal */
+  showScrollHintHeader = signal(false);
+
+  /** Controla la visibilidad del mensaje de scroll en las tarjetas de sesión */
+  showScrollHintCard = signal<string | null>(null);
+
   constructor(
     private fb: FormBuilder,
     @Inject(StripeService) private stripeService: StripeService,
@@ -267,6 +273,14 @@ export class Home implements OnInit {
    * Scroll suave a la sección de reservas con fallback para navegadores antiguos
    */
   scrollToReservas() {
+    // Mostrar el mensaje
+    this.showScrollHintHeader.set(true);
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+      this.showScrollHintHeader.set(false);
+    }, 5000);
+    
     const element = document.getElementById('reservas-section');
     if (!element) return;
     
@@ -282,7 +296,17 @@ export class Home implements OnInit {
   /**
    * Scroll suave a la sección de compra con fallback para navegadores antiguos
    */
-  scrollToCompra() {
+  scrollToCompra(sesionId?: string) {
+    // Mostrar el mensaje para la tarjeta específica
+    if (sesionId) {
+      this.showScrollHintCard.set(sesionId);
+      
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        this.showScrollHintCard.set(null);
+      }, 5000);
+    }
+    
     const element = document.getElementById('compra-section');
     if (!element) return;
     
