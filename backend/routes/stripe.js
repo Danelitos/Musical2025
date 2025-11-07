@@ -254,6 +254,10 @@ router.get('/checkout-session/:sessionId', verificarStripe, async (req, res) => 
  */
 async function procesarPagoCompletado(session) {
   try {
+    console.log(`🔄 [WEBHOOK] Iniciando procesamiento de pago...`);
+    console.log(`📧 [WEBHOOK] Email del cliente: ${session.customer_email}`);
+    console.log(`🆔 [WEBHOOK] Session ID: ${session.id}`);
+    
     const {
       customerName,
       numEntradasAdultos = '0',
@@ -264,9 +268,14 @@ async function procesarPagoCompletado(session) {
       sesionId
     } = session.metadata;
     
+    console.log(`👤 [WEBHOOK] Nombre: ${customerName}`);
+    console.log(`🎫 [WEBHOOK] Entradas - Adultos: ${numEntradasAdultos}, Niños: ${numEntradasNinos}`);
+    console.log(`📅 [WEBHOOK] Sesión: ${sesionFecha} ${sesionHora} - ${sesionLugar}`);
+    
     const sesionConfig = SESIONES_CONFIG.find(s => s.id === sesionId);
     
     // PASO 1: Guardar en MongoDB PRIMERO para generar ticketId
+    console.log(`💾 [WEBHOOK] Guardando transacción en MongoDB...`);
     const resultadoGuardado = await guardarTransaccion({
       stripeSessionId: session.id,
       stripePaymentIntentId: typeof session.payment_intent === 'string'
@@ -301,6 +310,7 @@ async function procesarPagoCompletado(session) {
     console.log(`✅ [WEBHOOK] Transacción guardada en MongoDB - ID: ${resultadoGuardado.insertedId}`);
     
     // PASO 2: Obtener la transacción guardada (con ticketId generado)
+    console.log(`🔍 [WEBHOOK] Recuperando transacción con ticketId...`);
     const { obtenerTransaccionPorId } = require('../services/database.service');
     const transaccionGuardada = await obtenerTransaccionPorId(resultadoGuardado.insertedId);
     
@@ -311,10 +321,11 @@ async function procesarPagoCompletado(session) {
     console.log(`🎫 [WEBHOOK] Ticket ID generado: ${transaccionGuardada.ticketId}`);
     
     // PASO 3: Enviar email con el ticketId
-    await enviarEmailConfirmacion({
+    console.log(`📮 [WEBHOOK] Preparando envío de email a ${session.customer_email}...`);
+    const datosEmail = {
       email: session.customer_email,
       nombre: customerName,
-      ticketId: transaccionGuardada.ticketId, // ← IMPORTANTE: incluir ticketId
+      ticketId: transaccionGuardada.ticketId,
       sesion: {
         fecha: sesionFecha,
         hora: sesionHora,
@@ -325,12 +336,17 @@ async function procesarPagoCompletado(session) {
       numEntradasAdultos: parseInt(numEntradasAdultos),
       numEntradasNinos: parseInt(numEntradasNinos),
       precioTotal: session.amount_total / 100
-    });
+    };
     
-    console.log(`✅ [WEBHOOK] Email enviado a ${session.customer_email}`);
+    console.log(`📧 [WEBHOOK] Datos del email:`, JSON.stringify(datosEmail, null, 2));
+    
+    await enviarEmailConfirmacion(datosEmail);
+    
+    console.log(`✅ [WEBHOOK] Email enviado exitosamente a ${session.customer_email}`);
     
   } catch (error) {
     console.error(`❌ [WEBHOOK] ERROR procesando pago:`, error.message);
+    console.error(`❌ [WEBHOOK] Stack trace:`, error.stack);
     throw error;
   }
 }
@@ -358,20 +374,24 @@ router.post('/webhook', verificarStripe, async (req, res) => {
         const session = event.data.object;
         console.log(`✅ [WEBHOOK] Pago completado - ${session.customer_email}`);
         
-        setImmediate(async () => {
-          try {
-            await procesarPagoCompletado(session);
-            console.log(`✅ [WEBHOOK] Procesamiento completo`);
-          } catch (error) {
-            console.error(`❌ [WEBHOOK] ERROR:`, error.message);
-          }
-        });
+        // ⚠️ IMPORTANTE: Ejecutar SÍNCRONAMENTE con await
+        // No usar setImmediate porque en Vercel la función se cierra antes de que termine
+        try {
+          console.log(`▶️ [WEBHOOK] Procesando pago de forma síncrona...`);
+          await procesarPagoCompletado(session);
+          console.log(`✅ [WEBHOOK] Procesamiento completo`);
+        } catch (error) {
+          console.error(`❌ [WEBHOOK] ERROR procesando pago:`, error.message);
+          console.error(`❌ [WEBHOOK] Stack:`, error.stack);
+          // No lanzar el error para que Stripe reciba 200 OK de todos modos
+        }
         break;
 
       default:
         console.log(`ℹ️ [WEBHOOK] Evento no manejado: ${event.type}`);
     }
 
+    // Responder a Stripe DESPUÉS de procesar todo
     res.json({ received: true });
 
   } catch (err) {

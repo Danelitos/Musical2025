@@ -600,49 +600,71 @@ async function generarPDFEntrada(datosReserva) {
 
 // Función reutilizable para enviar email de confirmación
 async function enviarEmailConfirmacion(datosReserva) {
-  const { email, nombre, sesion, numEntradasAdultos, numEntradasNinos, precioTotal } = datosReserva;
+  try {
+    console.log(`📧 [EMAIL] Iniciando envío de email de confirmación...`);
+    console.log(`📧 [EMAIL] Destinatario: ${datosReserva.email}`);
+    console.log(`📧 [EMAIL] Ticket ID: ${datosReserva.ticketId}`);
+    
+    const { email, nombre, sesion, numEntradasAdultos, numEntradasNinos, precioTotal } = datosReserva;
   
-  const reservationData = {
-    customerEmail: email,
-    customerName: nombre,
-    fecha: sesion.fecha,
-    hora: sesion.hora,
-    lugar: sesion.lugar,
-    numEntradasAdultos,
-    numEntradasNinos,
-    precioAdulto: sesion.precioAdulto,
-    precioNino: sesion.precioNino,
-    total: precioTotal
-  };
+    const reservationData = {
+      customerEmail: email,
+      customerName: nombre,
+      fecha: sesion.fecha,
+      hora: sesion.hora,
+      lugar: sesion.lugar,
+      numEntradasAdultos,
+      numEntradasNinos,
+      precioAdulto: sesion.precioAdulto,
+      precioNino: sesion.precioNino,
+      total: precioTotal
+    };
 
-  const pdfBuffer = await generarPDFEntrada(datosReserva);
-  const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
+    console.log(`📄 [EMAIL] Generando PDF de entrada...`);
+    const pdfBuffer = await generarPDFEntrada(datosReserva);
+    console.log(`✅ [EMAIL] PDF generado - Tamaño: ${pdfBuffer.length} bytes`);
+    
+    const pdfFilename = `Entrada_BelenDeJuda_${Date.now()}.pdf`;
+    const logoPath = path.join(__dirname, '../../src/assets/images/logo-fondo-negro.png');
+    
+    console.log(`📋 [EMAIL] Verificando variables de entorno...`);
+    console.log(`   EMAIL_USER: ${process.env.EMAIL_USER ? '✅ Configurado' : '❌ NO configurado'}`);
+    console.log(`   EMAIL_PASS: ${process.env.EMAIL_PASS ? '✅ Configurado' : '❌ NO configurado'}`);
+    console.log(`   EMAIL_HOST: ${process.env.EMAIL_HOST || 'smtp.gmail.com'}`);
+    console.log(`   EMAIL_PORT: ${process.env.EMAIL_PORT || '587'}`);
 
-  const logoPath = path.join(__dirname, '../../src/assets/images/logo-fondo-negro.png');
+    const mailOptions = {
+      from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: '✝️ Confirmación de Reserva - En Belén de Judá',
+      html: generateEmailTemplate(reservationData),
+      attachments: [
+        {
+          filename: pdfFilename,
+          content: pdfBuffer,
+          contentType: 'application/pdf'
+        },
+        {
+          filename: 'logo.png',
+          path: logoPath,
+          cid: 'logo' // mismo cid que se usa en el HTML: <img src="cid:logo">
+        }
+      ]
+    };
 
-  const mailOptions = {
-    from: `"En Belén de Judá Musical" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: '✝️ Confirmación de Reserva - En Belén de Judá',
-    html: generateEmailTemplate(reservationData),
-    attachments: [
-      {
-        filename: pdfFilename,
-        content: pdfBuffer,
-        contentType: 'application/pdf'
-      },
-      {
-        filename: 'logo.png',
-        path: logoPath,
-        cid: 'logo' // mismo cid que se usa en el HTML: <img src="cid:logo">
-      }
-    ]
-  };
-
-  const info = await transporter.sendMail(mailOptions);
-  console.log('✅ Email de confirmación enviado:', info.messageId);
-  
-  return info;
+    console.log(`📮 [EMAIL] Enviando email a ${email}...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ [EMAIL] Email enviado exitosamente - Message ID: ${info.messageId}`);
+    console.log(`✅ [EMAIL] Response: ${info.response}`);
+    
+    return info;
+  } catch (error) {
+    console.error(`❌ [EMAIL] ERROR enviando email:`, error.message);
+    console.error(`❌ [EMAIL] Stack trace:`, error.stack);
+    console.error(`❌ [EMAIL] Error code:`, error.code);
+    console.error(`❌ [EMAIL] Error response:`, error.response);
+    throw error;
+  }
 }
 
 /**
