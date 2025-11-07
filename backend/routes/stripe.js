@@ -130,7 +130,7 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
 
     // Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal'],
+      payment_method_types: ['card'],
       mode: 'payment',
       customer_email: customerEmail,
       line_items: lineItems,
