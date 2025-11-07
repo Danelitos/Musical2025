@@ -24,7 +24,8 @@ const SESIONES_CONFIG = [
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
     precioAdulto: 6,
     precioNino: 3,
-    capacidadTotal: 550
+    capacidadTotal: 550,        // Capacidad que se muestra al público
+    capacidadVendible: 530      // Capacidad real vendible (20 reservadas para imprevistos)
   },
   {
     id: '2',
@@ -33,7 +34,8 @@ const SESIONES_CONFIG = [
     lugar: 'Teatro Salesianos de Deusto (Bilbao)',
     precioAdulto: 6,
     precioNino: 3,
-    capacidadTotal: 550
+    capacidadTotal: 550,        // Capacidad que se muestra al público
+    capacidadVendible: 510      // Capacidad real vendible (40 reservadas para imprevistos)
   }
 ];
 
@@ -77,8 +79,8 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
       return res.status(404).json({ error: 'Sesión no encontrada' });
     }
 
-    // Verificar disponibilidad desde MongoDB
-    const disponibles = await obtenerDisponibilidad(sesionId, sesion.capacidadTotal);
+    // Verificar disponibilidad desde MongoDB usando capacidadVendible
+    const disponibles = await obtenerDisponibilidad(sesionId, sesion.capacidadVendible);
     if (totalEntradas > disponibles) {
       return res.status(400).json({
         error: `Solo quedan ${disponibles} entradas disponibles`,
@@ -128,7 +130,7 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
 
     // Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'paypal'],
       mode: 'payment',
       customer_email: customerEmail,
       line_items: lineItems,
@@ -170,10 +172,13 @@ router.get('/sesiones', async (req, res) => {
   try {
     const sesionesActualizadas = await Promise.all(
       SESIONES_CONFIG.map(async (sesion) => {
-        const disponibilidad = await obtenerDisponibilidad(sesion.id, sesion.capacidadTotal);
+        // Calcular disponibilidad real usando capacidadVendible (520)
+        const disponibilidad = await obtenerDisponibilidad(sesion.id, sesion.capacidadVendible);
         return {
           ...sesion,
-          entradasDisponibles: disponibilidad
+          entradasDisponibles: disponibilidad,
+          // Enviamos capacidadTotal (550) para mostrar en la UI
+          // pero internamente limitamos la venta a capacidadVendible (520)
         };
       })
     );

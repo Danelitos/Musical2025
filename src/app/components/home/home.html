@@ -100,12 +100,14 @@
                 </div>
                 <span class="precio-iva">(IVA incluido)</span>
               </div>
-              <div class="disponibilidad">
-                <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
-                  event_seat
-                </mat-icon>
-                <span>{{ sesion.entradasDisponibles }} entradas disponibles</span>
-              </div>
+              @if (sesion.entradasDisponibles <= 200) {
+                <div class="disponibilidad">
+                  <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
+                    event_seat
+                  </mat-icon>
+                  <span>Entradas disponibles: {{ sesion.entradasDisponibles }}/550</span>
+                </div>
+              }
             </div>
           </mat-card-content>
           
@@ -283,7 +285,7 @@
           @if (getEntradasRestantes() !== null && getEntradasRestantes()! < 100) {
             <div class="warning-message">
               <mat-icon>warning</mat-icon>
-              ¡Solo quedan {{ getEntradasRestantes() }} entradas disponibles para esta función!
+              ¡Solo quedan {{ getEntradasRestantes() }}/550 entradas disponibles para esta función!
             </div>
           }
 
