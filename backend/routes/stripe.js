@@ -35,7 +35,7 @@ const SESIONES_CONFIG = [
     precioAdulto: 6,
     precioNino: 3,
     capacidadTotal: 550,        // Capacidad que se muestra al público
-    capacidadVendible: 510      // Capacidad real vendible (40 reservadas para imprevistos)
+    capacidadVendible: 470      // Capacidad real vendible (80 reservadas para imprevistos)
   }
 ];
 
