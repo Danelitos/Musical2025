@@ -25,7 +25,8 @@ const SESIONES_CONFIG = [
     precioAdulto: 6,
     precioNino: 3,
     capacidadTotal: 550,        // Capacidad que se muestra al público
-    capacidadVendible: 530      // Capacidad real vendible (20 reservadas para imprevistos)
+    capacidadVendible: 0,       // Sesión ya pasada
+    disponible: false           // Sesión ya no disponible
   },
   {
     id: '2',
@@ -35,7 +36,19 @@ const SESIONES_CONFIG = [
     precioAdulto: 6,
     precioNino: 3,
     capacidadTotal: 550,        // Capacidad que se muestra al público
-    capacidadVendible: 470      // Capacidad real vendible (80 reservadas para imprevistos)
+    capacidadVendible: 470,     // Capacidad real vendible (80 reservadas para imprevistos)
+    disponible: true            // Sesión disponible
+  },
+  {
+    id: '3',
+    fecha: '2025-12-21',
+    hora: '19:30',
+    lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+    precioAdulto: 6,
+    precioNino: 3,
+    capacidadTotal: 550,        // Capacidad que se muestra al público
+    capacidadVendible: 550,     // Capacidad real vendible (20 reservadas para imprevistos)
+    disponible: true            // Sesión disponible
   }
 ];
 
@@ -77,6 +90,11 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
     const sesion = SESIONES_CONFIG.find(s => s.id === sesionId);
     if (!sesion) {
       return res.status(404).json({ error: 'Sesión no encontrada' });
+    }
+
+    // Verificar que la sesión esté disponible
+    if (sesion.disponible === false) {
+      return res.status(400).json({ error: 'Esta sesión ya no está disponible' });
     }
 
     // Verificar disponibilidad desde MongoDB usando capacidadVendible
@@ -170,15 +188,16 @@ router.post('/create-checkout-session', verificarStripe, async (req, res) => {
  */
 router.get('/sesiones', async (req, res) => {
   try {
+    // Devolver todas las sesiones (incluyendo las no disponibles para mostrar en UI)
     const sesionesActualizadas = await Promise.all(
       SESIONES_CONFIG.map(async (sesion) => {
-        // Calcular disponibilidad real usando capacidadVendible (520)
+        // Calcular disponibilidad real usando capacidadVendible
         const disponibilidad = await obtenerDisponibilidad(sesion.id, sesion.capacidadVendible);
         return {
           ...sesion,
           entradasDisponibles: disponibilidad,
           // Enviamos capacidadTotal (550) para mostrar en la UI
-          // pero internamente limitamos la venta a capacidadVendible (520)
+          // pero internamente limitamos la venta a capacidadVendible
         };
       })
     );

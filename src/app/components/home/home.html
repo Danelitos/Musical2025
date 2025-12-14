@@ -82,10 +82,15 @@
     
     <div class="sesiones-grid">
       @for (sesion of sesiones(); track sesion.id) {
-        <mat-card class="sesion-card animate-fade-in-up">
+        <mat-card class="sesion-card animate-fade-in-up" [class.sesion-no-disponible]="sesion.disponible === false" [class.sesion-agotada]="sesion.disponible !== false && sesion.entradasDisponibles === 0">
           <mat-card-header>
             <mat-card-title class="sesion-fecha">
               {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }}
+              @if (sesion.disponible === false) {
+                <span class="badge-no-disponible">NO DISPONIBLE</span>
+              } @else if (sesion.entradasDisponibles === 0) {
+                <span class="badge-sold-out">SOLD OUT</span>
+              }
             </mat-card-title>
             <mat-card-subtitle>{{ sesion.hora }} - {{ sesion.lugar }}</mat-card-subtitle>
           </mat-card-header>
@@ -100,7 +105,17 @@
                 </div>
                 <span class="precio-iva">(IVA incluido)</span>
               </div>
-              @if (sesion.entradasDisponibles <= 200) {
+              @if (sesion.disponible === false) {
+                <div class="disponibilidad no-disponible">
+                  <mat-icon color="warn">block</mat-icon>
+                  <span>Esta función ya no está disponible</span>
+                </div>
+              } @else if (sesion.entradasDisponibles === 0) {
+                <div class="disponibilidad agotado">
+                  <mat-icon>sell</mat-icon>
+                  <span>¡Todas las entradas vendidas!</span>
+                </div>
+              } @else if (sesion.entradasDisponibles <= 200) {
                 <div class="disponibilidad">
                   <mat-icon [color]="sesion.entradasDisponibles > 50 ? 'primary' : sesion.entradasDisponibles > 20 ? 'accent' : 'warn'">
                     event_seat
@@ -113,15 +128,17 @@
           
           <mat-card-actions>
             <button class="btn-secondary" 
-                    [disabled]="sesion.entradasDisponibles === 0"
+                    [disabled]="sesion.disponible === false || sesion.entradasDisponibles === 0"
                     (click)="compraForm.patchValue({sesionId: sesion.id}); scrollToCompra(sesion.id)">
-              @if (sesion.entradasDisponibles > 0) {
+              @if (sesion.disponible === false) {
+                No disponible
+              } @else if (sesion.entradasDisponibles > 0) {
                 Seleccionar esta función
               } @else {
-                Agotado
+                Sold Out
               }
             </button>
-            @if (sesion.entradasDisponibles > 0 && showScrollHintCard() === sesion.id) {
+            @if (sesion.disponible !== false && sesion.entradasDisponibles > 0 && showScrollHintCard() === sesion.id) {
               <p class="scroll-hint">
                 <mat-icon>info</mat-icon>
                 ¿No funciona? Desliza hacia abajo
@@ -241,9 +258,11 @@
             <mat-label>Selecciona la función</mat-label>
             <mat-select formControlName="sesionId">
               @for (sesion of sesiones(); track sesion.id) {
-                <mat-option [value]="sesion.id" [disabled]="sesion.entradasDisponibles === 0">
+                <mat-option [value]="sesion.id" [disabled]="sesion.disponible === false || sesion.entradasDisponibles === 0">
                   {{ sesion.fecha | date:'EEEE, d MMMM':'es-ES' }} - {{ sesion.hora }}
-                  @if (sesion.entradasDisponibles === 0) {
+                  @if (sesion.disponible === false) {
+                    - No disponible
+                  } @else if (sesion.entradasDisponibles === 0) {
                     - Agotado
                   }
                 </mat-option>

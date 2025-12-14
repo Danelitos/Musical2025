@@ -28,6 +28,7 @@ interface Sesion {
   precioAdulto: number;
   precioNino: number;
   entradasDisponibles: number;
+  disponible?: boolean;
 }
 
 /**
@@ -160,16 +161,28 @@ export class Home implements OnInit {
           lugar: 'Teatro Salesianos de Deusto (Bilbao)',
           precioAdulto: 6,
           precioNino: 3,
-          entradasDisponibles: 550
+          entradasDisponibles: 0,
+          disponible: false
         },
         {
           id: '2',
           fecha: new Date('2025-12-21'),
           hora: '17:00',
-          lugar: 'Teatro Salesianosde Deusto (Bilbao)',
+          lugar: 'Teatro Salesianos de Deusto (Bilbao)',
           precioAdulto: 6,
           precioNino: 3,
-          entradasDisponibles: 550
+          entradasDisponibles: 550,
+          disponible: true
+        },
+        {
+          id: '3',
+          fecha: new Date('2025-12-21'),
+          hora: '19:30',
+          lugar: 'Teatro Salesianos de Deusto (Bilbao)',
+          precioAdulto: 6,
+          precioNino: 3,
+          entradasDisponibles: 550,
+          disponible: true
         }
       ]);
     }
