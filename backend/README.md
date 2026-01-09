@@ -1,19 +1,41 @@
 # 🎭 En Belén de Judá - Backend API
 
-API REST para la gestión de venta de entradas del musical "En Belén de Judá".
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.18-lightgrey)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.3-green)](https://www.mongodb.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-14.5-blue)](https://stripe.com/)
 
-## 🎉 Estado del Proyecto
+API REST para la gestión de venta de entradas del musical "En Belén de Judá". Procesamiento de pagos, generación de tickets PDF con QR, envío de emails y validación de entradas.
 
-✅ **PROYECTO COMPLETADO** - La aplicación web está finalizada y en producción.
+🌐 **API en producción:** `https://enbelendejuda.com/api`
 
-🌐 **Sitio web:** [enbelendejuda.com](https://enbelendejuda.com)
+---
 
-## 📋 Endpoints Disponibles
+## 🚀 Quick Start
 
-### 🎟️ Stripe - Gestión de Pagos
+```bash
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+
+# Desarrollo (con auto-reload)
+npm run dev
+
+# Producción
+npm start
+```
+
+---
+
+## 📋 Endpoints
+
+### Stripe - Pagos
 
 #### `POST /api/stripe/create-checkout-session`
-Crea una sesión de pago en Stripe.
+Crea una sesión de pago.
 
 **Body:**
 ```json
@@ -31,56 +53,13 @@ Crea una sesión de pago en Stripe.
 }
 ```
 
-**Response:**
-```json
-{
-  "sessionId": "cs_test_...",
-  "url": "https://checkout.stripe.com/pay/cs_test_..."
-}
-```
-
----
-
 #### `GET /api/stripe/sesiones`
-Obtiene disponibilidad de todas las sesiones.
-
-**Response:**
-```json
-{
-  "sesiones": [
-    {
-      "id": "sesion1",
-      "fecha": "2025-12-12",
-      "hora": "19:00",
-      "nombre": "Viernes 12 Dic - 19:00h",
-      "disponibles": 550,
-      "capacidadTotal": 550,
-      "agotado": false
-    }
-  ]
-}
-```
-
----
+Obtiene disponibilidad de sesiones.
 
 #### `POST /api/stripe/webhook`
-Webhook para eventos de Stripe (uso interno).
+Webhook de Stripe (uso interno).
 
-**Headers:**
-```
-stripe-signature: <firma-del-webhook>
-```
-
----
-
-### 📧 Email - Envío de Tickets
-
-#### `POST /api/email/enviar-ticket`
-Envía el ticket por email (llamado automáticamente por webhook).
-
----
-
-### ✅ Validación - Escáner de Entradas
+### Validación
 
 #### `POST /api/validacion/validar`
 Valida un ticket escaneado.
@@ -92,71 +71,57 @@ Valida un ticket escaneado.
 }
 ```
 
-**Response (éxito):**
-```json
-{
-  "valido": true,
-  "mensaje": "✅ Entrada válida",
-  "ticket": {
-    "ticketId": "TICKET-1234567890",
-    "sesion": {
-      "nombre": "Viernes 12 Dic - 19:00h",
-      "fecha": "2025-12-12",
-      "hora": "19:00"
-    },
-    "entradas": {
-      "adultos": 2,
-      "ninos": 1,
-      "total": 3
-    },
-    "precio": {
-      "total": 13,
-      "iva": 1.18
-    }
-  }
-}
-```
-
-**Response (error):**
-```json
-{
-  "valido": false,
-  "mensaje": "❌ Entrada no encontrada",
-  "error": "NOT_FOUND"
-}
-```
-
 ---
 
-## 🔒 Seguridad
+## ⚙️ Variables de Entorno
 
-### Rate Limiting
-- **Stripe endpoints**: 10 peticiones/minuto por IP
-- **Validación**: 30 peticiones/minuto por IP
+```env
+# MongoDB
+MONGODB_URI=mongodb+srv://...
 
-### CORS
-Configurado para permitir:
-- `http://localhost:4200` (desarrollo)
-- `https://enbelendejuda.com` (producción)
-- `https://*.vercel.app` (preview deploys)
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-### Headers de Seguridad
-- Helmet activado con configuración segura
-- Content Security Policy
-- HSTS habilitado
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=tu-email@gmail.com
+EMAIL_PASS=xxxx xxxx xxxx xxxx  # App Password de Gmail
+
+# General
+NODE_ENV=development
+PORT=3000
+FRONTEND_URL=http://localhost:4200
+```
+
+### Configurar Gmail
+
+1. Activar verificación en 2 pasos
+2. Ir a: https://myaccount.google.com/apppasswords
+3. Generar App Password
+4. Usar en `EMAIL_PASS`
+
+### Configurar Stripe Webhook
+
+1. Ir a [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+2. Añadir endpoint: `https://tu-dominio.com/api/stripe/webhook`
+3. Seleccionar evento: `checkout.session.completed`
+4. Copiar signing secret a `STRIPE_WEBHOOK_SECRET`
 
 ---
 
 ## 🗄️ Base de Datos
 
-### Colección: `transacciones`
+### MongoDB Atlas
+
+**Colección:** `transacciones`
 
 **Esquema:**
 ```javascript
 {
-  _id: ObjectId,
-  ticketId: String,           // Único, formato TICKET-timestamp
-  stripeSessionId: String,    // Único
+  ticketId: String,           // TICKET-{timestamp}
+  stripeSessionId: String,
   sesion: {
     id: String,
     fecha: String,
@@ -169,67 +134,75 @@ Configurado para permitir:
     total: Number
   },
   precio: {
-    subtotal: Number,
-    iva: Number,
     total: Number,
-    desglose: {
-      adultos: {
-        cantidad: Number,
-        precioUnitario: Number,
-        precioSinIVA: Number,
-        iva: Number,
-        total: Number
-      },
-      ninos: { ... }
-    }
+    iva: Number,
+    subtotal: Number
   },
   cliente: {
     email: String,
     nombre: String
   },
   estadoPago: String,         // 'paid', 'pending', 'failed'
-  fechaCompra: Date,
-  validado: Boolean,          // Para control de entrada
-  fechaValidacion: Date
+  validado: Boolean,
+  fechaCompra: Date
 }
 ```
 
-### Índices
+**Índices:**
 - `ticketId` (único)
 - `stripeSessionId` (único)
-- `sesion.id + estadoPago` (compuesto, para consultas de disponibilidad)
+- `sesion.id + estadoPago` (compuesto)
 
 ---
 
-## ⚙️ Variables de Entorno
+## 🔒 Seguridad
 
-Ver archivo `.env.example` para la lista completa.
-
----
-
-## 📊 Logs y Monitoreo
-
-Los logs utilizan emojis para fácil identificación:
-- 🔌 Conexión a base de datos
-- 💾 Operaciones de base de datos
-- 💳 Operaciones de Stripe
-- 📧 Envío de emails
-- ✅ Operaciones exitosas
-- ❌ Errores
-- ⚠️ Advertencias
+- ✅ Helmet (protección headers HTTP)
+- ✅ CORS configurado
+- ✅ Rate limiting (prevención de abuso)
+- ✅ Validación de webhooks de Stripe
+- ✅ Variables de entorno para secretos
+- ✅ HTTPS obligatorio en producción
 
 ---
 
-## 🚀 Ejecución
+## 📊 Logs
 
-```bash
-# Desarrollo
-npm run dev
+Sistema de logging con emojis:
 
-# Producción
-npm start
+```
+🔌 Conexión a BD
+💳 Operaciones Stripe
+📧 Envío de emails
+✅ Éxito
+❌ Errores
 ```
 
 ---
 
-**Documentación completa en:** [README principal](../README.md)
+## 🏗️ Arquitectura
+
+```
+Usuario → Frontend → API REST
+                  ↓
+            MongoDB Atlas (transacciones)
+            Stripe API (pagos)
+            Gmail SMTP (tickets)
+```
+
+**Flujo de compra:**
+1. Usuario paga en Stripe Checkout
+2. Webhook confirma pago
+3. Guardar transacción en MongoDB
+4. Generar PDF con QR
+5. Enviar ticket por email
+
+---
+
+## 📜 Licencia
+
+© 2025 Asociación Cultural En Belén de Judá - Todos los derechos reservados
+
+---
+
+**Documentación completa:** [README principal](../README.md)

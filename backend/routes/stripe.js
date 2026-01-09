@@ -37,7 +37,7 @@ const SESIONES_CONFIG = [
     precioNino: 3,
     capacidadTotal: 550,        // Capacidad que se muestra al público
     capacidadVendible: 470,     // Capacidad real vendible (80 reservadas para imprevistos)
-    disponible: true            // Sesión disponible
+    disponible: false            // Sesión disponible
   },
   {
     id: '3',
@@ -48,7 +48,7 @@ const SESIONES_CONFIG = [
     precioNino: 3,
     capacidadTotal: 550,        // Capacidad que se muestra al público
     capacidadVendible: 550,     // Capacidad real vendible (20 reservadas para imprevistos)
-    disponible: true            // Sesión disponible
+    disponible: false            // Sesión disponible
   }
 ];
 
